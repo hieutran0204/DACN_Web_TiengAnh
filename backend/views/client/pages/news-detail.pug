@@ -1,0 +1,61 @@
+extends ../layouts/default
+
+block content
+  .container.my-5
+    .row.justify-content-center
+      .col-lg-8
+        article.card.shadow.p-4
+          h1.card-title.text-center.text-primary.mb-4= news.title
+
+          if news.image
+            .text-center.mb-4
+              img.img-fluid.rounded.shadow(src=news.image, alt=news.title, style="max-height: 400px;")
+
+          .card-body
+            .mb-4
+              p.text-justify= news.content
+
+            .text-center.text-muted.mb-4
+              p.mb-1 Viết bởi: 
+                strong= news.author
+              p.mb-0 vào #{news.createdAt.toLocaleDateString()}
+
+            if news.question
+              form#quiz.news-quiz.bg-light.p-4.rounded
+                h4.text-center.text-dark.mb-3= news.question
+
+                .form-check(v-for="(option, i) in news.options", :key="i")
+                  each option, i in news.options
+                    .form-check.mb-2
+                      input.form-check-input(type="radio", name="answer", id=`option-${i}`, value=i, required)
+                      label.form-check-label(for=`option-${i}`)= option
+
+                .text-center.mt-4
+                  button.btn.btn-primary(type="submit") Trả lời
+
+  script.
+    const correct = !isNaN(#{news.correctAnswer}) ? #{news.correctAnswer} : -1;
+    document.getElementById('quiz').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const selected = document.querySelector('input[name="answer"]:checked');
+      if (!selected) return;
+
+      document.querySelectorAll('.form-check-label').forEach(label => {
+        label.style.color = '';
+        label.style.fontWeight = '';
+        label.style.backgroundColor = '';
+        label.style.padding = '';
+      });
+
+      const selectedLabel = selected.nextElementSibling;
+      if (parseInt(selected.value) === correct) {
+        selectedLabel.style.color = '#27ae60';
+        selectedLabel.style.fontWeight = 'bold';
+        selectedLabel.style.backgroundColor = '#e8f5e9';
+        selectedLabel.style.padding = '5px';
+      } else {
+        selectedLabel.style.color = '#e74c3c';
+        selectedLabel.style.backgroundColor = '#fdedec';
+        selectedLabel.style.padding = '5px';
+      }
+    });

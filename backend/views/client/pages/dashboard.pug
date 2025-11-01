@@ -1,0 +1,26 @@
+extends ../layouts/default
+
+block content
+  .container.mt-5
+    .row.justify-content-center
+      .col-md-8
+        .card.shadow
+          .card-body
+            h1.text-center.mb-4 Chào mừng bạn đến với Dashboard
+            p.text-center Đây là trang thông tin dành cho người dùng.
+
+            .user-info.mt-4
+              h3.mb-3 Thông tin cá nhân
+              ul.list-group
+                li.list-group-item
+                  strong Tên: 
+                  |  #{user.name}
+                li.list-group-item
+                  strong Email: 
+                  |  #{user.email}
+
+            .actions.mt-4
+              h3.mb-3 Hành động nhanh
+              .d-grid.gap-2
+                a.btn.btn-primary(href='/user/update-profile') Cập nhật hồ sơ
+                a.btn.btn-outline-danger(href='/auth/logout') Đăng xuất

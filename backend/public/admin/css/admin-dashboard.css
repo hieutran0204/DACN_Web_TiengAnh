@@ -1,0 +1,14 @@
+/* Sửa lỗi sidebar bị khuất */
+#sidebar {
+    height: 100vh; /* Chiều cao toàn màn hình */
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 100; /* Đảm bảo nó hiển thị trên */
+    overflow-y: auto;
+  }
+  
+  main {
+    margin-left: 250px; /* Điều chỉnh tương ứng với chiều rộng sidebar */
+  }
+  

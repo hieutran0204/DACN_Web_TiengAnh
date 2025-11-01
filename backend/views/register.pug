@@ -1,0 +1,25 @@
+doctype html
+html
+  head
+    title Đăng ký
+    link(rel="stylesheet", href="/css/style.css")
+  body
+    h1 Đăng ký
+    
+    if error
+      p.error-message= error
+
+    form(action="/auth/register", method="POST")
+      label(for="username") Tên người dùng:
+      input(type="text", name="username", required)
+      
+      label(for="email") Email:
+      input(type="email", name="email", required)
+      
+      label(for="password") Mật khẩu:
+      input(type="password", name="password", required)
+      
+      button(type="submit") Đăng ký
+    
+    p Đã có tài khoản? 
+      a(href="/auth/login") Đăng nhập ngay
