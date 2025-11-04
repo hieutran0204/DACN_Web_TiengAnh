@@ -24,7 +24,7 @@ const router = require("express").Router();
 const Part = require("../models/part.model");
 const auth = require("../middlewares/auth");
 
-router.get("/", auth, async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const parts = await Part.find();
     res.json({ data: parts });
@@ -33,7 +33,7 @@ router.get("/", auth, async (req, res) => {
   }
 });
 
-router.post("/", auth, async (req, res) => {
+router.post("/", async (req, res) => {
   try {
     const part = await Part.create(req.body);
     res.status(201).json({ data: part });

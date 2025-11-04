@@ -38,9 +38,14 @@ export default function ListeningList() {
             }
           )
           .then((res) => {
+            // Đảm bảo dữ liệu có trường type và các trường khác
+            const formattedData = res.data.data.map((item) => ({
+              ...item,
+              type: item.type || "Unknown", // Đặt giá trị mặc định nếu type thiếu
+            }));
             callback({
               draw: data.draw,
-              data: res.data.data || [],
+              data: formattedData,
               recordsTotal: res.data.total || 0,
               recordsFiltered: res.data.total || 0,
             });
@@ -63,7 +68,7 @@ export default function ListeningList() {
       },
       columns: [
         { data: "_id" },
-        { data: "type" },
+        { data: "type" }, // Đảm bảo cột type được định nghĩa
         { data: null, render: renderers.question },
         { data: null, render: renderers.answer },
         { data: null, render: (q) => q.part?.name || q.part || "-" },

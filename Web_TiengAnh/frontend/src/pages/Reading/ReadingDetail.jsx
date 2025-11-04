@@ -7,8 +7,6 @@ export default function ReadingDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [question, setQuestion] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   useAdminCheck();
 
   useEffect(() => {
@@ -19,7 +17,6 @@ export default function ReadingDetail() {
       return;
     }
 
-    setLoading(true);
     axios
       .get(`http://localhost:3000/api/reading-questions/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -29,19 +26,19 @@ export default function ReadingDetail() {
       })
       .catch((err) => {
         if (err.response?.status === 401 || err.response?.status === 403) {
-          alert("Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.");
+          alert(
+            "Phiên đăng nhập hết hạn hoặc không hợp lệ. Vui lòng đăng nhập lại."
+          );
           localStorage.removeItem("token");
           localStorage.removeItem("roleId");
           localStorage.removeItem("role");
           window.location.href = "/login";
         } else {
-          setError(
-            "Không thể tải chi tiết câu hỏi: " +
-              (err.response?.data?.message || err.message)
+          alert(
+            "Lỗi lấy chi tiết: " + (err.response?.data?.error || err.message)
           );
         }
-      })
-      .finally(() => setLoading(false));
+      });
   }, [id]);
 
   const renderQuestionContent = () => {
@@ -235,10 +232,7 @@ export default function ReadingDetail() {
     }
   };
 
-  if (loading) return <div className="p-6 text-gray-600">Đang tải...</div>;
-  if (error) return <div className="p-6 text-red-600">Lỗi: {error}</div>;
-  if (!question)
-    return <div className="p-6 text-gray-600">Không tìm thấy câu hỏi.</div>;
+  if (!question) return <div className="p-6 text-gray-600">Đang tải...</div>;
 
   return (
     <div className="p-6 max-w-4xl mx-auto bg-white shadow-md rounded-lg">
@@ -274,9 +268,9 @@ export default function ReadingDetail() {
         </p>
         <p>
           <b>Độ khó:</b>{" "}
-          {question.difficult === "easy"
+          {question.difficulty === "easy"
             ? "Dễ"
-            : question.difficult === "medium"
+            : question.difficulty === "medium"
               ? "Trung bình"
               : "Khó"}
         </p>

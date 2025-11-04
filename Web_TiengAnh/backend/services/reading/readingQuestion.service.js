@@ -30,6 +30,13 @@ class ReadingQuestionService {
   async getQuestionsByPart(partId) {
     return await repo.getByPartId(partId);
   }
+  async getPaginatedQuestions(page = 1, limit = 10) {
+    const [data, total] = await Promise.all([
+      repo.getPaginated(page, limit),
+      repo.countTotal(),
+    ]);
+    return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
+  }
 }
 
 module.exports = new ReadingQuestionService();

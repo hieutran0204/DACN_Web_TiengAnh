@@ -1,534 +1,175 @@
-// // import { useState, useEffect } from "react";
-// // import { Link } from "react-router-dom";
-// // import axios from "axios";
-// // import { useAdminCheck } from "../../utils/auth";
-
-// // export default function ReadingList() {
-// //   const [questions, setQuestions] = useState([]);
-// //   const [loading, setLoading] = useState(true);
-// //   const [error, setError] = useState(null);
-// //   const [searchTerm, setSearchTerm] = useState("");
-// //   useAdminCheck();
-
-// //   useEffect(() => {
-// //     const token = localStorage.getItem("token");
-// //     if (!token) {
-// //       alert("Không tìm thấy token. Vui lòng đăng nhập lại.");
-// //       window.location.href = "/login";
-// //       return;
-// //     }
-
-// //     setLoading(true);
-// //     axios
-// //       .get("http://localhost:3000/api/reading-questions", {
-// //         headers: { Authorization: `Bearer ${token}` },
-// //       })
-// //       .then((res) => {
-// //         setQuestions(res.data.data || []);
-// //       })
-// //       .catch((err) => {
-// //         if (err.response?.status === 401 || err.response?.status === 403) {
-// //           alert("Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.");
-// //           localStorage.removeItem("token");
-// //           localStorage.removeItem("roleId");
-// //           localStorage.removeItem("role");
-// //           window.location.href = "/login";
-// //         } else {
-// //           setError(
-// //             "Không thể tải danh sách câu hỏi: " +
-// //               (err.response?.data?.message || err.message)
-// //           );
-// //         }
-// //       })
-// //       .finally(() => setLoading(false));
-// //   }, []);
-
-// //   const handleDelete = async (id) => {
-// //     if (!window.confirm("Bạn có chắc muốn xóa câu hỏi này?")) return;
-
-// //     const token = localStorage.getItem("token");
-// //     try {
-// //       await axios.delete(`http://localhost:3000/api/reading-questions/${id}`, {
-// //         headers: { Authorization: `Bearer ${token}` },
-// //       });
-// //       setQuestions(questions.filter((q) => q._id !== id));
-// //       alert("✅ Xóa câu hỏi thành công!");
-// //     } catch (err) {
-// //       if (err.response?.status === 401 || err.response?.status === 403) {
-// //         alert("Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.");
-// //         localStorage.removeItem("token");
-// //         localStorage.removeItem("roleId");
-// //         localStorage.removeItem("role");
-// //         window.location.href = "/login";
-// //       } else {
-// //         alert(
-// //           "❌ Lỗi xóa câu hỏi: " + (err.response?.data?.message || err.message)
-// //         );
-// //       }
-// //     }
-// //   };
-
-// //   const handleSearch = (e) => {
-// //     setSearchTerm(e.target.value);
-// //   };
-
-// //   const filteredQuestions = questions.filter(
-// //     (q) =>
-// //       q.content?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-// //       q.type?.toLowerCase().includes(searchTerm.toLowerCase())
-// //   );
-
-// //   if (loading) return <div className="p-6 text-gray-600">Đang tải...</div>;
-// //   if (error) return <div className="p-6 text-red-600">Lỗi: {error}</div>;
-
-// //   return (
-// //     <div className="p-6 max-w-6xl mx-auto bg-white shadow-md rounded-lg">
-// //       <div className="flex justify-between items-center mb-6">
-// //         <h2 className="text-2xl font-bold text-gray-800">
-// //           Danh sách câu hỏi Reading
-// //         </h2>
-// //         <Link
-// //           to="/reading/create"
-// //           className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
-// //           Tạo câu hỏi mới
-// //         </Link>
-// //       </div>
-
-// //       <div className="mb-4">
-// //         <input
-// //           type="text"
-// //           placeholder="Tìm kiếm theo nội dung hoặc loại câu hỏi..."
-// //           value={searchTerm}
-// //           onChange={handleSearch}
-// //           className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-// //         />
-// //       </div>
-
-// //       {filteredQuestions.length === 0 ? (
-// //         <p className="text-gray-500">Không tìm thấy câu hỏi nào.</p>
-// //       ) : (
-// //         <div className="overflow-x-auto">
-// //           <table className="min-w-full bg-white border border-gray-200">
-// //             <thead>
-// //               <tr className="bg-gray-100">
-// //                 <th className="py-2 px-4 border-b text-left text-sm font-medium text-gray-700">
-// //                   Hình ảnh
-// //                 </th>
-// //                 <th className="py-2 px-4 border-b text-left text-sm font-medium text-gray-700">
-// //                   Nội dung
-// //                 </th>
-// //                 <th className="py-2 px-4 border-b text-left text-sm font-medium text-gray-700">
-// //                   Loại
-// //                 </th>
-// //                 <th className="py-2 px-4 border-b text-left text-sm font-medium text-gray-700">
-// //                   Phần
-// //                 </th>
-// //                 <th className="py-2 px-4 border-b text-left text-sm font-medium text-gray-700">
-// //                   Độ khó
-// //                 </th>
-// //                 <th className="py-2 px-4 border-b text-left text-sm font-medium text-gray-700">
-// //                   Hành động
-// //                 </th>
-// //               </tr>
-// //             </thead>
-// //             <tbody>
-// //               {filteredQuestions.map((q) => (
-// //                 <tr key={q._id} className="hover:bg-gray-50">
-// //                   <td className="py-2 px-4 border-b">
-// //                     {q.image ? (
-// //                       <img
-// //                         src={q.image}
-// //                         alt="Question Image"
-// //                         className="w-16 h-16 object-cover rounded"
-// //                       />
-// //                     ) : (
-// //                       <span className="text-gray-500">Không có</span>
-// //                     )}
-// //                   </td>
-// //                   <td className="py-2 px-4 border-b text-sm text-gray-700">
-// //                     {q.content
-// //                       ? q.content.substring(0, 50) +
-// //                         (q.content.length > 50 ? "..." : "")
-// //                       : "Không có nội dung"}
-// //                   </td>
-// //                   <td className="py-2 px-4 border-b text-sm text-gray-700">
-// //                     {q.type || "N/A"}
-// //                   </td>
-// //                   <td className="py-2 px-4 border-b text-sm text-gray-700">
-// //                     {q.part?.name || "N/A"}
-// //                   </td>
-// //                   <td className="py-2 px-4 border-b text-sm text-gray-700">
-// //                     {q.difficult === "easy"
-// //                       ? "Dễ"
-// //                       : q.difficult === "medium"
-// //                         ? "Trung bình"
-// //                         : "Khó"}
-// //                   </td>
-// //                   <td className="py-2 px-4 border-b text-sm">
-// //                     <div className="flex space-x-2">
-// //                       <Link
-// //                         to={`/reading/${q._id}`}
-// //                         className="text-blue-600 hover:underline">
-// //                         Xem
-// //                       </Link>
-// //                       <Link
-// //                         to={`/reading/edit/${q._id}`}
-// //                         className="text-green-600 hover:underline">
-// //                         Sửa
-// //                       </Link>
-// //                       <button
-// //                         onClick={() => handleDelete(q._id)}
-// //                         className="text-red-600 hover:underline">
-// //                         Xóa
-// //                       </button>
-// //                     </div>
-// //                   </td>
-// //                 </tr>
-// //               ))}
-// //             </tbody>
-// //           </table>
-// //         </div>
-// //       )}
-// //     </div>
-// //   );
-// // }
-// import { useEffect, useState, useRef } from "react";
-// import { Link } from "react-router-dom";
-// import axios from "axios";
-// import $ from "jquery"; // Import jQuery
-// import { useAdminCheck } from "../../utils/auth";
-// import "datatables.net"; // Import DataTables
-
-// export default function ReadingList() {
-//   const [questions, setQuestions] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState(null);
-//   const tableRef = useRef(null);
-//   useAdminCheck();
-
-//   useEffect(() => {
-//     const token = localStorage.getItem("token");
-//     if (!token) {
-//       alert("Không tìm thấy token. Vui lòng đăng nhập lại.");
-//       window.location.href = "/login";
-//       return;
-//     }
-
-//     setLoading(true);
-//     axios
-//       .get("http://localhost:3000/api/reading-questions", {
-//         headers: { Authorization: `Bearer ${token}` },
-//       })
-//       .then((res) => {
-//         setQuestions(res.data.data || []);
-//       })
-//       .catch((err) => {
-//         if (err.response?.status === 401 || err.response?.status === 403) {
-//           alert("Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.");
-//           localStorage.removeItem("token");
-//           localStorage.removeItem("roleId");
-//           localStorage.removeItem("role");
-//           window.location.href = "/login";
-//         } else {
-//           setError(
-//             "Không thể tải danh sách câu hỏi: " +
-//               (err.response?.data?.message || err.message)
-//           );
-//         }
-//       })
-//       .finally(() => setLoading(false));
-//   }, []);
-
-//   useEffect(() => {
-//     if (tableRef.current && !loading && questions.length > 0) {
-//       $(tableRef.current).DataTable({
-//         paging: true,
-//         ordering: true,
-//         searching: true,
-//         info: true,
-//         pageLength: 10,
-//         responsive: true,
-//         destroy: true, // Đảm bảo hủy DataTable cũ trước khi khởi tạo mới
-//       });
-//     }
-
-//     // Cleanup khi component unmount
-//     return () => {
-//       if (tableRef.current && $.fn.DataTable.isDataTable(tableRef.current)) {
-//         $(tableRef.current).DataTable().destroy();
-//       }
-//     };
-//   }, [loading, questions]); // Thêm questions vào dependency array
-
-//   const handleDelete = async (id) => {
-//     if (!window.confirm("Bạn có chắc muốn xóa câu hỏi này?")) return;
-
-//     const token = localStorage.getItem("token");
-//     try {
-//       await axios.delete(`http://localhost:3000/api/reading-questions/${id}`, {
-//         headers: { Authorization: `Bearer ${token}` },
-//       });
-//       setQuestions(questions.filter((q) => q._id !== id));
-//       alert("✅ Xóa câu hỏi thành công!");
-//     } catch (err) {
-//       if (err.response?.status === 401 || err.response?.status === 403) {
-//         alert("Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.");
-//         localStorage.removeItem("token");
-//         localStorage.removeItem("roleId");
-//         localStorage.removeItem("role");
-//         window.location.href = "/login";
-//       } else {
-//         alert(
-//           "❌ Lỗi xóa câu hỏi: " + (err.response?.data?.message || err.message)
-//         );
-//       }
-//     }
-//   };
-
-//   if (loading) return <div className="p-6 text-gray-600">Đang tải...</div>;
-//   if (error) return <div className="p-6 text-red-600">Lỗi: {error}</div>;
-
-//   return (
-//     <div className="p-6 max-w-6xl mx-auto bg-white shadow-md rounded-lg">
-//       <div className="flex justify-between items-center mb-6">
-//         <h2 className="text-2xl font-bold text-gray-800">
-//           Danh sách câu hỏi Reading
-//         </h2>
-//         <Link
-//           to="/reading/create"
-//           className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
-//           Tạo câu hỏi mới
-//         </Link>
-//       </div>
-
-//       <table ref={tableRef} className="display min-w-full">
-//         <thead>
-//           <tr>
-//             <th>Hình ảnh</th>
-//             <th>Nội dung</th>
-//             <th>Loại</th>
-//             <th>Phần</th>
-//             <th>Độ khó</th>
-//             <th>Hành động</th>
-//           </tr>
-//         </thead>
-//         <tbody>
-//           {questions.map((q) => (
-//             <tr key={q._id}>
-//               <td>
-//                 {q.image ? (
-//                   <img
-//                     src={q.image}
-//                     alt="Question Image"
-//                     className="w-16 h-16 object-cover rounded"
-//                   />
-//                 ) : (
-//                   <span className="text-gray-500">Không có</span>
-//                 )}
-//               </td>
-//               <td>
-//                 {q.content?.substring(0, 50) +
-//                   (q.content?.length > 50 ? "..." : "")}
-//               </td>
-//               <td>{q.type || "N/A"}</td>
-//               <td>{q.part?.name || "N/A"}</td>
-//               <td>
-//                 {q.difficult === "easy"
-//                   ? "Dễ"
-//                   : q.difficult === "medium"
-//                     ? "Trung bình"
-//                     : "Khó"}
-//               </td>
-//               <td>
-//                 <div className="flex space-x-2">
-//                   <Link
-//                     to={`/reading/${q._id}`}
-//                     className="text-blue-600 hover:underline">
-//                     Xem
-//                   </Link>
-//                   <Link
-//                     to={`/reading/edit/${q._id}`}
-//                     className="text-green-600 hover:underline">
-//                     Sửa
-//                   </Link>
-//                   <button
-//                     onClick={() => handleDelete(q._id)}
-//                     className="text-red-600 hover:underline">
-//                     Xóa
-//                   </button>
-//                 </div>
-//               </td>
-//             </tr>
-//           ))}
-//         </tbody>
-//       </table>
-//     </div>
-//   );
-// }
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import $ from "jquery"; // Import jQuery
+import $ from "jquery";
+import "datatables.net";
 import { useAdminCheck, logout } from "../../utils/auth";
-import "datatables.net"; // Import DataTables
+
+const backendUrl = "http://localhost:3000";
 
 export default function ReadingList() {
-  const [questions, setQuestions] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const tableRef = useRef(null);
   useAdminCheck();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
-      setError("Không tìm thấy token. Vui lòng đăng nhập lại.");
-      setLoading(false);
+      alert("Không tìm thấy token. Vui lòng đăng nhập lại.");
+      window.location.href = "/login";
       return;
     }
 
-    setLoading(true);
-    setError(null);
-    axios
-      .get("http://localhost:3000/api/reading-questions", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => {
-        if (res.data && Array.isArray(res.data.data)) {
-          setQuestions(res.data.data);
-        } else {
-          setError("Dữ liệu từ server không hợp lệ hoặc trống.");
-        }
-      })
-      .catch((err) => {
-        const status = err.response?.status;
-        if (status === 401 || status === 403) {
-          setError("Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.");
-          localStorage.removeItem("token");
-          localStorage.removeItem("roleId");
-          localStorage.removeItem("role");
-          setTimeout(() => (window.location.href = "/login"), 100);
-        } else {
-          setError(
-            "Lỗi lấy danh sách: " +
-              (err.response?.data?.error || err.message || "Kết nối thất bại")
-          );
-        }
-      })
-      .finally(() => setLoading(false));
-  }, []);
-
-  useEffect(() => {
-    if (tableRef.current && !loading && questions.length > 0) {
-      $(tableRef.current).DataTable({
-        paging: true,
-        ordering: true,
-        searching: true,
-        info: true,
-        pageLength: 10,
-        responsive: true,
-        destroy: true, // Hủy DataTable cũ trước khi khởi tạo mới
-      });
+    if ($.fn.DataTable.isDataTable(tableRef.current)) {
+      $(tableRef.current).DataTable().destroy();
     }
 
-    // Cleanup khi component unmount
+    const table = $(tableRef.current).DataTable({
+      processing: true,
+      serverSide: true,
+      ajax: (data, callback) => {
+        const page = Math.floor(data.start / data.length) + 1;
+        const limit = data.length;
+
+        axios
+          .get(
+            `${backendUrl}/api/reading-questions?page=${page}&limit=${limit}`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          )
+          .then((res) => {
+            callback({
+              draw: data.draw,
+              data: res.data.data || [],
+              recordsTotal: res.data.total || 0,
+              recordsFiltered: res.data.total || 0,
+            });
+          })
+          .catch((err) => {
+            console.error("Lỗi:", err);
+            callback({
+              draw: data.draw,
+              data: [],
+              recordsTotal: 0,
+              recordsFiltered: 0,
+            });
+
+            if ([401, 403].includes(err.response?.status)) {
+              alert("Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.");
+              logout();
+              window.location.href = "/login";
+            }
+          });
+      },
+      columns: [
+        { data: "_id" },
+        { data: "type" },
+        { data: null, render: renderers.question },
+        { data: null, render: renderers.answer },
+        { data: null, render: (q) => q.part?.name || q.part || "-" },
+        {
+          data: null,
+          render: (q) =>
+            q.image
+              ? `<img src="${q.image}" alt="Hình" width="60" onerror="this.src='placeholder-image.jpg';"/>`
+              : "-",
+        },
+        {
+          data: null,
+          render: (q) => `
+            <button class="action-btn" data-id="${q._id}" data-action="detail">Chi tiết</button> |
+            <button class="action-btn" data-id="${q._id}" data-action="edit">Sửa</button> |
+            <button class="action-btn" data-id="${q._id}" data-action="delete">Xóa</button>
+          `,
+        },
+      ],
+      pageLength: 10,
+      responsive: true,
+      destroy: true,
+    });
+
+    $(tableRef.current).on("click", ".action-btn", function () {
+      const id = $(this).data("id");
+      const action = $(this).data("action");
+      if (ACTIONS[action]) ACTIONS[action](id);
+    });
+
     return () => {
-      if (tableRef.current && $.fn.DataTable.isDataTable(tableRef.current)) {
-        $(tableRef.current).DataTable().destroy();
+      if ($.fn.DataTable.isDataTable(tableRef.current)) {
+        table.destroy();
       }
     };
-  }, [loading, questions]); // Thêm questions vào dependency array
+  }, []);
+
+  const handleDetail = (id) => {
+    window.open(`/reading/${id}`, "_blank");
+  };
+
+  const handleEdit = (id) => {
+    window.open(`/reading/edit/${id}`, "_blank");
+  };
 
   const handleDelete = async (id) => {
-    if (window.confirm("Bạn có chắc muốn xóa câu hỏi này?")) {
-      const token = localStorage.getItem("token");
-      try {
-        await axios.delete(
-          `http://localhost:3000/api/reading-questions/${id}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        setQuestions(questions.filter((q) => q._id !== id));
-        alert("Xóa câu hỏi thành công!");
-      } catch (err) {
-        alert(
-          "Lỗi khi xóa: " +
-            (err.response?.data?.error || err.message || "Kết nối thất bại")
-        );
-      }
+    if (!window.confirm("Bạn có chắc muốn xóa câu hỏi này?")) return;
+    const token = localStorage.getItem("token");
+    try {
+      await axios.delete(`${backendUrl}/api/reading-questions/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      $(tableRef.current).DataTable().ajax.reload();
+      alert("Xóa thành công!");
+    } catch (err) {
+      alert(
+        "Lỗi khi xóa: " +
+          (err.response?.data?.error || err.message || "Kết nối thất bại")
+      );
     }
   };
 
-  const renderQuestionContent = (q) => {
-    switch (q.type) {
-      case "multiple_choice":
-        return q.multipleChoice?.question || "-";
-      case "true_false_not_given":
-      case "yes_no_not_given":
-        return q[q.type]?.statement || "-";
-      case "matching_headings":
-        return q.matchingHeadings?.paragraph || "-";
-      case "matching_information":
-        return q.matchingInformation?.infoText || "-";
-      case "matching_features":
-        return q.matchingFeatures?.item || "-";
-      case "matching_sentence_endings":
-        return q.matchingSentenceEndings?.start || "-";
-      case "sentence_completion":
-        return q.sentenceCompletion?.sentenceWithBlank || "-";
-      case "summary_completion":
-        return q.summaryCompletion?.summaryText || "-";
-      case "diagram_label_completion":
-        return q.diagramLabelCompletion?.diagramUrl || "-";
-      default:
-        return q.content || "-";
-    }
+  const ACTIONS = {
+    detail: handleDetail,
+    edit: handleEdit,
+    delete: handleDelete,
   };
 
-  const renderAnswer = (q) => {
-    switch (q.type) {
-      case "multiple_choice":
-        return q.multipleChoice?.answer || "-";
-      case "true_false_not_given":
-      case "yes_no_not_given":
-        return q[q.type]?.answer || "-";
-      case "matching_headings":
-        return q.matchingHeadings?.correctHeading || "-";
-      case "matching_information":
-        return q.matchingInformation?.paragraphLabel || "-";
-      case "matching_features":
-        return q.matchingFeatures?.matchedFeature || "-";
-      case "matching_sentence_endings":
-        return q.matchingSentenceEndings?.correctEnding || "-";
-      case "sentence_completion":
-        return q.sentenceCompletion?.answer || "-";
-      case "summary_completion":
-        return (q.summaryCompletion?.answers || []).join(", ") || "-";
-      case "diagram_label_completion":
-        return (
-          (q.diagramLabelCompletion?.correctLabels || []).join(", ") || "-"
-        );
-      default:
-        return "-";
-    }
+  const renderers = {
+    question: (q) => {
+      const map = {
+        multiple_choice: q.multipleChoice?.question,
+        short_answer: q.shortAnswer?.question,
+        matching: q.matching?.question,
+        sentence_completion: q.sentenceCompletion?.sentenceWithBlank,
+        summary_completion: q.summaryCompletion?.instruction,
+        diagram_label_completion: q.diagramLabelCompletion?.diagramUrl,
+      };
+      return map[q.type] || q.content || "-";
+    },
+    answer: (q) => {
+      const map = {
+        multiple_choice: q.multipleChoice?.answer,
+        short_answer: q.shortAnswer?.answer,
+        matching: (q.matching?.correctMatches || []).join(", "),
+        sentence_completion: q.sentenceCompletion?.answer,
+        summary_completion: (q.summaryCompletion?.answers || []).join(", "),
+        diagram_label_completion: (
+          q.diagramLabelCompletion?.correctLabels || []
+        ).join(", "),
+      };
+      return map[q.type] || "-";
+    },
   };
-
-  if (loading) return <p>Đang tải...</p>;
-  if (error) return <p style={{ color: "red" }}>{error}</p>;
-  if (questions.length === 0) return <p>Không có câu hỏi nào để hiển thị.</p>;
 
   return (
     <div style={{ padding: 20 }}>
-      <h2>Danh sách câu hỏi Reading</h2>
-      <button onClick={logout}>Đăng xuất</button>
-      <Link to="/reading/create" style={{ marginLeft: 10 }}>
-        <button>Tạo câu hỏi mới</button>
-      </Link>
-      <table
-        ref={tableRef}
-        className="display min-w-full"
-        style={{ borderCollapse: "collapse", width: "100%" }}>
+      <h2>📘 Danh sách câu hỏi Reading</h2>
+      <div style={{ marginBottom: 15 }}>
+        <button onClick={logout}>Đăng xuất</button>
+        <Link to="/reading/create" style={{ marginLeft: 10 }}>
+          <button>Tạo câu hỏi mới</button>
+        </Link>
+      </div>
+
+      <table ref={tableRef} className="display" style={{ width: "100%" }}>
         <thead>
           <tr>
             <th>ID</th>
@@ -540,43 +181,7 @@ export default function ReadingList() {
             <th>Hành động</th>
           </tr>
         </thead>
-        <tbody>
-          {questions.map((q) => (
-            <tr key={q._id}>
-              <td>{q._id}</td>
-              <td>{q.type}</td>
-              <td>{renderQuestionContent(q)}</td>
-              <td>{renderAnswer(q)}</td>
-              <td>{q.part?.name || q.part || "-"}</td>
-              <td>
-                {q.image ? (
-                  <img
-                    src={q.image}
-                    alt="Hình"
-                    width={60}
-                    onError={(e) => (e.target.src = "placeholder-image.jpg")}
-                  />
-                ) : (
-                  "-"
-                )}
-              </td>
-              <td>
-                <Link to={`/reading/${q._id}`}>Chi tiết</Link> |{" "}
-                <Link to={`/reading/edit/${q._id}`}>Sửa</Link> |{" "}
-                <button
-                  onClick={() => handleDelete(q._id)}
-                  style={{
-                    color: "red",
-                    border: "none",
-                    background: "none",
-                    cursor: "pointer",
-                  }}>
-                  Xóa
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
+        <tbody></tbody>
       </table>
     </div>
   );

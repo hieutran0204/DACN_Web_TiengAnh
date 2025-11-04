@@ -1,13 +1,14 @@
-const router = require("express").Router();
-const controller = require("../../controllers/reading/readingQuestion.controller");
+const express = require("express");
+const router = express.Router();
+const readingCtrl = require("../../controllers/reading/readingQuestion.controller");
 const reading_upload = require("../../middlewares/reading_upload.middleware");
-const auth = require("../../middlewares/auth");
 
-router.get("/", auth, controller.getAll);
-router.get("/:id", auth, controller.getById);
-router.post("/", auth, reading_upload, controller.create);
-router.put("/:id", auth, reading_upload, controller.update);
-router.delete("/:id", auth, controller.delete);
-router.get("/part/:partId", auth, controller.getByPart);
+router.get("/reading-questions", readingCtrl.getAllPaginated); // Sử dụng getAllPaginated thay getAll để tránh xung đột
+// router.get("/reading-questions", readingCtrl.getAll); // Xóa hoặc comment dòng này để tránh trùng lặp
+router.get("/reading-questions/:id", readingCtrl.getById); // Sửa thành :id
+router.post("/reading-questions", reading_upload, readingCtrl.create);
+router.put("/reading-questions/:id", reading_upload, readingCtrl.update); // Sửa thành :id
+router.delete("/reading-questions/:id", readingCtrl.delete); // Sửa thành :id
+router.get("/reading/part/:partId", readingCtrl.getByPart);
 
 module.exports = router;
