@@ -9,6 +9,6 @@ router.get("/reading-questions/:id", readingCtrl.getById); // Sửa thành :id
 router.post("/reading-questions", reading_upload, readingCtrl.create);
 router.put("/reading-questions/:id", reading_upload, readingCtrl.update); // Sửa thành :id
 router.delete("/reading-questions/:id", readingCtrl.delete); // Sửa thành :id
-router.get("/reading/part/:partId", readingCtrl.getByPart);
+router.get("/reading/part/:partId", readingCtrl.getById);
 
 module.exports = router;

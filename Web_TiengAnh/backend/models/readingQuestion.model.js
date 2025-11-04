@@ -96,7 +96,7 @@ const QuestionSchema = new mongoose.Schema({
   // ✅ Thêm trường image để lưu URL ảnh (tương đối)
   image: { type: String },
 
-  difficult: {
+  difficulty: {
     type: String,
     enum: ["easy", "medium", "hard"],
     default: "medium",

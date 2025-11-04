@@ -1,9 +1,9 @@
 // const mongoose = require("mongoose");
 
 // const ListeningQuestionSchema = new mongoose.Schema({
-//   part: {
+//   section: {
 //     type: mongoose.Schema.Types.ObjectId,
-//     ref: "Part",
+//     ref: "Section",
 //     required: true,
 //   },
 
@@ -11,7 +11,9 @@
 //     type: String,
 //     enum: [
 //       "form_note_table_completion",
-//       "multiple_choice",
+//       "summary_completion",
+//       "multiple_choice_single",
+//       "multiple_choice_multiple",
 //       "matching",
 //       "plan_map_diagram_labelling",
 //       "sentence_completion",
@@ -20,57 +22,31 @@
 //     required: true,
 //   },
 
-//   content: { type: String },
+//   title: String,
+//   content: String,
+//   instruction: String,
 
-//   // ✅ Thêm audio và image (URL tương đối)
-//   audio: { type: String },
+//   audio: { type: String, required: true },
 //   image: { type: String },
 
-//   formNoteTableCompletion: {
-//     instruction: String,
-//     blanks: [String],
-//     answers: [String],
-//     wordLimit: Number,
-//   },
-
-//   multipleChoice: {
-//     question: String,
-//     options: [String],
-//     answer: String,
-//   },
-
-//   matching: {
-//     question: String,
-//     items: [String],
-//     options: [String],
-//     correctMatches: [String],
-//   },
-
-//   planMapDiagramLabelling: {
-//     diagramUrl: String,
-//     labels: [String],
-//     correctLabels: [String],
-//   },
-
-//   sentenceCompletion: {
-//     sentenceWithBlank: String,
-//     answer: String,
-//     wordLimit: Number,
-//   },
-
-//   shortAnswer: {
-//     question: String,
-//     answer: String,
-//     wordLimit: Number,
-//   },
+//   subQuestions: [
+//     {
+//       questionNumber: Number,
+//       question: String,
+//       options: [String],
+//       correctAnswers: [String],
+//       wordLimit: Number,
+//       label: String,
+//       correctLabel: String,
+//       note: String,
+//     },
+//   ],
 
 //   explanation: String,
-
 //   difficulty: {
 //     type: String,
 //     enum: ["easy", "medium", "hard"],
 //     default: "medium",
-//     required: true,
 //   },
 
 //   createdAt: {
@@ -84,51 +60,64 @@
 //   ListeningQuestionSchema,
 //   "ListeningQuestions"
 // );
+
 const mongoose = require("mongoose");
 
-const ListeningQuestionSchema = new mongoose.Schema({
-  section: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Section",
-    required: true,
-  },
-
-  type: {
+const ReadingPassageSchema = new mongoose.Schema({
+  // ===== Phân loại (Passage 1, 2, 3) =====
+  passage: {
     type: String,
-    enum: [
-      "form_note_table_completion",
-      "summary_completion",
-      "multiple_choice_single",
-      "multiple_choice_multiple",
-      "matching",
-      "plan_map_diagram_labelling",
-      "sentence_completion",
-      "short_answer",
-    ],
     required: true,
   },
 
-  title: String,
-  content: String,
-  instruction: String,
+  // ===== Thông tin nội dung =====
+  title: {
+    type: String,
+    required: true,
+  },
 
-  audio: { type: String, required: true },
-  image: { type: String },
+  content: {
+    type: String, // nội dung chính của đoạn đọc
+    required: true,
+  },
 
+  image: {
+    type: String, // ảnh minh họa (nếu có)
+  },
+
+  // ===== DANH SÁCH CÂU HỎI CON =====
   subQuestions: [
     {
       questionNumber: Number,
+      type: {
+        type: String,
+        enum: [
+          "multiple_choice",
+          "true_false_not_given",
+          "yes_no_not_given",
+          "matching_headings",
+          "matching_information",
+          "matching_features",
+          "matching_sentence_endings",
+          "sentence_completion",
+          "summary_completion",
+          "diagram_label_completion",
+        ],
+        required: true,
+      },
       question: String,
       options: [String],
-      correctAnswers: [String],
+      answer: String,
       wordLimit: Number,
-      label: String,
+      labels: [String],
       correctLabel: String,
-      note: String,
+
+      // Có thể chứa nội dung đặc thù nếu là dạng khác
+      paragraph: String, // cho dạng matching headings / information
+      explanation: String,
     },
   ],
 
-  explanation: String,
   difficulty: {
     type: String,
     enum: ["easy", "medium", "hard"],
@@ -142,7 +131,7 @@ const ListeningQuestionSchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.model(
-  "ListeningQuestion",
-  ListeningQuestionSchema,
-  "ListeningQuestions"
+  "ReadingPassage",
+  ReadingPassageSchema,
+  "ReadingPassages"
 );
