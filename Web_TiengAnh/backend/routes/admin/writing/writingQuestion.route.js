@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const writingCtrl = require("../../controllers/writing/writingQuestion.controller");
-const writing_upload = require("../../middlewares/writing_upload.middleware");
+const writingCtrl = require("../../../controllers/writing/writingQuestion.controller");
+const writing_upload = require("../../../middlewares/writing_upload.middleware");
 
 router.get("/writing-questions", writingCtrl.getAllPaginated);
 router.get("/writing-questions/:id", writingCtrl.getById);

@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const Skill = require("../models/skill.models");
+const Skill = require("../../models/skill.models");
 
 router.post("/", async (req, res) => {
   try {

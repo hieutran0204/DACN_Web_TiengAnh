@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const speakingCtrl = require("../../controllers/speaking/speakingQuestion.controller");
-const speaking_upload = require("../../middlewares/speaking_upload.middleware");
+const speakingCtrl = require("../../../controllers/speaking/speakingQuestion.controller");
+const speaking_upload = require("../../../middlewares/speaking_upload.middleware");
 
 router.get("/speaking-questions", speakingCtrl.getAllPaginated);
 router.get("/speaking-questions/:id", speakingCtrl.getById);
