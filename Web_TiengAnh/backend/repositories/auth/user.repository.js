@@ -1,85 +1,51 @@
+// repositories/auth/user.repository.js
 const User = require("../../models/user/user.model");
+const bcrypt = require("bcryptjs");
 
-// Tìm user theo username
-exports.findByUsername = async (username) => {
-  try {
-    return await User.findOne({ username });
-  } catch (err) {
-    console.error("Error in findByUsername:", err.message);
-    throw err; // Ném lỗi lên để xử lý ở cấp cao hơn
+class UserRepository {
+  // ĐĂNG NHẬP – PHẢI CÓ POPULATE ROLE
+  async findByUsernameWithRole(username) {
+    return await User.findOne({ username })
+      .populate("roleId", "name")
+      .select("+password") // vì password bị select: false
+      .lean();
   }
-};
 
-// Tìm user theo username, có populate role
-exports.findByUsernameWithRole = async (username) => {
-  try {
-    console.log("Repository - Finding username:", username); // Debug
-    const user = await User.findOne({ username }).populate("roleId");
-    console.log("Repository - Found user:", user); // Debug
-    return user;
-  } catch (err) {
-    console.error("Error in findByUsernameWithRole:", err.message);
-    throw err;
+  async findByUsername(username) {
+    return await User.findOne({ username }).lean();
   }
-};
 
-// Tìm user theo email
-exports.findByEmail = async (email) => {
-  try {
-    return await User.findOne({ email });
-  } catch (err) {
-    console.error("Error in findByEmail:", err.message);
-    throw err;
+  async findByEmail(email) {
+    return await User.findOne({ email }).lean();
   }
-};
 
-// Tìm user theo email, có populate role
-exports.findByEmailWithRole = async (email) => {
-  try {
-    return await User.findOne({ email }).populate("roleId");
-  } catch (err) {
-    console.error("Error in findByEmailWithRole:", err.message);
-    throw err;
+  async create(data) {
+    return await User.create(data);
   }
-};
 
-// Tìm user theo id, có populate role
-exports.findByIdWithRole = async (id) => {
-  try {
-    return await User.findById(id).populate("roleId");
-  } catch (err) {
-    console.error("Error in findByIdWithRole:", err.message);
-    throw err;
+  async update(id, data) {
+    return await User.findByIdAndUpdate(id, data, { new: true }).select(
+      "-password"
+    );
   }
-};
 
-// Tạo user mới (dùng cho register)
-exports.create = async (userData) => {
-  try {
-    const user = new User(userData);
-    return await user.save();
-  } catch (err) {
-    console.error("Error in create:", err.message);
-    throw err;
+  async delete(id) {
+    return await User.findByIdAndDelete(id);
   }
-};
 
-// Lấy tất cả users
-exports.getAll = async () => {
-  try {
-    return await User.find().populate("roleId");
-  } catch (err) {
-    console.error("Error in getAll:", err.message);
-    throw err;
+  async getAllWithRole() {
+    return await User.find()
+      .populate("roleId", "name _id")
+      .select("-password -__v")
+      .lean();
   }
-};
 
-// Cập nhật trạng thái
-exports.updateStatus = async (id, status) => {
-  try {
-    return await User.findByIdAndUpdate(id, { status }, { new: true });
-  } catch (err) {
-    console.error("Error in updateStatus:", err.message);
-    throw err;
+  async findByIdWithRole(id) {
+    return await User.findById(id)
+      .populate("roleId", "name _id")
+      .select("-password -__v")
+      .lean();
   }
-};
+}
+
+module.exports = new UserRepository();

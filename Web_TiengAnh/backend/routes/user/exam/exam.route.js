@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const { verifyToken } = require("../../../middlewares/auth");
 const examCtrl = require("../../../controllers/exam/Exam.controller");
-console.log("examCtrl debug:", examCtrl);
+// console.log("examCtrl debug:", examCtrl);
 
 // 1. KHÁCH VÃNG LAI: Xem danh sách đề
 router.get("/public", examCtrl.getAll); // ← KHÔNG TOKEN
