@@ -46,7 +46,7 @@ export default function Features() {
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-foreground mb-4">Learning Modules</h2>
           <p className="text-lg text-muted-foreground">
-            Choose your learning path and start improving your English today
+            Chọn lộ trình học tập của bạn và bắt đầu cải thiện tiếng Anh ngay hôm nay
           </p>
         </div>
 

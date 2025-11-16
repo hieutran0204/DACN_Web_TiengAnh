@@ -1,0 +1,11 @@
+/* frontend/styles/login.module.css */
+
+.pageContainer {
+    height: 100vh; /* Chiều cao toàn màn hình */
+    background-image: url('/public/students-taking-exam-test.jpg'); /* Đường dẫn ảnh */
+    background-size: cover; /* Ảnh phủ toàn bộ màn hình */
+    background-position: center; /* Căn giữa ảnh */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }

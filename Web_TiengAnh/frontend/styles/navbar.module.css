@@ -1,0 +1,26 @@
+/* Web_TiengAnh/frontend/styles/navbar.module.css */
+
+
+
+/* Định dạng chung cho các mục trong navLinks */
+.navLink {
+  padding: 8px 16px;
+  border-radius: 9999px;
+  text-decoration: none;
+  color: #333; /* Màu chữ mặc định */
+  border: 2px solid transparent; /* Khung mặc định (ẩn) */
+  transition: background-color 0.3s, color 0.3s, border-color 0.3s; /* Hiệu ứng chuyển đổi */
+}
+
+/* Hiệu ứng khi di chuột vào mục */
+.navLink:hover {
+  background-color: #f0f0f0; /* Màu nền khi di chuột */
+  color: #0070f3; /* Màu chữ khi di chuột */
+}
+
+/* Định dạng cho mục đang được chọn */
+.active {
+  border-color: #0070f3; /* Màu khung khi mục đang được chọn */
+  background-color: #e6f7ff; /* Màu nền khi mục đang được chọn */
+  color: #0070f3; /* Màu chữ khi mục đang được chọn */
+}

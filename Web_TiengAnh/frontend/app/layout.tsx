@@ -5,6 +5,8 @@ import { Analytics } from "@vercel/analytics/next";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { ChatBox } from "@/components/chat-box";
+import '../styles/navbar.module.css';
+import '../styles/login.module.css';
 import "./globals.css";
 
 const _geist = Geist({ subsets: ["latin"] });
