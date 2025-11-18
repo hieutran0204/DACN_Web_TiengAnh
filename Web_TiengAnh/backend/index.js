@@ -119,7 +119,10 @@ app.use(
     credentials: true,
   })
 );
-
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
+  next();
+});
 // Debug (bật khi cần)
 // app.use((req, res, next) => {
 //   console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
