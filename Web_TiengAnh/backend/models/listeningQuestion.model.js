@@ -2,119 +2,86 @@
 
 // const ListeningQuestionSchema = new mongoose.Schema({
 //   section: {
-//     type: mongoose.Schema.Types.ObjectId,
-//     ref: "Section",
+//     type: String,
+//     enum: ["Section 1", "Section 2", "Section 3", "Section 4"], // PHẢI CÓ DẤU CÁCH!!!
 //     required: true,
 //   },
-
 //   type: {
 //     type: String,
 //     enum: [
-//       "form_note_table_completion",
-//       "summary_completion",
-//       "multiple_choice_single",
-//       "multiple_choice_multiple",
+//       "multiple_choice",
+//       "fill_in_the_blank",
 //       "matching",
-//       "plan_map_diagram_labelling",
+//       "note_completion",
 //       "sentence_completion",
-//       "short_answer",
 //     ],
 //     required: true,
 //   },
-
-//   title: String,
-//   content: String,
-//   instruction: String,
-
+//   title: { type: String, required: true },
 //   audio: { type: String, required: true },
-//   image: { type: String },
-
+//   transcript: String,
+//   explanation: String,
 //   subQuestions: [
 //     {
-//       questionNumber: Number,
-//       question: String,
+//       question: { type: String, required: true },
+//       correctAnswer: { type: String, required: true },
 //       options: [String],
-//       correctAnswers: [String],
-//       wordLimit: Number,
-//       label: String,
-//       correctLabel: String,
-//       note: String,
 //     },
 //   ],
-
-//   explanation: String,
 //   difficulty: {
 //     type: String,
 //     enum: ["easy", "medium", "hard"],
 //     default: "medium",
 //   },
-
-//   createdAt: {
-//     type: Date,
-//     default: Date.now,
-//   },
+//   createdAt: { type: Date, default: Date.now },
 // });
 
-// module.exports = mongoose.model(
-//   "ListeningQuestion",
-//   ListeningQuestionSchema,
-//   "ListeningQuestions"
-// );
+// module.exports = mongoose.model("ListeningQuestion", ListeningQuestionSchema);
 
 const mongoose = require("mongoose");
 
-const ReadingPassageSchema = new mongoose.Schema({
-  // ===== Phân loại (Passage 1, 2, 3) =====
-  passage: {
+const ListeningQuestionSchema = new mongoose.Schema({
+  section: {
     type: String,
+    enum: ["Section 1", "Section 2", "Section 3", "Section 4"],
     required: true,
   },
-
-  // ===== Thông tin nội dung =====
-  title: {
+  type: {
     type: String,
+    enum: [
+      "multiple_choice",
+      "fill_in_the_blank",
+      "matching",
+      "note_completion",
+      "sentence_completion",
+    ],
     required: true,
   },
+  title: { type: String, required: true },
+  audio: { type: String, required: true },
+  transcript: String,
+  explanation: String,
 
-  content: {
-    type: String, // nội dung chính của đoạn đọc
-    required: true,
-  },
-
-  image: {
-    type: String, // ảnh minh họa (nếu có)
-  },
-
-  // ===== DANH SÁCH CÂU HỎI CON =====
+  // ĐÃ SỬA HOÀN TOÀN TẠI ĐÂY
   subQuestions: [
     {
-      questionNumber: Number,
-      type: {
-        type: String,
-        enum: [
-          "multiple_choice",
-          "true_false_not_given",
-          "yes_no_not_given",
-          "matching_headings",
-          "matching_information",
-          "matching_features",
-          "matching_sentence_endings",
-          "sentence_completion",
-          "summary_completion",
-          "diagram_label_completion",
-        ],
-        required: true,
-      },
-      question: String,
-      options: [String],
-      answer: String,
-      wordLimit: Number,
-      labels: [String],
-      correctLabel: String,
+      question: { type: String, required: true },
 
-      // Có thể chứa nội dung đặc thù nếu là dạng khác
-      paragraph: String, // cho dạng matching headings / information
-      explanation: String,
+      // Cũ (Multiple Choice, Matching cũ) → vẫn hỗ trợ để không lỗi dữ liệu cũ
+      correctAnswer: { type: String }, // không required nữa
+
+      // MỚI – DÀNH CHO fill_in_the_blank, note_completion, sentence_completion
+      correctAnswers: {
+        type: [String],
+        default: undefined,
+        // Chỉ bắt buộc khi type không phải multiple_choice
+      },
+
+      // Dành cho multiple_choice
+      options: [String],
+
+      // Dành cho matching (nếu cần lưu riêng)
+      matchingOptions: [String],
     },
   ],
 
@@ -123,15 +90,44 @@ const ReadingPassageSchema = new mongoose.Schema({
     enum: ["easy", "medium", "hard"],
     default: "medium",
   },
-
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
+  createdAt: { type: Date, default: Date.now },
 });
 
-module.exports = mongoose.model(
-  "ReadingPassage",
-  ReadingPassageSchema,
-  "ReadingPassages"
-);
+// ==================== VIRTUAL + MIDDLEWARE ĐỂ TỰ ĐỘNG CHUYỂN ĐỔI (TÙY CHỌN) ====================
+// Nếu bạn muốn tự động chuyển correctAnswer → correctAnswers hoặc ngược lại (rất tiện)
+
+ListeningQuestionSchema.pre("validate", function (next) {
+  // Với fill/note/sentence: phải có correctAnswers (mảng)
+  if (
+    ["fill_in_the_blank", "note_completion", "sentence_completion"].includes(
+      this.type
+    )
+  ) {
+    this.subQuestions.forEach((sq) => {
+      if (sq.correctAnswers && sq.correctAnswers.length > 0) {
+        // Đã có mảng → bỏ correctAnswer cũ
+        sq.correctAnswer = undefined;
+      } else if (sq.correctAnswer) {
+        // Nếu vẫn gửi kiểu cũ → tự động chuyển thành mảng
+        sq.correctAnswers = [sq.correctAnswer];
+        sq.correctAnswer = undefined;
+      } else {
+        // Không có gì → lỗi validate sẽ tự báo
+      }
+    });
+  }
+
+  // Với multiple_choice: chỉ dùng correctAnswer (1 đáp án A/B/C/D)
+  if (this.type === "multiple_choice") {
+    this.subQuestions.forEach((sq) => {
+      if (Array.isArray(sq.correctAnswers) && sq.correctAnswers.length > 0) {
+        sq.correctAnswer = sq.correctAnswers[0]; // lấy cái đầu
+        sq.correctAnswers = undefined;
+      }
+    });
+  }
+
+  next();
+});
+
+module.exports = mongoose.model("ListeningQuestion", ListeningQuestionSchema);

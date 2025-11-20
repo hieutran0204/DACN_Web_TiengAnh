@@ -4,6 +4,6 @@ const ctrl = require("../../../controllers/listening/listeningQuestion.controlle
 
 router.get("/", verifyToken, ctrl.getAllPaginated);
 router.get("/:id", verifyToken, ctrl.getById);
-router.get("/part/:partId", verifyToken, ctrl.getBySection);
+// router.get("/part/:partId", verifyToken, ctrl.getBySection);
 
 module.exports = router;
