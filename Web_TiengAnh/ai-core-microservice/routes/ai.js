@@ -1,23 +1,33 @@
+// routes/ai.js
 const express = require("express");
 const router = express.Router();
 const {
-  scoreWriting,
-  scoreSpeaking,
-  generateFeedback,
-} = require("../services/geminiService"); // ← Thay tên file
+  analyzeWriting,
+  analyzeSpeaking,
+} = require("../services/geminiService.js");
 
-// Các endpoint giữ nguyên như trước
 router.post("/score/writing", async (req, res) => {
   try {
-    const { essay } = req.body;
-    if (!essay) return res.status(400).json({ error: "Missing essay" });
-
-    const result = await scoreWriting(essay);
+    const { essay, question, type } = req.body;
+    if (!essay) return res.status(400).json({ error: "Thiếu essay" });
+    const result = await analyzeWriting(essay, question, type);
     res.json({ success: true, data: result });
-  } catch (error) {
-    console.error("Writing score error:", error);
-    res.status(500).json({ error: "AI Scoring failed" });
+  } catch (err) {
+    console.error("Writing error:", err);
+    res.status(500).json({ success: false, error: "Lỗi AI Writing" });
   }
 });
 
-// Tương tự cho /score/speaking và /feedback...
+router.post("/score/speaking", async (req, res) => {
+  try {
+    const { transcript, question, part } = req.body;
+    if (!transcript) return res.status(400).json({ error: "Thiếu transcript" });
+    const result = await analyzeSpeaking(transcript, question, part);
+    res.json({ success: true, data: result });
+  } catch (err) {
+    console.error("Speaking error:", err);
+    res.status(500).json({ success: false, error: "Lỗi AI Speaking" });
+  }
+});
+
+module.exports = router;

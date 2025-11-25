@@ -3,7 +3,8 @@ const mongoose = require("mongoose");
 const ExamSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, default: "" },
-
+  // THÊM DÒNG NÀY – SIÊU QUAN TRỌNG!!!
+  isPublished: { type: Boolean, default: false }, // false = draft, true = public
   // Mỗi kỹ năng có nhiều câu
   skills: {
     listening: [

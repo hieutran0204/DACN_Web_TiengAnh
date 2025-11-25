@@ -1,0 +1,18 @@
+# Node.js common
+node_modules/
+.env
+.env.local
+.DS_Store
+*.log
+
+# Build folders
+dist/
+build/
+.out/
+
+# Docker
+.docker/
+
+# IDE
+.vscode/
+.idea/

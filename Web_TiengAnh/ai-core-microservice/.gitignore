@@ -1,0 +1,10 @@
+# Bỏ qua toàn bộ node_modules
+node_modules/
+
+# (Tùy chọn) bỏ qua thêm một số thư mục/file phổ biến khác
+.env
+.env.local
+.DS_Store
+dist/
+build/
+*.log

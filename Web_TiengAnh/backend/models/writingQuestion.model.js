@@ -1,14 +1,10 @@
 const mongoose = require("mongoose");
 
 const WritingQuestionSchema = new mongoose.Schema({
-  part: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Part",
-    required: true,
-  },
   skill: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Skill",
+    type: String,
+    enum: ["writing"], // ← Giống hệt Speaking
+    default: "writing", // ← Tự động gán luôn
     required: true,
   },
 
@@ -21,7 +17,7 @@ const WritingQuestionSchema = new mongoose.Schema({
   type: {
     type: String,
     enum: [
-      // Task 1 - Academic
+      // Task 1
       "bar_chart",
       "line_graph",
       "pie_chart",
@@ -29,16 +25,14 @@ const WritingQuestionSchema = new mongoose.Schema({
       "process",
       "map",
       "mixed_chart",
-      // Task 1 - General
-      "formal_letter",
-      "semi_formal_letter",
-      "informal_letter",
+
       // Task 2
       "opinion",
       "discussion",
       "problem_solution",
       "cause_effect",
       "advantage_disadvantage",
+      "two_part_question",
     ],
     required: true,
   },
@@ -55,18 +49,13 @@ const WritingQuestionSchema = new mongoose.Schema({
     trim: true,
   },
 
-  suggestedIdeas: {
-    type: [String],
-    default: [],
-  },
-
   sampleAnswer: {
     type: String,
     default: "",
   },
 
   image: {
-    type: String,
+    type: String, // URL ảnh Task 1
   },
 
   difficulty: {
@@ -80,5 +69,9 @@ const WritingQuestionSchema = new mongoose.Schema({
     default: Date.now,
   },
 });
+
+// Index để tìm kiếm nhanh hơn
+WritingQuestionSchema.index({ task: 1, type: 1 });
+WritingQuestionSchema.index({ topic: "text", question: "text" });
 
 module.exports = mongoose.model("WritingQuestion", WritingQuestionSchema);

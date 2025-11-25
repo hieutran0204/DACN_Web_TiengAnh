@@ -1,13 +1,19 @@
-const express = require("express");
-const router = express.Router();
-const speakingCtrl = require("../../../controllers/speaking/speakingQuestion.controller");
+const router = require("express").Router();
 const speaking_upload = require("../../../middlewares/speaking_upload.middleware");
+const SpeakingQuestionController = require("../../../controllers/speaking/speakingQuestion.controller");
 
-router.get("/speaking-questions", speakingCtrl.getAllPaginated);
-router.get("/speaking-questions/:id", speakingCtrl.getById);
-router.post("/speaking-questions", speaking_upload, speakingCtrl.create);
-router.put("/speaking-questions/:id", speaking_upload, speakingCtrl.update);
-router.delete("/speaking-questions/:id", speakingCtrl.delete);
-router.get("/speaking/part/:partId", speakingCtrl.getByPart);
+router.post("/", speaking_upload, SpeakingQuestionController.create);
+
+router.get("/", SpeakingQuestionController.getAll);
+
+router.get("/paginated", SpeakingQuestionController.getAllPaginated);
+
+router.get("/:id", SpeakingQuestionController.getById);
+
+router.put("/:id", speaking_upload, SpeakingQuestionController.update);
+
+router.delete("/:id", SpeakingQuestionController.delete);
+
+router.get("/part/:partId", SpeakingQuestionController.getByPart);
 
 module.exports = router;

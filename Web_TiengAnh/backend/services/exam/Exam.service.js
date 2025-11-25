@@ -6,10 +6,6 @@ class ExamService {
     return await repo.create(data);
   }
 
-  async getAllExams() {
-    return await repo.findAll();
-  }
-
   async getExamById(id) {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       throw new Error("ID không hợp lệ");
@@ -36,11 +32,15 @@ class ExamService {
     if (!exists) throw new Error("Đề thi không tồn tại");
     return await repo.deleteById(id);
   }
+  // services/exam/Exam.service.js
+  async getAllExams(filter = {}) {
+    return await repo.findAll(filter);
+  }
 
-  async getPaginatedExams(page = 1, limit = 10) {
+  async getPaginatedExams(page = 1, limit = 10, filter = {}) {
     const [data, total] = await Promise.all([
-      repo.getPaginated(page, limit),
-      repo.countTotal(),
+      repo.getPaginated(page, limit, filter),
+      repo.countTotal(filter),
     ]);
 
     return {

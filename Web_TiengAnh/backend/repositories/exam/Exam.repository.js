@@ -1,3 +1,4 @@
+// repositories/exam/Exam.repository.js
 const Exam = require("../../models/exam.model");
 
 const ExamRepository = {
@@ -5,10 +6,12 @@ const ExamRepository = {
     return await Exam.create(data);
   },
 
-  async findAll() {
-    return await Exam.find().populate(
-      "skills.listening skills.reading skills.writing skills.speaking"
-    );
+  async findAll(filter = {}) {
+    return await Exam.find(filter)
+      .sort({ createdAt: -1 })
+      .populate(
+        "skills.listening skills.reading skills.writing skills.speaking"
+      );
   },
 
   async findById(id) {
@@ -21,17 +24,18 @@ const ExamRepository = {
     return await Exam.findByIdAndUpdate(id, data, {
       new: true,
       runValidators: true,
-      populate:
-        "skills.listening skills.reading skills.writing skills.speaking",
-    });
+    }).populate(
+      "skills.listening skills.reading skills.writing skills.speaking"
+    );
   },
 
   async deleteById(id) {
     return await Exam.findByIdAndDelete(id);
   },
 
-  async getPaginated(page = 1, limit = 10) {
-    return await Exam.find()
+  async getPaginated(page = 1, limit = 10, filter = {}) {
+    return await Exam.find(filter)
+      .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
       .populate(
@@ -39,8 +43,8 @@ const ExamRepository = {
       );
   },
 
-  async countTotal() {
-    return await Exam.countDocuments();
+  async countTotal(filter = {}) {
+    return await Exam.countDocuments(filter);
   },
 };
 
