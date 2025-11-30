@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import Navbar from "@/components/navbar";
-import Footer from "@/components/footer";
+
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -60,13 +60,13 @@ interface ReadingPassage {
   title: string;
   passage: string;
   type:
-    | "multiple_choice"
-    | "true_false_not_given"
-    | "yes_no_not_given"
-    | "matching_headings"
-    | "fill_in_the_blank"
-    | "summary_completion"
-    | "sentence_completion";
+  | "multiple_choice"
+  | "true_false_not_given"
+  | "yes_no_not_given"
+  | "matching_headings"
+  | "fill_in_the_blank"
+  | "summary_completion"
+  | "sentence_completion";
   subQuestions: SubQuestion[];
 }
 
@@ -167,7 +167,7 @@ export default function ReadingExamPage() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50">
-      <Navbar />
+
       <div className="pt-20 pb-16 max-w-7xl mx-auto px-4">
         <div className="text-center mb-10">
           <h1 className="text-5xl font-bold text-gray-800 mb-3">
@@ -259,14 +259,14 @@ export default function ReadingExamPage() {
                       {(currentPassage.type === "fill_in_the_blank" ||
                         currentPassage.type === "summary_completion" ||
                         currentPassage.type === "sentence_completion") && (
-                        <Input
-                          type="text"
-                          placeholder="Nhập đáp án (ví dụ: 25, the internet, NOT GIVEN...)"
-                          value={userAnswers[sq._id] || ""}
-                          onChange={(e) => handleAnswer(sq._id, e.target.value)}
-                          className="text-xl h-16"
-                        />
-                      )}
+                          <Input
+                            type="text"
+                            placeholder="Nhập đáp án (ví dụ: 25, the internet, NOT GIVEN...)"
+                            value={userAnswers[sq._id] || ""}
+                            onChange={(e) => handleAnswer(sq._id, e.target.value)}
+                            className="text-xl h-16"
+                          />
+                        )}
                     </div>
                   ))}
                 </div>
@@ -302,7 +302,7 @@ export default function ReadingExamPage() {
           </div>
         )}
       </div>
-      <Footer />
+
     </main>
   );
 }

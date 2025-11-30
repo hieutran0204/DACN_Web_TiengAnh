@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/navbar";
+
 import Footer from "@/components/footer";
 import { apiFetch } from "@/lib/api";
 
@@ -113,13 +114,12 @@ export default function UsersPage() {
                     <td className="p-6">{user.email}</td>
                     <td className="p-6">
                       <span
-                        className={`px-6 py-3 rounded-full text-white font-extrabold text-lg shadow-lg ${
-                          user.roleId?.name === "admin"
-                            ? "bg-red-600"
-                            : user.roleId?.name === "editor"
-                              ? "bg-orange-600"
-                              : "bg-emerald-600"
-                        }`}>
+                        className={`px-6 py-3 rounded-full text-white font-extrabold text-lg shadow-lg ${user.roleId?.name === "admin"
+                          ? "bg-red-600"
+                          : user.roleId?.name === "editor"
+                            ? "bg-orange-600"
+                            : "bg-emerald-600"
+                          }`}>
                         {user.roleId?.name?.toUpperCase() || "USER"}
                       </span>
                     </td>

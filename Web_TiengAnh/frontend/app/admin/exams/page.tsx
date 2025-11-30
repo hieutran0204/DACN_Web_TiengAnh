@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Navbar from "@/components/navbar";
+
 import Footer from "@/components/footer";
 import {
   Card,
@@ -241,7 +242,7 @@ export default function AdminExamsPage() {
   if (loading) {
     return (
       <main className="min-h-screen bg-background">
-        <Navbar />
+
         <div className="mt-16 py-10 max-w-7xl mx-auto px-4">
           <div className="flex justify-between mb-10">
             <Skeleton className="h-12 w-96" />
@@ -274,7 +275,7 @@ export default function AdminExamsPage() {
   if (error) {
     return (
       <main className="min-h-screen bg-background flex items-center justify-center">
-        <Navbar />
+
         <div className="text-center max-w-md">
           <AlertCircle className="w-16 h-16 text-destructive mx-auto mb-4" />
           <h2 className="text-2xl font-bold mb-4">Không thể tải dữ liệu</h2>

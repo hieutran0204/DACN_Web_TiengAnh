@@ -1,18 +1,17 @@
 "use client";
-import Navbar from "@/components/navbar";
+
 import Hero from "@/components/hero";
 import Features from "@/components/features";
-import Footer from "@/components/footer";
+import StatsSection from "@/components/stats-section";
+import CTASection from "@/components/cta-section";
 
 export default function Home() {
   return (
     <main className="min-h-screen bg-background flex flex-col">
-      <Navbar />
-      <div className="flex-1 pt-16">
-        <Hero />
-        <Features />
-      </div>
-      <Footer />
+      <Hero />
+      <StatsSection />
+      <Features />
+      <CTASection />
     </main>
   );
 }

@@ -4,8 +4,8 @@ import type React from "react"
 
 import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
+import { AnimatePresence, motion } from "framer-motion"
 import { Input } from "@/components/ui/input"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { MessageCircle, X, Send } from "lucide-react"
 
 interface Message {
@@ -79,90 +79,105 @@ export function ChatBox() {
       {/* Floating Chat Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 z-40 p-4 bg-primary text-primary-foreground rounded-full shadow-lg hover:bg-primary/90 transition-all duration-200 flex items-center justify-center"
+        className="fixed bottom-6 right-6 z-40 w-14 h-14 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-full shadow-2xl hover:shadow-blue-500/50 hover:scale-110 transition-all duration-300 flex items-center justify-center"
         aria-label="Open chat"
       >
-        {isOpen ? <X size={24} /> : <MessageCircle size={24} />}
+        {isOpen ? (
+          <X size={28} className="animate-in zoom-in duration-200" />
+        ) : (
+          <div className="relative">
+            <div className="absolute -inset-1 bg-white/30 rounded-full animate-ping opacity-75"></div>
+            <MessageCircle size={28} className="relative z-10 animate-in zoom-in duration-200" />
+          </div>
+        )}
       </button>
 
       {/* Chat Window */}
-      {isOpen && (
-        <div className="fixed bottom-24 right-6 z-50 w-96 h-96 bg-card rounded-lg shadow-2xl flex flex-col border border-border overflow-hidden">
-          {/* Header */}
-          <div className="bg-primary text-primary-foreground p-4 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <MessageCircle size={20} />
-              <h2 className="font-semibold text-lg">English AI Assistant</h2>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0, x: 20, y: 20 }}
+            animate={{ opacity: 1, scale: 1, x: 0, y: 0 }}
+            exit={{ opacity: 0, scale: 0, x: 20, y: 20 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            style={{ transformOrigin: "bottom right" }}
+            className="fixed bottom-24 right-6 z-50 w-96 h-96 bg-white/60 backdrop-blur-lg rounded-lg shadow-2xl flex flex-col border border-border overflow-hidden"
+          >
+            {/* Header */}
+            <div className="bg-primary/70 backdrop-blur-md text-primary-foreground p-4 flex items-center justify-between border-b border-white/20">
+              <div className="flex items-center gap-2">
+                <MessageCircle size={20} />
+                <h2 className="font-semibold text-lg">English AI Assistant</h2>
+              </div>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="hover:bg-white/20 p-1 rounded transition-colors"
+                aria-label="Close chat"
+              >
+                <X size={20} />
+              </button>
             </div>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="hover:bg-primary/80 p-1 rounded transition-colors"
-              aria-label="Close chat"
-            >
-              <X size={20} />
-            </button>
-          </div>
 
-          {/* Messages Area */}
-          <ScrollArea className="flex-1 p-4">
-            <div className="space-y-4">
-              {messages.map((message) => (
-                <div key={message.id} className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}>
-                  <div
-                    className={`max-w-xs px-4 py-2 rounded-lg ${
-                      message.sender === "user"
+            {/* Messages Area */}
+            <div className="flex-1 p-4 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+              <div className="space-y-4">
+                {messages.map((message) => (
+                  <div key={message.id} className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}>
+                    <div
+                      className={`max-w-xs px-4 py-2 rounded-lg ${message.sender === "user"
                         ? "bg-primary text-primary-foreground rounded-br-none"
                         : "bg-muted text-foreground rounded-bl-none"
-                    }`}
-                  >
-                    <p className="text-sm">{message.text}</p>
-                    <span className="text-xs opacity-70 mt-1 block">
-                      {message.timestamp.toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </span>
-                  </div>
-                </div>
-              ))}
-              {isLoading && (
-                <div className="flex justify-start">
-                  <div className="bg-muted text-foreground px-4 py-2 rounded-lg rounded-bl-none">
-                    <div className="flex gap-2">
-                      <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" />
-                      <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce delay-100" />
-                      <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce delay-200" />
+                        }`}
+                    >
+                      <p className="text-sm">{message.text}</p>
+                      <span className="text-xs opacity-70 mt-1 block">
+                        {message.timestamp.toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
                     </div>
                   </div>
-                </div>
-              )}
-              <div ref={scrollRef} />
+                ))}
+                {isLoading && (
+                  <div className="flex justify-start">
+                    <div className="bg-muted text-foreground px-4 py-2 rounded-lg rounded-bl-none">
+                      <div className="flex gap-2">
+                        <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" />
+                        <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce delay-100" />
+                        <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce delay-200" />
+                      </div>
+                    </div>
+                  </div>
+                )}
+                <div ref={scrollRef} />
+              </div>
             </div>
-          </ScrollArea>
 
-          {/* Input Area */}
-          <form onSubmit={handleSendMessage} className="border-t border-border p-4 bg-background">
-            <div className="flex gap-2">
-              <Input
-                type="text"
-                placeholder="Ask me anything..."
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                disabled={isLoading}
-                className="flex-1"
-              />
-              <Button
-                type="submit"
-                size="icon"
-                disabled={isLoading || !inputValue.trim()}
-                className="bg-primary hover:bg-primary/90"
-              >
-                <Send size={18} />
-              </Button>
-            </div>
-          </form>
-        </div>
-      )}
+            {/* Input Area */}
+            <form onSubmit={handleSendMessage} className="border-t border-border p-4 bg-white/30">
+              <div className="flex gap-2">
+                <Input
+                  type="text"
+                  placeholder="Ask me anything..."
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  disabled={isLoading}
+                  className="flex-1"
+                />
+                <Button
+                  type="submit"
+                  size="icon"
+                  disabled={isLoading || !inputValue.trim()}
+                  className="bg-primary hover:bg-primary/90"
+                >
+                  <Send size={18} />
+                </Button>
+              </div>
+            </form>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   )
 }

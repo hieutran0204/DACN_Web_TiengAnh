@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Navbar from "@/components/navbar";
-import Footer from "@/components/footer";
+
+
 import {
   Card,
   CardContent,
@@ -62,7 +62,7 @@ export default function ReadingListPage() {
 
   return (
     <>
-      <Navbar />
+
       <main className="min-h-screen pt-20 pb-16">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-12">
@@ -136,7 +136,7 @@ export default function ReadingListPage() {
           )}
         </div>
       </main>
-      <Footer />
+
     </>
   );
 }

@@ -7,6 +7,10 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { ChatBox } from "@/components/chat-box";
 import "./globals.css";
 
+import ConditionalNavbar from "@/components/conditional-navbar";
+import ConditionalFooter from "@/components/conditional-footer";
+
+
 const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
@@ -43,7 +47,11 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         <SidebarProvider defaultOpen={false}>
           <AppSidebar />
-          <div className="flex flex-col flex-1 w-full">{children}</div>
+          <div className="flex flex-col flex-1 w-full">
+            <ConditionalNavbar />
+            {children}
+            <ConditionalFooter />
+          </div>
         </SidebarProvider>
 
         {/* ✅ Global Chat + Analytics (bỏ toast) */}

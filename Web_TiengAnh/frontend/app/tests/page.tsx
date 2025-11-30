@@ -1,576 +1,8 @@
-// // // "use client";
-
-// // // import Navbar from "@/components/navbar";
-// // // import { Card } from "@/components/ui/card";
-// // // import { Button } from "@/components/ui/button";
-// // // import { Clock, BarChart3, Trophy } from "lucide-react";
-
-// // // export default function TestsPage() {
-// // //   const tests = [
-// // //     {
-// // //       id: 1,
-// // //       title: "TOEFL Practice Test",
-// // //       duration: "180 minutes",
-// // //       questions: 120,
-// // //       difficulty: "Intermediate",
-// // //       attempts: 1245,
-// // //     },
-// // //     {
-// // //       id: 2,
-// // //       title: "IELTS Mock Exam",
-// // //       duration: "170 minutes",
-// // //       questions: 100,
-// // //       difficulty: "Intermediate",
-// // //       attempts: 987,
-// // //     },
-// // //     {
-// // //       id: 3,
-// // //       title: "English Proficiency Test",
-// // //       duration: "90 minutes",
-// // //       questions: 50,
-// // //       difficulty: "Beginner",
-// // //       attempts: 2341,
-// // //     },
-// // //     {
-// // //       id: 4,
-// // //       title: "Advanced Grammar Test",
-// // //       duration: "60 minutes",
-// // //       questions: 40,
-// // //       difficulty: "Advanced",
-// // //       attempts: 543,
-// // //     },
-// // //   ];
-
-// // //   return (
-// // //     <main className="min-h-screen bg-background">
-// // //       <Navbar />
-// // //       <div className="mt-16 pt-8 pb-16">
-// // //         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-// // //           <div className="mb-12">
-// // //             <h1 className="text-4xl font-bold text-foreground mb-4">
-// // //               Mock Tests
-// // //             </h1>
-// // //             <p className="text-lg text-muted-foreground">
-// // //               Prepare for TOEFL, IELTS, and other English proficiency tests with
-// // //               realistic practice exams
-// // //             </p>
-// // //           </div>
-
-// // //           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-// // //             {tests.map((test) => (
-// // //               <Card
-// // //                 key={test.id}
-// // //                 className="p-6 hover:shadow-lg transition-shadow">
-// // //                 <div className="mb-4">
-// // //                   <h3 className="text-xl font-semibold text-foreground mb-2">
-// // //                     {test.title}
-// // //                   </h3>
-// // //                   <span className="inline-block px-3 py-1 rounded-full text-sm font-medium bg-primary/10 text-primary">
-// // //                     {test.difficulty}
-// // //                   </span>
-// // //                 </div>
-
-// // //                 <div className="space-y-3 mb-6">
-// // //                   <div className="flex items-center gap-3 text-muted-foreground">
-// // //                     <Clock className="w-5 h-5" />
-// // //                     <span>{test.duration}</span>
-// // //                   </div>
-// // //                   <div className="flex items-center gap-3 text-muted-foreground">
-// // //                     <BarChart3 className="w-5 h-5" />
-// // //                     <span>{test.questions} questions</span>
-// // //                   </div>
-// // //                   <div className="flex items-center gap-3 text-muted-foreground">
-// // //                     <Trophy className="w-5 h-5" />
-// // //                     <span>
-// // //                       {test.attempts.toLocaleString()} people attempted
-// // //                     </span>
-// // //                   </div>
-// // //                 </div>
-
-// // //                 <Button className="w-full bg-primary hover:bg-accent text-primary-foreground">
-// // //                   Start Test
-// // //                 </Button>
-// // //               </Card>
-// // //             ))}
-// // //           </div>
-// // //         </div>
-// // //       </div>
-// // //     </main>
-// // //   );
-// // // }
-
-// // // app/tests/page.tsx
-// // "use client";
-
-// // import { useState, useEffect } from "react";
-// // import Link from "next/link";
-// // import Navbar from "@/components/navbar";
-// // import Footer from "@/components/footer";
-// // import {
-// //   Card,
-// //   CardContent,
-// //   CardDescription,
-// //   CardHeader,
-// //   CardTitle,
-// // } from "@/components/ui/card";
-// // import { Button } from "@/components/ui/button";
-// // import { Badge } from "@/components/ui/badge";
-// // import {
-// //   Clock,
-// //   Headphones,
-// //   BookOpen,
-// //   PenTool,
-// //   Mic,
-// //   Trophy,
-// //   Users,
-// // } from "lucide-react";
-// // import { apiFetch } from "@/lib/api";
-
-// // interface SkillTest {
-// //   skill: string;
-// //   title: string;
-// //   description: string;
-// //   icon: React.ReactNode;
-// //   color: string;
-// //   bgGradient: string;
-// //   count: number;
-// //   attempts: number;
-// //   path: string; // Đã thêm đúng
-// // }
-
-// // export default function TestsPage() {
-// //   const [stats, setStats] = useState({
-// //     listening: { count: 0, attempts: 0 },
-// //     reading: { count: 0, attempts: 0 },
-// //     writing: { count: 0, attempts: 0 },
-// //     speaking: { count: 0, attempts: 0 },
-// //   });
-// //   const [loading, setLoading] = useState(true);
-
-// //   useEffect(() => {
-// //     apiFetch("/exams?isPublic=true")
-// //       .then((exams: any[]) => {
-// //         const data = {
-// //           listening: { count: 0, attempts: 0 },
-// //           reading: { count: 0, attempts: 0 },
-// //           writing: { count: 0, attempts: 0 },
-// //           speaking: { count: 0, attempts: 0 },
-// //         };
-
-// //         exams.forEach((exam) => {
-// //           if (exam.skills?.listening?.length > 0) {
-// //             data.listening.count += 1;
-// //             data.listening.attempts +=
-// //               exam.totalAttempts || Math.floor(Math.random() * 3000) + 500;
-// //           }
-// //           if (exam.skills?.reading?.length > 0) data.reading.count += 1;
-// //           if (exam.skills?.writing?.length > 0) data.writing.count += 1;
-// //           if (exam.skills?.speaking?.length > 0) data.speaking.count += 1;
-// //         });
-
-// //         setStats(data);
-// //       })
-// //       .catch(() => {
-// //         // Fake data đẹp nếu lỗi
-// //         setStats({
-// //           listening: { count: 28, attempts: 52340 },
-// //           reading: { count: 22, attempts: 41890 },
-// //           writing: { count: 19, attempts: 33670 },
-// //           speaking: { count: 16, attempts: 25780 },
-// //         });
-// //       })
-// //       .finally(() => setLoading(false));
-// //   }, []);
-
-// //   const skills: SkillTest[] = [
-// //     {
-// //       skill: "listening",
-// //       title: "Listening Tests",
-// //       description: "40 câu • 30 phút • Audio chuẩn British Council",
-// //       icon: <Headphones className="w-12 h-12" />,
-// //       color: "text-blue-600",
-// //       bgGradient: "from-blue-500 to-cyan-500",
-// //       count: stats.listening.count,
-// //       attempts: stats.listening.attempts,
-// //       path: "/tests/listening",
-// //     },
-// //     {
-// //       skill: "reading",
-// //       title: "Reading Tests",
-// //       description: "40 câu • 60 phút • 3 passages đa dạng",
-// //       icon: <BookOpen className="w-12 h-12" />,
-// //       color: "text-green-600",
-// //       bgGradient: "from-green-500 to-emerald-500",
-// //       count: stats.reading.count,
-// //       attempts: stats.reading.attempts,
-// //       path: "/tests/reading",
-// //     },
-// //     {
-// //       skill: "writing",
-// //       title: "Writing Tests",
-// //       description: "Task 1 & Task 2 • AI chấm điểm • Gợi ý band",
-// //       icon: <PenTool className="w-12 h-12" />,
-// //       color: "text-purple-600",
-// //       bgGradient: "from-purple-500 to-pink-500",
-// //       count: stats.writing.count,
-// //       attempts: stats.writing.attempts,
-// //       path: "/tests/writing",
-// //     },
-// //     {
-// //       skill: "speaking",
-// //       title: "Speaking Tests",
-// //       description: "Part 1-3 • Ghi âm • AI chấm fluency & pronunciation",
-// //       icon: <Mic className="w-12 h-12" />,
-// //       color: "text-orange-600",
-// //       bgGradient: "from-orange-500 to-red-500",
-// //       count: stats.speaking.count,
-// //       attempts: stats.speaking.attempts,
-// //       path: "/tests/speaking", // ĐÃ SỬA ĐÚNG
-// //     },
-// //   ];
-
-// //   return (
-// //     <main className="min-h-screen bg-background">
-// //       <Navbar />
-// //       <div className="mt-16 pt-8 pb-20">
-// //         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-// //           {/* Hero */}
-// //           <div className="text-center mb-16">
-// //             <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6">
-// //               Full IELTS Mock Tests
-// //             </h1>
-// //             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-// //               Luyện thi IELTS chuẩn quốc tế • Chấm điểm tự động • Theo dõi tiến
-// //               độ • Band score chính xác
-// //             </p>
-// //           </div>
-
-// //           {/* Skill Cards */}
-// //           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
-// //             {skills.map((skill) => (
-// //               <Link href={skill.path} key={skill.skill}>
-// //                 <Card className="group hover:shadow-2xl transition-all duration-300 border-2 hover:border-primary/50 cursor-pointer overflow-hidden">
-// //                   <div className={`h-2 bg-gradient-to-r ${skill.bgGradient}`} />
-// //                   <CardHeader className="pb-4">
-// //                     <div className="flex items-start justify-between">
-// //                       <div
-// //                         className={`${skill.color} p-4 bg-primary/10 rounded-2xl group-hover:scale-110 transition-transform`}>
-// //                         {skill.icon}
-// //                       </div>
-// //                       <Badge variant="secondary" className="text-lg px-4 py-2">
-// //                         {skill.count} đề thi
-// //                       </Badge>
-// //                     </div>
-// //                     <CardTitle className="text-3xl font-bold mt-6 group-hover:text-primary transition">
-// //                       {skill.title}
-// //                     </CardTitle>
-// //                     <CardDescription className="text-lg mt-3">
-// //                       {skill.description}
-// //                     </CardDescription>
-// //                   </CardHeader>
-
-// //                   <CardContent className="space-y-6">
-// //                     <div className="flex items-center gap-4 text-muted-foreground">
-// //                       <Users className="w-6 h-6 text-primary" />
-// //                       <span className="text-lg">
-// //                         <strong className="text-foreground text-2xl">
-// //                           {skill.attempts.toLocaleString()}
-// //                         </strong>{" "}
-// //                         người đã luyện tập
-// //                       </span>
-// //                     </div>
-
-// //                     <Button
-// //                       size="lg"
-// //                       className="w-full h-14 text-lg font-semibold group-hover:scale-105 transition-transform">
-// //                       Bắt Đầu Luyện Ngay
-// //                     </Button>
-// //                   </CardContent>
-// //                 </Card>
-// //               </Link>
-// //             ))}
-// //           </div>
-
-// //           {/* Banner */}
-// //           <div className="bg-gradient-to-r from-primary/10 via-purple-500/10 to-pink-500/10 rounded-3xl p-12 text-center">
-// //             <h2 className="text-4xl md:text-5xl font-extrabold text-foreground mb-6">
-// //               Hơn <span className="text-primary">150.000+</span> học viên đã đạt
-// //               band 7.0+
-// //             </h2>
-// //             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-12">
-// //               {[
-// //                 "Chính xác 98%",
-// //                 "Cập nhật 2025",
-// //                 "AI chấm điểm",
-// //                 "Hỗ trợ 24/7",
-// //               ].map((item) => (
-// //                 <div key={item} className="text-center">
-// //                   <Trophy className="w-12 h-12 text-yellow-500 mx-auto mb-3" />
-// //                   <p className="text-xl font-bold text-foreground">{item}</p>
-// //                 </div>
-// //               ))}
-// //             </div>
-// //           </div>
-// //         </div>
-// //       </div>
-// //       <Footer />
-// //     </main>
-// //   );
-// // }
-// "use client";
-
-// import { useState, useEffect } from "react";
-// import Link from "next/link";
-// import Navbar from "@/components/navbar";
-// import Footer from "@/components/footer";
-// import {
-//   Card,
-//   CardContent,
-//   CardDescription,
-//   CardHeader,
-//   CardTitle,
-// } from "@/components/ui/card";
-// import { Button } from "@/components/ui/button";
-// import { Badge } from "@/components/ui/badge";
-// import { Skeleton } from "@/components/ui/skeleton";
-// import {
-//   Headphones,
-//   BookOpen,
-//   PenTool,
-//   Mic,
-//   Trophy,
-//   Users,
-// } from "lucide-react";
-// import { apiFetch } from "@/lib/api";
-
-// interface Exam {
-//   _id: string;
-//   title: string;
-//   description?: string;
-//   durationMinutes: number;
-//   isPublished: boolean;
-//   skills: {
-//     listening?: any[];
-//     reading?: any[];
-//     writing?: any[];
-//     speaking?: any[];
-//   };
-//   totalAttempts?: number;
-// }
-
-// export default function TestsPage() {
-//   const [publicExams, setPublicExams] = useState<Exam[]>([]);
-//   const [loading, setLoading] = useState(true);
-
-//   useEffect(() => {
-//     // LẤY ĐỀ THI CÔNG KHAI – ĐÃ SỬA ĐÚNG ROUTE
-//     apiFetch("/exam?isPublished=true") // ← ĐÚNG, không thêm /api
-//       .then((res: any) => {
-//         const data = res.data ?? res;
-//         const exams = Array.isArray(data) ? data : [];
-//         console.log("Tất cả đề thi public:", exams);
-
-//         // LỌC CHỈ NHỮNG ĐỀ CÓ isPublished: true (phòng trường hợp backend trả bậy)
-//         const filtered = exams.filter((exam: Exam) => exam.isPublished);
-//         setPublicExams(filtered);
-//       })
-//       .catch((err) => {
-//         console.error("Lỗi load đề:", err);
-//         setPublicExams([]);
-//       })
-//       .finally(() => setLoading(false));
-//   }, []);
-
-//   // ĐẾM CHÍNH XÁC SỐ ĐỀ THEO KỸ NĂNG
-//   const skillCounts = {
-//     listening: publicExams.filter(
-//       (e) => e.skills?.listening && e.skills.listening.length > 0
-//     ).length,
-//     reading: publicExams.filter(
-//       (e) => e.skills?.reading && e.skills.reading.length > 0
-//     ).length,
-//     writing: publicExams.filter(
-//       (e) => e.skills?.writing && e.skills.writing.length > 0
-//     ).length,
-//     speaking: publicExams.filter(
-//       (e) => e.skills?.speaking && e.skills.speaking.length > 0
-//     ).length,
-//   };
-
-//   const skills = [
-//     {
-//       skill: "listening",
-//       title: "Listening Tests",
-//       description: "40 câu • 30 phút • Audio chuẩn British Council",
-//       icon: <Headphones className="w-12 h-12" />,
-//       color: "text-blue-600",
-//       bgGradient: "from-blue-500 to-cyan-500",
-//       count: skillCounts.listening,
-//       attempts: 52340 + skillCounts.listening * 1850,
-//       path: "/tests/listening",
-//     },
-//     {
-//       skill: "reading",
-//       title: "Reading Tests",
-//       description: "40 câu • 60 phút • 3 passages đa dạng",
-//       icon: <BookOpen className="w-12 h-12" />,
-//       color: "text-green-600",
-//       bgGradient: "from-green-500 to-emerald-500",
-//       count: skillCounts.reading,
-//       attempts: 41890 + skillCounts.reading * 1700,
-//       path: "/tests/reading",
-//     },
-//     {
-//       skill: "writing",
-//       title: "Writing Tests",
-//       description: "Task 1 & Task 2 • AI chấm điểm • Gợi ý band",
-//       icon: <PenTool className="w-12 h-12" />,
-//       color: "text-purple-600",
-//       bgGradient: "from-purple-500 to-pink-500",
-//       count: skillCounts.writing,
-//       attempts: 33670 + skillCounts.writing * 1400,
-//       path: "/tests/writing",
-//     },
-//     {
-//       skill: "speaking",
-//       title: "Speaking Tests",
-//       description: "Part 1-3 • Ghi âm • AI chấm fluency & pronunciation",
-//       icon: <Mic className="w-12 h-12" />,
-//       color: "text-orange-600",
-//       bgGradient: "from-orange-500 to-red-500",
-//       count: skillCounts.speaking,
-//       attempts: 25780 + skillCounts.speaking * 1200,
-//       path: "/tests/speaking",
-//     },
-//   ];
-
-//   // Loading state
-//   if (loading) {
-//     return (
-//       <main className="min-h-screen bg-background">
-//         <Navbar />
-//         <div className="mt-16 pt-20 max-w-7xl mx-auto px-4">
-//           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-//             {[...Array(4)].map((_, i) => (
-//               <Card key={i} className="overflow-hidden">
-//                 <div className="h-2 bg-gradient-to-r from-blue-500 to-cyan-500" />
-//                 <CardHeader>
-//                   <div className="flex justify-between items-start">
-//                     <Skeleton className="h-20 w-20 rounded-2xl" />
-//                     <Skeleton className="h-8 w-24" />
-//                   </div>
-//                   <Skeleton className="h-10 w-64 mt-6" />
-//                   <Skeleton className="h-6 w-full mt-3" />
-//                 </CardHeader>
-//                 <CardContent>
-//                   <Skeleton className="h-12 w-full" />
-//                 </CardContent>
-//               </Card>
-//             ))}
-//           </div>
-//         </div>
-//         <Footer />
-//       </main>
-//     );
-//   }
-
-//   return (
-//     <main className="min-h-screen bg-background">
-//       <Navbar />
-//       <div className="mt-16 pt-8 pb-20">
-//         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-//           {/* Hero */}
-//           <div className="text-center mb-16">
-//             <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6">
-//               Full IELTS Mock Tests
-//             </h1>
-//             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-//               Luyện thi IELTS chuẩn quốc tế • Chấm điểm tự động • Theo dõi tiến
-//               độ • Band score chính xác
-//             </p>
-//           </div>
-
-//           {/* Skill Cards */}
-//           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
-//             {skills.map((skill) => (
-//               <Link href={skill.path} key={skill.skill}>
-//                 <Card className="group hover:shadow-2xl transition-all duration-300 border-2 hover:border-primary/50 cursor-pointer overflow-hidden">
-//                   <div className={`h-2 bg-gradient-to-r ${skill.bgGradient}`} />
-//                   <CardHeader className="pb-4">
-//                     <div className="flex items-start justify-between">
-//                       <div
-//                         className={`${skill.color} p-4 bg-primary/10 rounded-2xl group-hover:scale-110 transition-transform`}>
-//                         {skill.icon}
-//                       </div>
-//                       <Badge
-//                         variant="secondary"
-//                         className="text-lg px-4 py-2 font-bold">
-//                         {skill.count} đề thi
-//                       </Badge>
-//                     </div>
-//                     <CardTitle className="text-3xl font-bold mt-6 group-hover:text-primary transition">
-//                       {skill.title}
-//                     </CardTitle>
-//                     <CardDescription className="text-lg mt-3">
-//                       {skill.description}
-//                     </CardDescription>
-//                   </CardHeader>
-
-//                   <CardContent className="space-y-6">
-//                     <div className="flex items-center gap-4 text-muted-foreground">
-//                       <Users className="w-6 h-6 text-primary" />
-//                       <span className="text-lg">
-//                         <strong className="text-foreground text-2xl">
-//                           {skill.attempts.toLocaleString()}
-//                         </strong>{" "}
-//                         người đã luyện tập
-//                       </span>
-//                     </div>
-
-//                     <Button
-//                       size="lg"
-//                       className="w-full h-14 text-lg font-semibold group-hover:scale-105 transition-transform">
-//                       Bắt Đầu Luyện Ngay
-//                     </Button>
-//                   </CardContent>
-//                 </Card>
-//               </Link>
-//             ))}
-//           </div>
-
-//           {/* Banner */}
-//           <div className="bg-gradient-to-r from-primary/10 via-purple-500/10 to-pink-500/10 rounded-3xl p-12 text-center">
-//             <h2 className="text-4xl md:text-5xl font-extrabold text-foreground mb-6">
-//               Hơn <span className="text-primary">150.000+</span> học viên đã đạt
-//               band 7.0+
-//             </h2>
-//             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-12">
-//               {[
-//                 "Chính xác 98%",
-//                 "Cập nhật 2025",
-//                 "AI chấm điểm",
-//                 "Hỗ trợ 24/7",
-//               ].map((item) => (
-//                 <div key={item} className="text-center">
-//                   <Trophy className="w-12 h-12 text-yellow-500 mx-auto mb-3" />
-//                   <p className="text-xl font-bold text-foreground">{item}</p>
-//                 </div>
-//               ))}
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-//       <Footer />
-//     </main>
-//   );
-// }
-
 "use client";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Navbar from "@/components/navbar";
-import Footer from "@/components/footer";
+import { motion } from "framer-motion";
 import {
   Card,
   CardContent,
@@ -588,6 +20,9 @@ import {
   Mic,
   Users,
   Trophy,
+  Play,
+  Clock,
+  CheckCircle2,
 } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 
@@ -614,7 +49,6 @@ export default function TestsPage() {
     apiFetch("/exam?isPublished=true")
       .then((res: any) => {
         const data = res.success && res.data ? res.data : [];
-        console.log("Đề thi public đã load:", data);
         setExams(Array.isArray(data) ? data : []);
       })
       .catch((err) => {
@@ -624,7 +58,6 @@ export default function TestsPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  // TÍNH TOÁN THỐNG KÊ TỪ DATA THẬT 100%
   const skillStats = {
     listening: exams.filter((e) => e.questionCount.listening > 0).length,
     reading: exams.filter((e) => e.questionCount.reading > 0).length,
@@ -647,162 +80,208 @@ export default function TestsPage() {
   const skills = [
     {
       title: "Listening Tests",
-      icon: <Headphones className="w-12 h-12" />,
-      color: "text-blue-600",
-      bgGradient: "from-blue-500 to-cyan-500",
+      icon: Headphones,
+      color: "text-blue-500",
+      bg: "bg-blue-500/10",
+      gradient: "from-blue-500/20 to-cyan-500/20",
+      border: "border-blue-500/20",
       count: skillStats.listening,
       questions: totalQuestions.listening,
-      duration: "30-40 phút",
+      duration: "30-40 mins",
       path: "/tests/listening",
     },
     {
       title: "Reading Tests",
-      icon: <BookOpen className="w-12 h-12" />,
-      color: "text-green-600",
-      bgGradient: "from-green-500 to-emerald-500",
+      icon: BookOpen,
+      color: "text-green-500",
+      bg: "bg-green-500/10",
+      gradient: "from-green-500/20 to-emerald-500/20",
+      border: "border-green-500/20",
       count: skillStats.reading,
       questions: totalQuestions.reading,
-      duration: "60 phút",
+      duration: "60 mins",
       path: "/tests/reading",
     },
     {
       title: "Writing Tests",
-      icon: <PenTool className="w-12 h-12" />,
-      color: "text-purple-600",
-      bgGradient: "from-purple-500 to-pink-500",
+      icon: PenTool,
+      color: "text-purple-500",
+      bg: "bg-purple-500/10",
+      gradient: "from-purple-500/20 to-pink-500/20",
+      border: "border-purple-500/20",
       count: skillStats.writing,
       questions: totalQuestions.writing,
-      duration: "60 phút",
+      duration: "60 mins",
       path: "/tests/writing",
     },
     {
       title: "Speaking Tests",
-      icon: <Mic className="w-12 h-12" />,
-      color: "text-orange-600",
-      bgGradient: "from-orange-500 to-red-500",
+      icon: Mic,
+      color: "text-orange-500",
+      bg: "bg-orange-500/10",
+      gradient: "from-orange-500/20 to-red-500/20",
+      border: "border-orange-500/20",
       count: skillStats.speaking,
       questions: totalQuestions.speaking,
-      duration: "11-14 phút",
+      duration: "11-14 mins",
       path: "/tests/speaking",
     },
   ];
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-background">
-        <Navbar />
-        <div className="mt-16 pt-20 max-w-7xl mx-auto px-4">
+      <main className="min-h-screen bg-background pt-24 pb-16 px-4">
+        <div className="max-w-7xl mx-auto space-y-8">
+          <div className="text-center space-y-4">
+            <Skeleton className="h-12 w-3/4 md:w-1/2 mx-auto" />
+            <Skeleton className="h-6 w-2/3 md:w-1/3 mx-auto" />
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {[...Array(4)].map((_, i) => (
-              <Card key={i} className="overflow-hidden">
-                <div className="h-2 bg-gradient-to-r from-blue-500 to-cyan-500" />
-                <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <Skeleton className="h-20 w-20 rounded-2xl" />
-                    <Skeleton className="h-8 w-24" />
-                  </div>
-                  <Skeleton className="h-10 w-64 mt-6" />
-                  <Skeleton className="h-6 w-full mt-3" />
-                </CardHeader>
-                <CardContent>
-                  <Skeleton className="h-12 w-full" />
-                </CardContent>
-              </Card>
+              <Skeleton key={i} className="h-80 w-full rounded-3xl" />
             ))}
           </div>
         </div>
-        <Footer />
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-background">
-      <Navbar />
-      <div className="mt-16 pt-8 pb-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Hero */}
-          <div className="text-center mb-16">
-            <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6">
-              Full IELTS Mock Tests
-            </h1>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Luyện thi IELTS chuẩn quốc tế • Chấm điểm tự động • Theo dõi tiến
-              độ • Band score chính xác
-            </p>
+    <main className="min-h-screen bg-background relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-500/5 rounded-full blur-[120px]" />
+        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-purple-500/5 rounded-full blur-[120px]" />
+      </div>
+
+      <div className="relative z-10 pt-24 pb-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          {/* Hero Section */}
+          <div className="text-center mb-20">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary font-medium mb-6">
+                <Trophy className="w-4 h-4" />
+                <span>Premium IELTS Preparation</span>
+              </div>
+              <h1 className="text-5xl md:text-7xl font-extrabold text-foreground mb-6 tracking-tight">
+                Full IELTS{" "}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-600">
+                  Mock Tests
+                </span>
+              </h1>
+              <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+                Experience realistic exam conditions with our comprehensive mock
+                tests. Get instant AI scoring, detailed feedback, and accurate
+                band score predictions.
+              </p>
+            </motion.div>
           </div>
 
           {/* Skill Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
-            {skills.map((skill) => (
-              <Link href={skill.path} key={skill.title}>
-                <Card className="group hover:shadow-2xl transition-all duration-300 border-2 hover:border-primary/50 cursor-pointer overflow-hidden">
-                  <div className={`h-2 bg-gradient-to-r ${skill.bgGradient}`} />
-                  <CardHeader className="pb-4">
-                    <div className="flex items-start justify-between">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-24">
+            {skills.map((skill, index) => {
+              const Icon = skill.icon;
+              return (
+                <motion.div
+                  key={skill.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                >
+                  <Link href={skill.path} className="block h-full">
+                    <div className="group relative h-full bg-card/50 backdrop-blur-sm border border-border/50 rounded-3xl overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
+                      {/* Card Gradient Background */}
                       <div
-                        className={`${skill.color} p-4 bg-primary/10 rounded-2xl group-hover:scale-110 transition-transform`}>
-                        {skill.icon}
+                        className={`absolute inset-0 bg-gradient-to-br ${skill.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`}
+                      />
+
+                      <div className="relative p-8 flex flex-col h-full">
+                        <div className="flex justify-between items-start mb-8">
+                          <div
+                            className={`w-16 h-16 rounded-2xl ${skill.bg} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}
+                          >
+                            <Icon className={`w-8 h-8 ${skill.color}`} />
+                          </div>
+                          <Badge
+                            variant="secondary"
+                            className="text-sm px-3 py-1 font-semibold bg-background/80 backdrop-blur-md"
+                          >
+                            {skill.count} Tests Available
+                          </Badge>
+                        </div>
+
+                        <h3 className="text-3xl font-bold text-foreground mb-4 group-hover:text-primary transition-colors">
+                          {skill.title}
+                        </h3>
+
+                        <div className="space-y-3 mb-8 flex-1">
+                          <div className="flex items-center gap-3 text-muted-foreground">
+                            <CheckCircle2 className="w-5 h-5 text-green-500" />
+                            <span>{skill.questions} practice questions</span>
+                          </div>
+                          <div className="flex items-center gap-3 text-muted-foreground">
+                            <Clock className="w-5 h-5 text-blue-500" />
+                            <span>{skill.duration} per test</span>
+                          </div>
+                          <div className="flex items-center gap-3 text-muted-foreground">
+                            <Users className="w-5 h-5 text-purple-500" />
+                            <span>
+                              {totalAttempts.toLocaleString()} attempts
+                            </span>
+                          </div>
+                        </div>
+
+                        <Button
+                          size="lg"
+                          className="w-full h-14 text-lg font-semibold rounded-xl group-hover:bg-primary group-hover:text-primary-foreground transition-all shadow-lg"
+                        >
+                          Start Practicing <Play className="w-5 h-5 ml-2 fill-current" />
+                        </Button>
                       </div>
-                      <Badge
-                        variant="secondary"
-                        className="text-lg px-4 py-2 font-bold">
-                        {skill.count} đề thi
-                      </Badge>
                     </div>
-                    <CardTitle className="text-3xl font-bold mt-6 group-hover:text-primary transition">
-                      {skill.title}
-                    </CardTitle>
-                    <CardDescription className="text-lg mt-3">
-                      {skill.questions} câu • {skill.duration}
-                    </CardDescription>
-                  </CardHeader>
-
-                  <CardContent className="space-y-6">
-                    <div className="flex items-center gap-4 text-muted-foreground">
-                      <Users className="w-6 h-6 text-primary" />
-                      <span className="text-lg">
-                        <strong className="text-foreground text-2xl">
-                          {totalAttempts.toLocaleString()}
-                        </strong>{" "}
-                        lượt luyện tập
-                      </span>
-                    </div>
-
-                    <Button
-                      size="lg"
-                      className="w-full h-14 text-lg font-semibold group-hover:scale-105 transition-transform">
-                      Bắt Đầu Luyện Ngay
-                    </Button>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
+                  </Link>
+                </motion.div>
+              );
+            })}
           </div>
 
-          {/* Banner */}
-          <div className="bg-gradient-to-r from-primary/10 via-purple-500/10 to-pink-500/10 rounded-3xl p-12 text-center">
-            <h2 className="text-4xl md:text-5xl font-extrabold text-foreground mb-6">
-              Hơn <span className="text-primary">150.000+</span> học viên đã đạt
-              band 7.0+
-            </h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-12">
-              {[
-                "Chính xác 98%",
-                "Cập nhật 2025",
-                "AI chấm điểm",
-                "Hỗ trợ 24/7",
-              ].map((item) => (
-                <div key={item} className="text-center">
-                  <Trophy className="w-12 h-12 text-yellow-500 mx-auto mb-3" />
-                  <p className="text-xl font-bold text-foreground">{item}</p>
-                </div>
-              ))}
+          {/* Stats Banner */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+            viewport={{ once: true }}
+            className="relative rounded-3xl overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/90 to-purple-600/90 backdrop-blur-xl" />
+            <div className="relative p-12 md:p-16 text-center text-white">
+              <h2 className="text-4xl md:text-5xl font-bold mb-8">
+                Join <span className="text-yellow-300">150,000+</span> Students
+                Achieving Band 7.0+
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+                {[
+                  { label: "Accuracy", value: "98%" },
+                  { label: "Updated", value: "2025" },
+                  { label: "AI Scoring", value: "Instant" },
+                  { label: "Support", value: "24/7" },
+                ].map((stat, index) => (
+                  <div key={index} className="space-y-2">
+                    <div className="text-3xl md:text-4xl font-bold text-yellow-300">
+                      {stat.value}
+                    </div>
+                    <div className="text-white/80 font-medium">{stat.label}</div>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
-      <Footer />
     </main>
   );
 }

@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import Navbar from "@/components/navbar";
+
 import Footer from "@/components/footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -62,11 +62,11 @@ interface ListeningQuestion {
   _id: string;
   section: string;
   type:
-    | "multiple_choice"
-    | "fill_in_the_blank"
-    | "note_completion"
-    | "sentence_completion"
-    | "matching";
+  | "multiple_choice"
+  | "fill_in_the_blank"
+  | "note_completion"
+  | "sentence_completion"
+  | "matching";
   title: string;
   audio?: string;
   subQuestions: SubQuestion[];
@@ -143,7 +143,7 @@ export default function ListeningExamPage() {
   useEffect(() => {
     if (audioRef.current && exam?.skills.listening[currentQIndex]?.audio) {
       audioRef.current.currentTime = 0;
-      audioRef.current.play().catch(() => {});
+      audioRef.current.play().catch(() => { });
     }
   }, [currentQIndex, exam]);
 
@@ -198,7 +198,7 @@ export default function ListeningExamPage() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-indigo-50 via-blue-50 to-cyan-50">
-      <Navbar />
+
       <div className="pt-20 pb-16 max-w-7xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-10">
@@ -300,15 +300,15 @@ export default function ListeningExamPage() {
                     {(currentQuestion.type === "fill_in_the_blank" ||
                       currentQuestion.type === "note_completion" ||
                       currentQuestion.type === "sentence_completion") && (
-                      <Input
-                        type="text"
-                        placeholder="Nhập đáp án của bạn..."
-                        value={userAnswers[sq._id] || ""}
-                        onChange={(e) => handleAnswer(sq._id, e.target.value)}
-                        className="text-xl h-16"
-                        autoFocus
-                      />
-                    )}
+                        <Input
+                          type="text"
+                          placeholder="Nhập đáp án của bạn..."
+                          value={userAnswers[sq._id] || ""}
+                          onChange={(e) => handleAnswer(sq._id, e.target.value)}
+                          className="text-xl h-16"
+                          autoFocus
+                        />
+                      )}
                   </div>
                 ))}
               </div>
@@ -343,7 +343,7 @@ export default function ListeningExamPage() {
           </Card>
         )}
       </div>
-      <Footer />
+
     </main>
   );
 }
