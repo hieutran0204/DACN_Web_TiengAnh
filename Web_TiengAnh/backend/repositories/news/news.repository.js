@@ -14,11 +14,32 @@ class NewsRepository {
   }
 
   async updateById(id, data) {
-    return await News.findByIdAndUpdate(id, data, { new: true });
+    return await News.findByIdAndUpdate(id, data, { 
+      new: true,
+      runValidators: true 
+    });
   }
 
   async deleteById(id) {
     return await News.findByIdAndDelete(id);
+  }
+
+  // Phân trang
+  async findPaginated(page = 1, limit = 10) {
+    const skip = (page - 1) * limit;
+    const news = await News.find()
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+    
+    const total = await News.countDocuments();
+    
+    return {
+      news,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit)
+    };
   }
 }
 

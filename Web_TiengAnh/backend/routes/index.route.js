@@ -39,7 +39,7 @@ router.use("/user/game", require("./user/game.route")); // SỬA: bỏ /api
 router.use("/user/game/categories", require("./admin/game/category.route")); // User lấy danh sách
 router.use("/user/game/matching", require("./user/game/matchingGame.route"));
 router.use("/user/wordguessing", require("./user/wordguessing/wordCard.route"));
-
+router.use("/user/news", require("./user/news/news.route"));
 // ======================= ADMIN ROUTES =======================
 router.use("/admin/exam", require("./admin/exam/exam.route")); // ← QUẢN LÝ ĐỀ
 router.use("/admin/questions", require("./admin/question/question.route"));
