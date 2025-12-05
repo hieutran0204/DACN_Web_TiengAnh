@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-
 import Footer from "@/components/footer";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
@@ -19,35 +19,21 @@ import {
   Volume2,
   ChevronLeft,
   ChevronRight,
+  Play,
+  Pause,
+  RotateCcw,
+  Loader2,
+  AlertCircle
 } from "lucide-react";
 import { apiFetch } from "@/lib/api";
+import { Slider } from "@/components/ui/slider";
 
 // Band score chuẩn IELTS Listening 2025
 const listeningBandScore: Record<number, number> = {
-  39: 9.0,
-  38: 8.5,
-  37: 8.5,
-  36: 8.0,
-  35: 8.0,
-  34: 7.5,
-  33: 7.5,
-  32: 7.0,
-  31: 7.0,
-  30: 6.5,
-  29: 6.5,
-  28: 6.0,
-  27: 6.0,
-  26: 5.5,
-  25: 5.5,
-  24: 5.0,
-  23: 5.0,
-  22: 5.0,
-  21: 4.5,
-  20: 4.5,
-  19: 4.0,
-  18: 4.0,
-  17: 3.5,
-  16: 3.5,
+  39: 9.0, 38: 8.5, 37: 8.5, 36: 8.0, 35: 8.0, 34: 7.5, 33: 7.5,
+  32: 7.0, 31: 7.0, 30: 6.5, 29: 6.5, 28: 6.0, 27: 6.0, 26: 5.5,
+  25: 5.5, 24: 5.0, 23: 5.0, 22: 5.0, 21: 4.5, 20: 4.5, 19: 4.0,
+  18: 4.0, 17: 3.5, 16: 3.5,
 };
 
 interface SubQuestion {
@@ -61,12 +47,7 @@ interface SubQuestion {
 interface ListeningQuestion {
   _id: string;
   section: string;
-  type:
-  | "multiple_choice"
-  | "fill_in_the_blank"
-  | "note_completion"
-  | "sentence_completion"
-  | "matching";
+  type: "multiple_choice" | "fill_in_the_blank" | "note_completion" | "sentence_completion" | "matching";
   title: string;
   audio?: string;
   subQuestions: SubQuestion[];
@@ -82,20 +63,23 @@ interface Exam {
 
 export default function ListeningExamPage() {
   const { id } = useParams();
+  const router = useRouter();
+  const { toast } = useToast();
+
   const [exam, setExam] = useState<Exam | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentQIndex, setCurrentQIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState<Record<string, string>>({});
   const [showResult, setShowResult] = useState(false);
   const [finalScore, setFinalScore] = useState(0);
-  const { toast } = useToast();
+  const [timeLeft, setTimeLeft] = useState(30 * 60); // 30 minutes default
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [audioProgress, setAudioProgress] = useState(0);
+  const [audioDuration, setAudioDuration] = useState(0);
+
   const audioRef = useRef<HTMLAudioElement>(null);
 
-  // Tổng số câu hỏi thực tế (tính theo subQuestions)
-  const totalQuestions =
-    exam?.skills.listening.reduce((acc, q) => acc + q.subQuestions.length, 0) ||
-    0;
-
+  // Fetch Exam
   useEffect(() => {
     if (!id) return;
 
@@ -106,9 +90,10 @@ export default function ListeningExamPage() {
         if (!data?.skills?.listening?.length) {
           toast({
             variant: "destructive",
-            title: "Lỗi",
-            description: "Đề không có phần Listening",
+            title: "Error",
+            description: "No Listening section found.",
           });
+          router.push("/tests");
           return;
         }
 
@@ -126,31 +111,83 @@ export default function ListeningExamPage() {
         };
 
         setExam(fixedData);
-        toast({ title: "Thành công", description: "Đã tải đề Listening!" });
+        if (fixedData.durationMinutes) {
+          setTimeLeft(fixedData.durationMinutes * 60);
+        }
       })
       .catch((err) => {
-        console.error("Lỗi tải đề:", err);
+        console.error("Error loading exam:", err);
         toast({
           variant: "destructive",
-          title: "Lỗi",
-          description: "Không tải được đề thi",
+          title: "Error",
+          description: "Failed to load exam data.",
         });
       })
       .finally(() => setLoading(false));
-  }, [id, toast]);
+  }, [id, toast, router]);
 
-  // Tự động phát audio khi chuyển câu
+  // Timer
   useEffect(() => {
-    if (audioRef.current && exam?.skills.listening[currentQIndex]?.audio) {
-      audioRef.current.currentTime = 0;
-      audioRef.current.play().catch(() => { });
-    }
-  }, [currentQIndex, exam]);
+    if (showResult || loading) return;
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          handleSubmit();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [showResult, loading]);
 
-  const currentQuestion = exam?.skills.listening[currentQIndex];
-  const progress = exam
-    ? ((currentQIndex + 1) / exam.skills.listening.length) * 100
-    : 0;
+  // Audio Handling
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+      setAudioProgress(0);
+      // Auto-play when switching sections if desired, or let user control it.
+      // Let's let user control it to avoid annoyance, or maybe auto-play is better for exams?
+      // Standard behavior: User clicks play.
+    }
+  }, [currentQIndex]);
+
+  const togglePlay = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  const handleTimeUpdate = () => {
+    if (audioRef.current) {
+      setAudioProgress(audioRef.current.currentTime);
+      setAudioDuration(audioRef.current.duration || 0);
+    }
+  };
+
+  const handleAudioEnded = () => {
+    setIsPlaying(false);
+  };
+
+  const handleSeek = (value: number[]) => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = value[0];
+      setAudioProgress(value[0]);
+    }
+  };
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  };
 
   const handleAnswer = (subQId: string, answer: string) => {
     setUserAnswers((prev) => ({ ...prev, [subQId]: answer }));
@@ -163,21 +200,14 @@ export default function ListeningExamPage() {
     exam.skills.listening.forEach((q) => {
       q.subQuestions.forEach((sq) => {
         const userAns = userAnswers[sq._id]?.trim().toLowerCase() || "";
-
-        // Trường hợp có nhiều đáp án đúng (fill in the blank, note, sentence completion)
         if (sq.correctAnswers && sq.correctAnswers.length > 0) {
-          const normalized = sq.correctAnswers.map((a) =>
-            a.trim().toLowerCase()
-          );
+          const normalized = sq.correctAnswers.map((a) => a.trim().toLowerCase());
           if (normalized.includes(userAns)) correct++;
-        }
-        // Trường hợp chỉ có 1 đáp án đúng (multiple choice)
-        else if (sq.correctAnswer) {
+        } else if (sq.correctAnswer) {
           if (userAns === sq.correctAnswer.trim().toLowerCase()) correct++;
         }
       });
     });
-
     return correct;
   };
 
@@ -185,645 +215,254 @@ export default function ListeningExamPage() {
     const score = calculateScore();
     setFinalScore(score);
     setShowResult(true);
-
-    const band = listeningBandScore[score] || 0;
-    toast({
-      title: "HOÀN THÀNH XUẤT SẮC!",
-      description: `Bạn đúng ${score}/${totalQuestions} câu → Band ${band.toFixed(1)}`,
-    });
   };
 
   if (loading) return <LoadingScreen />;
-  if (!exam || !currentQuestion) return <NotFoundScreen />;
+  if (!exam) return <NotFoundScreen />;
+
+  const currentQuestion = exam.skills.listening[currentQIndex];
+  const totalQuestions = exam.skills.listening.reduce((acc, q) => acc + q.subQuestions.length, 0);
+  const progressPercentage = ((currentQIndex + 1) / exam.skills.listening.length) * 100;
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-indigo-50 via-blue-50 to-cyan-50">
+    <main className="min-h-screen bg-slate-50/50 dark:bg-slate-950 transition-colors duration-300">
+      {/* HEADER */}
+      <header className="sticky top-0 z-40 w-full border-b bg-white/80 dark:bg-slate-900/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-slate-900/60 border-t-4 border-t-primary shadow-sm dark:border-b-slate-800">
+        <div className="container max-w-7xl mx-auto flex h-16 items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link href="/tests" className="flex items-center text-muted-foreground hover:text-primary transition-colors font-medium">
+              <ChevronLeft className="w-5 h-5 mr-1" />
+              Back
+            </Link>
+            <div className="h-6 w-px bg-border" />
+            <h1 className="text-lg font-bold text-slate-800 dark:text-slate-100 truncate max-w-[200px] md:max-w-md">
+              {exam.title}
+            </h1>
+          </div>
 
-      <div className="pt-20 pb-16 max-w-7xl mx-auto px-4">
-        {/* Header */}
-        <div className="text-center mb-10">
-          <h1 className="text-5xl font-bold text-gray-800 mb-3">
-            {exam.title}
-          </h1>
-          <p className="text-xl text-gray-600">IELTS Listening Practice Test</p>
+          <div className="flex items-center gap-3">
+            <div className={`flex items-center gap-2 px-4 py-1.5 rounded-md border shadow-sm ${timeLeft < 300 ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-900 text-red-600 dark:text-red-400' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300'}`}>
+              <Clock className={`w-4 h-4 ${timeLeft < 300 ? 'animate-pulse' : ''}`} />
+              <span className="font-mono font-medium">{formatTime(timeLeft)}</span>
+            </div>
+            <Button size="sm" onClick={handleSubmit} className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-md hover:shadow-lg transition-all">
+              Submit
+            </Button>
+          </div>
         </div>
+      </header>
 
-        <div className="flex flex-wrap justify-center gap-4 mb-10">
-          <Badge variant="secondary" className="text-lg px-8 py-3">
-            <Headphones className="w-5 h-5 mr-2" />
-            Listening
-          </Badge>
-          <Badge variant="outline" className="text-lg px-8 py-3">
-            <Clock className="w-5 h-5 mr-2" />
-            ~30 phút
-          </Badge>
-          <Badge variant="outline" className="text-lg px-8 py-3">
-            {totalQuestions} câu hỏi
-          </Badge>
-        </div>
-
+      <div className="container py-8 max-w-7xl mx-auto">
         {showResult ? (
           <ResultScreen score={finalScore} total={totalQuestions} />
         ) : (
-          <Card className="shadow-2xl border-0 overflow-hidden">
-            <CardHeader className="bg-gradient-to-r from-blue-700 to-cyan-600 text-white">
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle className="text-3xl font-bold">
-                    {currentQuestion.section} - {currentQuestion.title}
-                  </CardTitle>
-                  <p className="text-blue-100 mt-2">
-                    Câu {currentQIndex + 1} / {exam.skills.listening.length}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <span className="text-3xl font-bold">
-                    {Math.round(progress)}%
-                  </span>
-                </div>
-              </div>
-              <Progress value={progress} className="mt-4 h-5 bg-white/30" />
-            </CardHeader>
-
-            <CardContent className="p-8 space-y-10">
-              {/* Audio Player */}
-              {currentQuestion.audio && (
-                <div className="bg-black/90 rounded-2xl p-8 shadow-2xl">
-                  <div className="flex items-center justify-center gap-4 mb-4">
-                    <Volume2 className="w-10 h-10 text-white" />
-                    <audio
-                      ref={audioRef}
-                      controls
-                      className="w-full max-w-2xl h-14">
-                      <source src={currentQuestion.audio} type="audio/mpeg" />
-                      Trình duyệt không hỗ trợ audio.
-                    </audio>
-                  </div>
-                  <p className="text-center text-white/80 text-sm">
-                    Phát 1 lần duy nhất – giống thi thật
-                  </p>
-                </div>
-              )}
-
-              {/* Sub Questions */}
-              <div className="space-y-8">
-                {currentQuestion.subQuestions.map((sq, idx) => (
-                  <div
-                    key={sq._id}
-                    className="bg-gray-50 rounded-2xl p-8 border-2 border-gray-200">
-                    <Label className="text-xl font-semibold mb-6 block">
-                      {idx + 1}. {sq.question}
-                    </Label>
-
-                    {/* Multiple Choice */}
-                    {currentQuestion.type === "multiple_choice" &&
-                      sq.options && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {sq.options.map((opt) => (
-                            <Button
-                              key={opt}
-                              variant={
-                                userAnswers[sq._id] === opt
-                                  ? "default"
-                                  : "outline"
-                              }
-                              size="lg"
-                              className="h-16 text-lg font-medium justify-start"
-                              onClick={() => handleAnswer(sq._id, opt)}>
-                              {opt}
-                            </Button>
-                          ))}
-                        </div>
-                      )}
-
-                    {/* Fill in the blank / Note / Sentence Completion */}
-                    {(currentQuestion.type === "fill_in_the_blank" ||
-                      currentQuestion.type === "note_completion" ||
-                      currentQuestion.type === "sentence_completion") && (
-                        <Input
-                          type="text"
-                          placeholder="Nhập đáp án của bạn..."
-                          value={userAnswers[sq._id] || ""}
-                          onChange={(e) => handleAnswer(sq._id, e.target.value)}
-                          className="text-xl h-16"
-                          autoFocus
-                        />
-                      )}
-                  </div>
-                ))}
-              </div>
-
-              {/* Navigation */}
-              <div className="flex justify-between items-center pt-8 border-t-2">
+          <div className="space-y-6">
+            {/* PROGRESS & NAVIGATION */}
+            <div className="flex items-center justify-between bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+              <div className="flex items-center gap-4">
                 <Button
                   variant="outline"
-                  size="lg"
+                  size="sm"
                   disabled={currentQIndex === 0}
-                  onClick={() => setCurrentQIndex((i) => i - 1)}>
-                  <ChevronLeft className="mr-2" /> Câu trước
+                  onClick={() => setCurrentQIndex((i) => i - 1)}
+                  className="h-9 w-9 p-0 rounded-full dark:border-slate-700 dark:hover:bg-slate-800"
+                >
+                  <ChevronLeft className="w-4 h-4" />
                 </Button>
-
-                {currentQIndex === exam.skills.listening.length - 1 ? (
-                  <Button
-                    size="lg"
-                    className="bg-green-600 hover:bg-green-700 text-xl px-12"
-                    onClick={handleSubmit}>
-                    <CheckCircle2 className="mr-3" /> Nộp Bài & Xem Band
-                  </Button>
-                ) : (
-                  <Button
-                    size="lg"
-                    className="text-xl px-12"
-                    onClick={() => setCurrentQIndex((i) => i + 1)}>
-                    Câu tiếp theo <ChevronRight className="ml-2" />
-                  </Button>
-                )}
+                <div>
+                  <h2 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Section {currentQIndex + 1}</h2>
+                  <p className="font-bold text-slate-800 dark:text-slate-100">{currentQuestion.title}</p>
+                </div>
               </div>
-            </CardContent>
-          </Card>
+              <div className="flex items-center gap-4">
+                <div className="text-right hidden sm:block">
+                  <span className="text-xs text-slate-500 dark:text-slate-400">Progress</span>
+                  <p className="font-bold text-primary">{Math.round(progressPercentage)}%</p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={currentQIndex === exam.skills.listening.length - 1}
+                  onClick={() => setCurrentQIndex((i) => i + 1)}
+                  className="h-9 w-9 p-0 rounded-full dark:border-slate-700 dark:hover:bg-slate-800"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+
+            {/* QUESTIONS CARD */}
+            <Card className="border-slate-200 dark:border-slate-800 shadow-md bg-white dark:bg-slate-900 overflow-hidden">
+              <CardHeader className="bg-slate-50/50 dark:bg-slate-800/50 border-b dark:border-slate-800 py-4">
+                <div className="flex items-center gap-2">
+                  <Badge className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50 border-blue-200 dark:border-blue-800">
+                    {currentQuestion.type.replace(/_/g, " ").toUpperCase()}
+                  </Badge>
+                  <span className="text-sm text-slate-500 dark:text-slate-400 ml-auto">
+                    {currentQuestion.subQuestions.length} Questions
+                  </span>
+                </div>
+              </CardHeader>
+              <CardContent className="p-6 md:p-8 space-y-8">
+                {/* AUDIO PLAYER */}
+                {currentQuestion.audio && (
+                  <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-4 mb-6 flex items-center gap-4">
+                    <Button
+                      size="icon"
+                      className="h-10 w-10 rounded-full shadow-sm bg-primary hover:bg-primary/90 text-white flex-none"
+                      onClick={togglePlay}
+                    >
+                      {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-1" />}
+                    </Button>
+
+                    <div className="flex-1 space-y-1">
+                      <div className="flex justify-between text-xs font-medium text-slate-500 dark:text-slate-400">
+                        <span>{formatTime(audioProgress)}</span>
+                        <span>{formatTime(audioDuration)}</span>
+                      </div>
+                      <Slider
+                        value={[audioProgress]}
+                        max={audioDuration}
+                        step={0.1}
+                        onValueChange={handleSeek}
+                        className="cursor-pointer"
+                      />
+                    </div>
+
+                    <div className="hidden md:flex items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-full">
+                      <Volume2 className="w-3.5 h-3.5" />
+                      <span>Audio</span>
+                    </div>
+
+                    <audio
+                      ref={audioRef}
+                      src={currentQuestion.audio}
+                      onTimeUpdate={handleTimeUpdate}
+                      onEnded={handleAudioEnded}
+                      onLoadedMetadata={handleTimeUpdate}
+                      className="hidden"
+                    />
+                  </div>
+                )}
+
+                {currentQuestion.subQuestions.map((sq, idx) => (
+                  <div key={sq._id} className="space-y-4">
+                    <div className="flex gap-4">
+                      <div className="flex-none w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center font-bold text-sm border border-slate-200 dark:border-slate-700">
+                        {idx + 1}
+                      </div>
+                      <div className="flex-1 space-y-4">
+                        <Label className="text-lg font-medium text-slate-800 dark:text-slate-100 leading-relaxed block">
+                          {sq.question}
+                        </Label>
+
+                        {/* Multiple Choice */}
+                        {currentQuestion.type === "multiple_choice" && sq.options && (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {sq.options.map((opt, i) => (
+                              <div
+                                key={`${opt}-${i}`}
+                                onClick={() => handleAnswer(sq._id, opt)}
+                                className={`cursor-pointer p-4 rounded-lg border transition-all flex items-center gap-3 ${userAnswers[sq._id] === opt
+                                  ? "bg-primary/5 dark:bg-primary/10 border-primary ring-1 ring-primary"
+                                  : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600"
+                                  }`}
+                              >
+                                <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${userAnswers[sq._id] === opt ? "border-primary bg-primary text-white" : "border-slate-300 dark:border-slate-600"
+                                  }`}>
+                                  {userAnswers[sq._id] === opt && <div className="w-2 h-2 rounded-full bg-white" />}
+                                </div>
+                                <span className={`text-base ${userAnswers[sq._id] === opt ? "text-primary font-medium" : "text-slate-700 dark:text-slate-300"}`}>
+                                  {opt}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Text Input */}
+                        {(currentQuestion.type === "fill_in_the_blank" ||
+                          currentQuestion.type === "note_completion" ||
+                          currentQuestion.type === "sentence_completion") && (
+                            <Input
+                              type="text"
+                              placeholder="Type your answer..."
+                              value={userAnswers[sq._id] || ""}
+                              onChange={(e) => handleAnswer(sq._id, e.target.value)}
+                              className="max-w-md text-lg h-12 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:border-primary focus:ring-primary/20"
+                            />
+                          )}
+                      </div>
+                    </div>
+                    {idx < currentQuestion.subQuestions.length - 1 && <div className="h-px bg-slate-100 dark:bg-slate-800 my-6" />}
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
         )}
       </div>
 
+
+      <Footer />
     </main>
   );
 }
 
-// Component phụ đẹp lung linh
 const LoadingScreen = () => (
-  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-cyan-50">
-    <div className="text-center">
-      <div className="w-24 h-24 border-8 border-blue-600 border-t-transparent rounded-full animate-spin mb-8" />
-      <p className="text-3xl font-bold text-blue-800">
-        Đang tải đề thi Listening...
-      </p>
+  <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
+    <div className="flex flex-col items-center gap-4">
+      <Loader2 className="w-12 h-12 text-primary animate-spin" />
+      <p className="text-lg font-medium text-slate-600 dark:text-slate-400">Loading exam...</p>
     </div>
   </div>
 );
 
 const NotFoundScreen = () => (
-  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-pink-50">
-    <div className="text-center">
-      <p className="text-6xl font-bold text-red-600 mb-4">
-        Không tìm thấy đề thi
-      </p>
-      <Button asChild size="lg">
-        <Link href="/tests/listening">Quay lại danh sách</Link>
-      </Button>
-    </div>
+  <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 gap-4">
+    <AlertCircle className="w-16 h-16 text-red-500" />
+    <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Exam Not Found</h2>
+    <Button asChild variant="outline">
+      <Link href="/tests">Back to Tests</Link>
+    </Button>
   </div>
 );
 
 const ResultScreen = ({ score, total }: { score: number; total: number }) => {
   const band = listeningBandScore[score] || 0;
-  const message =
-    band >= 8
-      ? "THIÊN TÀI!"
-      : band >= 7
-        ? "XUẤT SẮC!"
-        : band >= 6
-          ? "TỐT!"
-          : "CỐ GẮNG THÊM NHÉ!";
 
   return (
-    <Card className="max-w-3xl mx-auto text-center py-20 shadow-3xl border-4 border-green-500">
-      <CardHeader>
-        <CardTitle className="text-7xl font-bold text-green-600">
-          HOÀN THÀNH!
+    <Card className="max-w-2xl mx-auto text-center border-slate-200 dark:border-slate-800 shadow-lg bg-white dark:bg-slate-900">
+      <CardHeader className="bg-slate-50 dark:bg-slate-800/50 border-b dark:border-slate-800 py-8">
+        <CardTitle className="text-3xl font-bold text-slate-800 dark:text-slate-100">
+          Test Completed!
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-8">
-        <div className="text-9xl font-black text-blue-600">
-          {score}
-          <span className="text-5xl text-gray-600">/{total}</span>
+      <CardContent className="p-8 space-y-8">
+        <div className="grid grid-cols-2 gap-8">
+          <div className="space-y-2">
+            <p className="text-sm text-slate-500 dark:text-slate-400 uppercase tracking-wide font-semibold">Your Score</p>
+            <div className="text-5xl font-black text-primary">
+              {score}<span className="text-2xl text-slate-400 dark:text-slate-600 font-medium">/{total}</span>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <p className="text-sm text-slate-500 dark:text-slate-400 uppercase tracking-wide font-semibold">IELTS Band</p>
+            <div className="text-5xl font-black text-blue-600 dark:text-blue-400">
+              {band.toFixed(1)}
+            </div>
+          </div>
         </div>
-        <div className="text-5xl font-bold">
-          Band ước tính:{" "}
-          <span className="text-8xl text-green-600">{band.toFixed(1)}</span>
-        </div>
-        <div className="text-4xl font-bold text-purple-600">{message}</div>
 
-        <div className="flex gap-8 justify-center mt-16">
-          <Button asChild size="lg" className="text-2xl px-12 py-8">
-            <Link href="/tests/listening">Làm đề khác</Link>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+          <Button asChild size="lg" className="w-full sm:w-auto shadow-md">
+            <Link href="/tests/listening">Practice Another Test</Link>
           </Button>
-          <Button
-            asChild
-            size="lg"
-            variant="outline"
-            className="text-2xl px-12 py-8">
-            <Link href="/tests">Trang chủ</Link>
+          <Button asChild size="lg" variant="outline" className="w-full sm:w-auto dark:border-slate-700 dark:hover:bg-slate-800">
+            <Link href="/tests">Back to Home</Link>
           </Button>
         </div>
       </CardContent>
     </Card>
   );
 };
-
-// "use client";
-
-// import { useState, useEffect, useRef } from "react";
-// import { useParams } from "next/navigation";
-// import Link from "next/link";
-// import Navbar from "@/components/navbar";
-// import Footer from "@/components/footer";
-// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-// import { Button } from "@/components/ui/button";
-// import { Badge } from "@/components/ui/badge";
-// import { Progress } from "@/components/ui/progress";
-// import { Input } from "@/components/ui/input";
-// import { Label } from "@/components/ui/label";
-// import { useToast } from "@/components/ui/use-toast";
-// import {
-//   Headphones,
-//   Clock,
-//   CheckCircle2,
-//   Volume2,
-//   ChevronLeft,
-//   ChevronRight,
-//   RotateCw,
-// } from "lucide-react";
-// import { apiFetch } from "@/lib/api";
-
-// // Band score chuẩn IELTS Listening
-// const listeningBandScore: Record<number, number> = {
-//   39: 9.0,
-//   38: 8.5,
-//   37: 8.5,
-//   36: 8.0,
-//   35: 8.0,
-//   34: 7.5,
-//   33: 7.5,
-//   32: 7.0,
-//   31: 7.0,
-//   30: 6.5,
-//   29: 6.5,
-//   28: 6.0,
-//   27: 6.0,
-//   26: 5.5,
-//   25: 5.5,
-//   24: 5.0,
-//   23: 5.0,
-//   22: 5.0,
-//   21: 4.5,
-//   20: 4.5,
-//   19: 4.0,
-//   18: 4.0,
-//   17: 3.5,
-//   16: 3.5,
-// };
-
-// interface SubQuestion {
-//   _id: string;
-//   question: string;
-//   correctAnswer?: string;
-//   correctAnswers?: string[];
-//   options?: string[];
-// }
-
-// interface ListeningQuestion {
-//   _id: string;
-//   section: string;
-//   type:
-//     | "multiple_choice"
-//     | "fill_in_the_blank"
-//     | "note_completion"
-//     | "sentence_completion"
-//     | "matching";
-//   title: string;
-//   audio?: string;
-//   subQuestions: SubQuestion[];
-// }
-
-// interface Exam {
-//   _id: string;
-//   title: string;
-//   description?: string;
-//   skills: { listening: ListeningQuestion[] };
-// }
-
-// export default function ListeningExamPage() {
-//   const { id } = useParams();
-//   const [exam, setExam] = useState<Exam | null>(null);
-//   const [loading, setLoading] = useState(true);
-//   const [currentQIndex, setCurrentQIndex] = useState(0);
-//   const [userAnswers, setUserAnswers] = useState<Record<string, string>>({});
-//   const [showResult, setShowResult] = useState(false);
-//   const [finalScore, setFinalScore] = useState(0);
-//   const { toast } = useToast();
-//   const audioRef = useRef<HTMLAudioElement>(null);
-
-//   const totalQuestions =
-//     exam?.skills.listening.reduce((acc, q) => acc + q.subQuestions.length, 0) ||
-//     0;
-
-//   useEffect(() => {
-//     if (!id) return;
-
-//     apiFetch(`/exam/${id}?populate=true`)
-//       .then((res: any) => {
-//         const data = res?.success ? res.data : res;
-//         if (!data?.skills?.listening?.length) {
-//           toast({
-//             variant: "destructive",
-//             title: "Lỗi",
-//             description: "Không có phần Listening",
-//           });
-//           return;
-//         }
-
-//         const fixedData = {
-//           ...data,
-//           skills: {
-//             listening: data.skills.listening.map((q: any) => ({
-//               ...q,
-//               audio: q.audio?.startsWith("http")
-//                 ? q.audio
-//                 : `http://localhost:3000${q.audio || ""}`,
-//             })),
-//           },
-//         };
-
-//         setExam(fixedData);
-//         toast({
-//           title: "Thành công",
-//           description: "Đề đã tải xong – bạn có thể nghe lại thoải mái!",
-//         });
-//       })
-//       .catch(() => {
-//         toast({
-//           variant: "destructive",
-//           title: "Lỗi",
-//           description: "Không tải được đề thi",
-//         });
-//       })
-//       .finally(() => setLoading(false));
-//   }, [id, toast]);
-
-//   const currentQuestion = exam?.skills.listening[currentQIndex];
-//   const progress = exam
-//     ? ((currentQIndex + 1) / exam.skills.listening.length) * 100
-//     : 0;
-
-//   const handleAnswer = (subQId: string, answer: string) => {
-//     setUserAnswers((prev) => ({ ...prev, [subQId]: answer }));
-//   };
-
-//   const replayAudio = () => {
-//     if (audioRef.current) {
-//       audioRef.current.currentTime = 0;
-//       audioRef.current.play();
-//     }
-//   };
-
-//   const calculateScore = () => {
-//     if (!exam) return 0;
-//     let correct = 0;
-
-//     exam.skills.listening.forEach((q) => {
-//       q.subQuestions.forEach((sq) => {
-//         const userAns = userAnswers[sq._id]?.trim().toLowerCase() || "";
-//         if (sq.correctAnswers && sq.correctAnswers.length > 0) {
-//           const correctSet = new Set(
-//             sq.correctAnswers.map((a) => a.trim().toLowerCase())
-//           );
-//           if (correctSet.has(userAns)) correct++;
-//         } else if (sq.correctAnswer) {
-//           if (userAns === sq.correctAnswer.trim().toLowerCase()) correct++;
-//         }
-//       });
-//     });
-//     return correct;
-//   };
-
-//   const handleSubmit = () => {
-//     const score = calculateScore();
-//     setFinalScore(score);
-//     setShowResult(true);
-//     const band = listeningBandScore[score] || 0;
-//     toast({
-//       title: "HOÀN THÀNH!",
-//       description: `Đúng ${score}/${totalQuestions} → Band ${band.toFixed(1)}`,
-//     });
-//   };
-
-//   if (loading) return <LoadingScreen />;
-//   if (!exam || !currentQuestion) return <NotFoundScreen />;
-
-//   return (
-//     <main className="min-h-screen bg-gradient-to-br from-indigo-50 via-blue-50 to-cyan-50">
-//       <Navbar />
-//       <div className="pt-20 pb-16 max-w-7xl mx-auto px-4">
-//         <div className="text-center mb-10">
-//           <h1 className="text-5xl font-bold text-gray-800 mb-3">
-//             {exam.title}
-//           </h1>
-//           <p className="text-xl text-gray-600">
-//             IELTS Listening – Luyện tập thoải mái, nghe lại không giới hạn
-//           </p>
-//         </div>
-
-//         <div className="flex flex-wrap justify-center gap-4 mb-6 mb-10">
-//           <Badge variant="secondary" className="text-lg px-8 py-3">
-//             <Headphones className="w-5 h-5 mr-2" />
-//             Listening
-//           </Badge>
-//           <Badge variant="outline" className="text-lg px-8 py-3">
-//             <Clock className="w-5 h-5 mr-2" />
-//             ~30 phút
-//           </Badge>
-//           <Badge variant="outline" className="text-lg px-8 py-3">
-//             {totalQuestions} câu
-//           </Badge>
-//         </div>
-
-//         {showResult ? (
-//           <ResultScreen score={finalScore} total={totalQuestions} />
-//         ) : (
-//           <Card className="shadow-2xl border-0 overflow-hidden">
-//             <CardHeader className="bg-gradient-to-r from-blue-700 to-cyan-600 text-white">
-//               <div className="flex justify-between items-start">
-//                 <div>
-//                   <CardTitle className="text-3xl font-bold">
-//                     {currentQuestion.section} - {currentQuestion.title}
-//                   </CardTitle>
-//                   <p className="text-blue-100 mt-2">
-//                     Câu {currentQIndex + 1} / {exam.skills.listening.length}
-//                   </p>
-//                 </div>
-//                 <span className="text-3xl font-bold">
-//                   {Math.round(progress)}%
-//                 </span>
-//               </div>
-//               <Progress value={progress} className="mt-4 h-5 bg-white/30" />
-//             </CardHeader>
-
-//             <CardContent className="p-8 space-y-10">
-//               {/* AUDIO PLAYER – NGHE LẠI THOẢI MÁI */}
-//               {currentQuestion.audio && (
-//                 <div className="bg-black/90 rounded-2xl p-8 shadow-2xl text-center">
-//                   <div className="flex items-center justify-center gap-6 mb-6">
-//                     <Button
-//                       size="lg"
-//                       variant="secondary"
-//                       onClick={replayAudio}
-//                       className="rounded-full w-16 h-16 p-0">
-//                       <RotateCw className="w-8 h-8" />
-//                     </Button>
-//                     <audio
-//                       ref={audioRef}
-//                       controls
-//                       controlsList="nodownload"
-//                       className="w-full max-w-3xl h-16 text-white">
-//                       <source src={currentQuestion.audio} type="audio/mpeg" />
-//                       Trình duyệt không hỗ trợ.
-//                     </audio>
-//                   </div>
-//                   <p className="text-white/90 text-lg font-medium">
-//                     Nghe lại thoải mái – luyện tập mà bro!
-//                   </p>
-//                 </div>
-//               )}
-
-//               {/* SUB QUESTIONS */}
-//               <div className="space-y-8">
-//                 {currentQuestion.subQuestions.map((sq, idx) => (
-//                   <div
-//                     key={sq._id}
-//                     className="bg-gray-50 rounded-2xl p-8 border-2 border-gray-200">
-//                     <Label className="text-xl font-semibold mb-6 block">
-//                       {idx + 1}. {sq.question}
-//                     </Label>
-
-//                     {/* Multiple Choice */}
-//                     {currentQuestion.type === "multiple_choice" &&
-//                       sq.options && (
-//                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-//                           {sq.options.map((opt) => (
-//                             <Button
-//                               key={opt}
-//                               variant={
-//                                 userAnswers[sq._id] === opt
-//                                   ? "default"
-//                                   : "outline"
-//                               }
-//                               size="lg"
-//                               className="h-16 text-lg justify-start"
-//                               onClick={() => handleAnswer(sq._id, opt)}>
-//                               {opt}
-//                             </Button>
-//                           ))}
-//                         </div>
-//                       )}
-
-//                     {/* Fill / Note / Sentence Completion */}
-//                     {(currentQuestion.type === "fill_in_the_blank" ||
-//                       currentQuestion.type === "note_completion" ||
-//                       currentQuestion.type === "sentence_completion") && (
-//                       <Input
-//                         type="text"
-//                         placeholder="Gõ đáp án vào đây..."
-//                         value={userAnswers[sq._id] || ""}
-//                         onChange={(e) => handleAnswer(sq._id, e.target.value)}
-//                         className="text-xl h-16"
-//                       />
-//                     )}
-//                   </div>
-//                 ))}
-//               </div>
-
-//               {/* NAVIGATION */}
-//               <div className="flex justify-between items-center pt-8 border-t-2">
-//                 <Button
-//                   variant="outline"
-//                   size="lg"
-//                   disabled={currentQIndex === 0}
-//                   onClick={() => setCurrentQIndex((i) => i - 1)}>
-//                   <ChevronLeft className="mr-2" /> Câu trước
-//                 </Button>
-
-//                 {currentQIndex === exam.skills.listening.length - 1 ? (
-//                   <Button
-//                     size="lg"
-//                     className="bg-green-600 hover:bg-green-700 text-xl px-16"
-//                     onClick={handleSubmit}>
-//                     <CheckCircle2 className="mr-3" /> Nộp Bài & Xem Band
-//                   </Button>
-//                 ) : (
-//                   <Button
-//                     size="lg"
-//                     className="text-xl px-16"
-//                     onClick={() => setCurrentQIndex((i) => i + 1)}>
-//                     Câu tiếp theo <ChevronRight className="ml-2" />
-//                   </Button>
-//                 )}
-//               </div>
-//             </CardContent>
-//           </Card>
-//         )}
-//       </div>
-//       <Footer />
-//     </main>
-//   );
-// }
-
-// // Các screen phụ giữ nguyên đẹp như cũ
-// const LoadingScreen = () => (
-//   <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-cyan-50">
-//     <div className="text-center">
-//       <div className="w-24 h-24 border-8 border-blue-600 border-t-transparent rounded-full animate-spin mb-8" />
-//       <p className="text-3xl font-bold text-blue-800">Đang tải đề thi...</p>
-//     </div>
-//   </div>
-// );
-
-// const NotFoundScreen = () => (
-//   <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-pink-50">
-//     <p className="text-6xl font-bold text-red-600">Không tìm thấy đề thi</p>
-//   </div>
-// );
-
-// const ResultScreen = ({ score, total }: { score: number; total: number }) => {
-//   const band = listeningBandScore[score] || 0;
-//   const message =
-//     band >= 8
-//       ? "THIÊN TÀI!"
-//       : band >= 7
-//         ? "XUẤT SẮC!"
-//         : band >= 6
-//           ? "TỐT!"
-//           : "CỐ GẮNG THÊM NHÉ!";
-
-//   return (
-//     <Card className="max-w-3xl mx-auto text-center py-20 shadow-3xl border-4 border-green-500">
-//       <CardHeader>
-//         <CardTitle className="text-7xl font-bold text-green-600">
-//           HOÀN THÀNH!
-//         </CardTitle>
-//       </CardHeader>
-//       <CardContent className="space-y-8">
-//         <div className="text-9xl font-black text-blue-600">
-//           {score}
-//           <span className="text-5xl text-gray-600">/{total}</span>
-//         </div>
-//         <div className="text-5xl font-bold">
-//           Band ước tính:{" "}
-//           <span className="text-8xl text-green-600">{band.toFixed(1)}</span>
-//         </div>
-//         <div className="text-4xl font-bold text-purple-600">{message}</div>
-
-//         <div className="flex gap-8 justify-center mt-16">
-//           <Button asChild size="lg" className="text-2xl px-12 py-8">
-//             <Link href="/tests/listening">Làm đề khác</Link>
-//           </Button>
-//           <Button
-//             asChild
-//             size="lg"
-//             variant="outline"
-//             className="text-2xl px-12 py-8">
-//             <Link href="/tests">Trang chủ</Link>
-//           </Button>
-//         </div>
-//       </CardContent>
-//     </Card>
-//   );
-// };

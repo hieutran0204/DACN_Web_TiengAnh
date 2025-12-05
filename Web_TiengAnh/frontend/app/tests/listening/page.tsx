@@ -150,9 +150,9 @@ export default function ListeningTestsPage() {
               exams.map((exam) => (
                 <motion.div key={exam._id} variants={item}>
                   <Link href={`/tests/listening/exam/${exam._id}`}>
-                    <Card className="group h-full hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border-2 hover:border-blue-500/50 cursor-pointer overflow-hidden bg-card/50 backdrop-blur-sm">
+                    <Card className="group h-full hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border-2 hover:border-blue-500/50 cursor-pointer overflow-hidden bg-card/50 backdrop-blur-sm p-0 gap-0">
                       <div className="h-2 bg-gradient-to-r from-blue-500 to-cyan-500" />
-                      <CardHeader className="pb-4">
+                      <CardHeader className="pb-4 pt-6">
                         <div className="flex justify-between items-start mb-4">
                           <Badge variant="secondary" className="font-medium bg-blue-500/10 text-blue-600 hover:bg-blue-500/20">
                             IELTS Official
@@ -170,7 +170,7 @@ export default function ListeningTestsPage() {
                         </CardDescription>
                       </CardHeader>
 
-                      <CardContent className="space-y-5">
+                      <CardContent className="space-y-5 pb-6">
                         <div className="grid grid-cols-2 gap-4">
                           <div className="flex items-center gap-3">
                             <Clock className="w-5 h-5 text-blue-500" />

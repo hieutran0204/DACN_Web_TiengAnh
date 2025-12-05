@@ -1,5 +1,29 @@
 "use client";
+
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  ArrowLeft,
+  ArrowRight,
+  RefreshCw,
+  CheckCircle2,
+  XCircle,
+  Trophy,
+  BrainCircuit,
+  Lightbulb,
+  Play,
+  GraduationCap,
+  ChevronLeft,
+} from "lucide-react";
+import Link from "next/link";
 
 interface Category {
   _id: string;
@@ -41,6 +65,7 @@ export default function MatchingGamePlay() {
   const [shuffledMeanings, setShuffledMeanings] = useState<MeaningObj[]>([]);
   const [isChecked, setIsChecked] = useState(false);
   const [correctCount, setCorrectCount] = useState(0);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchCategories();
@@ -57,6 +82,7 @@ export default function MatchingGamePlay() {
   };
 
   const startGame = async (categoryId: string) => {
+    setLoading(true);
     try {
       const res = await fetch(
         `http://localhost:3000/api/user/game/matching/category/${categoryId}/random`
@@ -91,6 +117,8 @@ export default function MatchingGamePlay() {
     } catch (error) {
       console.error("Lỗi kết nối:", error);
       alert("Lỗi kết nối server");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -104,26 +132,23 @@ export default function MatchingGamePlay() {
   };
 
   const handleWordClick = (wordObj: WordObj) => {
-    if (isChecked) return; // Đã kiểm tra rồi thì không cho chọn nữa
-    if (isMatched(wordObj.index, "word")) return; // Đã ghép rồi
-
+    if (isChecked) return;
+    if (isMatched(wordObj.index, "word")) return;
     setSelectedWord(wordObj);
   };
 
   const handleMeaningClick = (meaningObj: MeaningObj) => {
     if (isChecked) return;
     if (isMatched(meaningObj.index, "meaning")) return;
-
     if (!selectedWord) return;
 
-    // Tạo cặp ghép mới
     const newMatch: Match = {
       wordIndex: selectedWord.index,
       meaningIndex: meaningObj.index,
     };
 
     setMatches([...matches, newMatch]);
-    setSelectedWord(null); // Reset để chọn từ tiếp theo
+    setSelectedWord(null);
   };
 
   const isMatched = (index: number, type: "word" | "meaning"): boolean => {
@@ -133,10 +158,7 @@ export default function MatchingGamePlay() {
   };
 
   const checkAllAnswers = () => {
-    if (matches.length !== 4) {
-      alert("Bạn cần ghép đủ 4 cặp!");
-      return;
-    }
+    if (!game || matches.length !== game.words.length) return;
 
     const correct = matches.filter(
       (m) => m.wordIndex === m.meaningIndex
@@ -144,6 +166,13 @@ export default function MatchingGamePlay() {
     setCorrectCount(correct);
     setIsChecked(true);
   };
+
+  // Auto-check when all pairs are matched
+  useEffect(() => {
+    if (game && matches.length === game.words.length && matches.length > 0) {
+      checkAllAnswers();
+    }
+  }, [matches, game]);
 
   const isCorrectMatch = (wordIndex: number, meaningIndex: number): boolean => {
     if (!isChecked) return false;
@@ -172,233 +201,339 @@ export default function MatchingGamePlay() {
     }
   };
 
-  const removeMatch = (wordIndex: number) => {
-    if (isChecked) return;
-    setMatches(matches.filter((m) => m.wordIndex !== wordIndex));
-  };
+  // --- Render Components ---
 
   if (!game) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center p-6">
-        <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-2xl w-full">
-          <h1 className="text-4xl font-bold text-center mb-2 text-gray-800">
-            🎯 Ghép Từ Với Nghĩa
-          </h1>
-          <p className="text-center text-gray-600 mb-8">
-            Chọn một chủ đề để bắt đầu!
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {categories.map((cat) => (
-              <button
-                key={cat._id}
-                onClick={() => startGame(cat._id)}
-                className="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-6 rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all transform hover:scale-105 shadow-lg">
-                <h3 className="text-xl font-bold">{cat.name}</h3>
-                {cat.description && (
-                  <p className="text-sm mt-2 opacity-90">{cat.description}</p>
-                )}
-              </button>
-            ))}
-          </div>
+      <div className="min-h-[calc(100vh-4rem)] bg-slate-50 dark:bg-slate-950 flex items-center justify-center p-4 relative overflow-hidden pt-24">
+        {/* Decorative Background Elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-500/10 rounded-full blur-[100px]" />
+          <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500/10 rounded-full blur-[100px]" />
         </div>
+
+        <Card className="w-full max-w-5xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-slate-200 dark:border-slate-800 shadow-2xl relative z-10">
+          {/* Back Button */}
+          <div className="absolute top-6 left-6 z-20">
+            <Link href="/games">
+              <Button variant="ghost" size="sm" className="gap-2 text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400">
+                <ChevronLeft className="w-5 h-5" />
+                <span className="font-bold">Games</span>
+              </Button>
+            </Link>
+          </div>
+
+          <CardHeader className="text-center pb-8 pt-10">
+            <div className="mx-auto w-16 h-16 bg-indigo-100 dark:bg-indigo-900/30 rounded-2xl flex items-center justify-center mb-4 text-indigo-600 dark:text-indigo-400">
+              <GraduationCap className="w-8 h-8" />
+            </div>
+            <CardTitle className="text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-100 mb-2">
+              Luyện Tập Từ Vựng
+            </CardTitle>
+            <CardDescription className="text-lg text-slate-600 dark:text-slate-400">
+              Chọn chủ đề để bắt đầu bài tập ghép từ
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-6 md:p-10">
+            {loading ? (
+              <div className="flex flex-col items-center justify-center py-12 gap-4">
+                <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+                <p className="text-slate-500 font-medium">Đang tải dữ liệu...</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {categories.map((category, index) => (
+                  <motion.button
+                    key={category._id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    whileHover={{ scale: 1.03, y: -5 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => startGame(category._id)}
+                    className="group relative overflow-hidden rounded-3xl bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 p-8 text-left shadow-lg hover:shadow-2xl hover:border-indigo-500/30 dark:hover:border-indigo-400/30 transition-all duration-500"
+                  >
+                    {/* Decorative Gradients */}
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 rounded-bl-full -mr-8 -mt-8 transition-all group-hover:scale-150 group-hover:from-indigo-500/20 group-hover:to-purple-500/20" />
+                    <div className="absolute bottom-0 left-0 w-24 h-24 bg-blue-500/5 rounded-tr-full -ml-6 -mb-6 transition-all group-hover:scale-125" />
+
+                    <div className="absolute top-6 right-6 p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl text-indigo-600 dark:text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300 shadow-sm">
+                      <Play className="w-6 h-6" />
+                    </div>
+
+                    <div className="relative z-10 pt-4">
+                      <h3 className="font-bold text-2xl text-slate-800 dark:text-slate-100 group-hover:text-indigo-700 dark:group-hover:text-indigo-400 transition-colors mb-3">
+                        {category.name}
+                      </h3>
+                      <p className="text-base text-slate-500 dark:text-slate-400 font-medium line-clamp-2 leading-relaxed mb-6">
+                        {category.description || "Bài tập rèn luyện kỹ năng ghi nhớ từ vựng"}
+                      </p>
+
+                      <div className="flex items-center text-sm font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider group-hover:translate-x-2 transition-transform duration-300">
+                        Bắt đầu ngay <ArrowRight className="w-4 h-4 ml-2" />
+                      </div>
+                    </div>
+                  </motion.button>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-500 to-purple-600 p-6">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="bg-white rounded-xl shadow-lg p-4 mb-6 flex justify-between items-center flex-wrap gap-4">
-          <button
-            onClick={resetGame}
-            className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition">
-            ← Quay lại
-          </button>
+    <div className="min-h-[calc(100vh-4rem)] bg-slate-50 dark:bg-slate-950 relative overflow-hidden flex flex-col pt-24">
+      {/* Dynamic Background */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-100/40 via-slate-50/0 to-slate-50/0 dark:from-indigo-950/40 dark:via-slate-950/0 dark:to-slate-950/0" />
+        <div className="absolute top-1/4 left-10 w-64 h-64 bg-purple-400/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-1/4 right-10 w-80 h-80 bg-blue-400/10 rounded-full blur-3xl animate-pulse delay-700" />
+      </div>
 
-          <div className="flex gap-6 items-center text-sm md:text-base">
-            <div className="text-center">
-              <div className="text-gray-600">Đã ghép</div>
-              <div className="text-2xl font-bold text-purple-600">
-                {matches.length}/4
+      {/* Game HUD */}
+      <div className="sticky top-16 z-30 px-4 py-4 mb-4">
+        <div className="max-w-5xl mx-auto bg-white/90 dark:bg-slate-900/90 backdrop-blur-md rounded-2xl shadow-lg border border-indigo-100 dark:border-indigo-800 p-4 flex flex-wrap items-center justify-between gap-4">
+          <Button
+            variant="ghost"
+            onClick={() => setGame(null)}
+            className="hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold"
+          >
+            <ArrowLeft className="w-5 h-5 mr-2" />
+            Chọn chủ đề khác
+          </Button>
+
+          <div className="flex items-center gap-6 md:gap-12">
+            <div className="flex flex-col items-center">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">ĐÃ GHÉP</span>
+              <div className="text-2xl font-black text-indigo-600 dark:text-indigo-400">
+                {matches.length}/{game.words.length}
               </div>
             </div>
-            {isChecked && (
-              <div className="text-center">
-                <div className="text-gray-600">Đúng</div>
-                <div className="text-2xl font-bold text-green-600">
-                  {correctCount}
-                </div>
+
+            <div className="flex flex-col items-center">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">KẾT QUẢ</span>
+              <div className={`text-2xl font-black ${matches.length === game.words.length
+                ? "text-green-500"
+                : "text-orange-500"
+                }`}>
+                {matches.length}/{game.words.length}
               </div>
-            )}
+            </div>
           </div>
 
-          {!isChecked ? (
-            <button
-              onClick={checkAllAnswers}
-              disabled={matches.length !== 4}
-              className={`px-6 py-2 rounded-lg font-semibold transition ${
-                matches.length === 4
-                  ? "bg-blue-600 text-white hover:bg-blue-700"
-                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
-              }`}>
-              Kiểm tra
-            </button>
-          ) : (
-            <button
+          <div className="flex items-center gap-3">
+            <Button
               onClick={playAgain}
-              className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold transition">
-              Chơi tiếp
-            </button>
-          )}
-        </div>
-
-        {/* Result Message */}
-        {isChecked && (
-          <div
-            className={`mb-6 p-4 rounded-xl text-center font-bold text-lg ${
-              correctCount === 4
-                ? "bg-green-100 text-green-800 border-2 border-green-300"
-                : "bg-yellow-100 text-yellow-800 border-2 border-yellow-300"
-            }`}>
-            {correctCount === 4 ? (
-              <>🎉 Hoàn hảo! Bạn đã ghép đúng tất cả!</>
-            ) : (
-              <>Bạn ghép đúng {correctCount}/4 cặp. Hãy thử lại!</>
-            )}
+              className="bg-green-600 hover:bg-green-700 text-white font-bold shadow-md hover:shadow-lg transition-all active:scale-95"
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Chơi lại
+            </Button>
           </div>
-        )}
+        </div>
+      </div>
 
-        {/* Game Board */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Từ vựng */}
+      {/* Game Board */}
+      <div className="flex-1 max-w-6xl mx-auto w-full px-4 pb-12 relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 h-full">
+
+          {/* Words Column */}
           <div className="space-y-4">
-            <h3 className="text-white text-xl font-bold text-center mb-4">
-              📝 Từ vựng
-            </h3>
-            {shuffledWords.map((wordObj) => {
-              const match = matches.find((m) => m.wordIndex === wordObj.index);
-              const isSelected = selectedWord?.index === wordObj.index;
-              const matchedMeaning = match
-                ? shuffledMeanings.find((m) => m.index === match.meaningIndex)
-                : null;
+            <div className="flex items-center gap-2 mb-4 px-2">
+              <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                <BrainCircuit className="w-5 h-5" />
+              </div>
+              <h2 className="text-xl font-bold text-slate-700 dark:text-slate-200">Từ vựng</h2>
+            </div>
 
-              return (
-                <div key={wordObj.index} className="relative">
-                  <button
+            <div className="grid gap-3">
+              {shuffledWords.map((wordObj) => {
+                const match = matches.find((p) => p.wordIndex === wordObj.index);
+                const isSelected = selectedWord?.index === wordObj.index;
+                const matchedMeaning = match
+                  ? shuffledMeanings.find((m) => m.index === match.meaningIndex)
+                  : null;
+
+                // Determine Card Style
+                let cardStyle = "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500 hover:-translate-y-1 hover:shadow-md";
+                let textStyle = "text-slate-700 dark:text-slate-200";
+
+                if (match) {
+                  if (isChecked) {
+                    if (isCorrectMatch(match.wordIndex, match.meaningIndex)) {
+                      cardStyle = "bg-green-50 dark:bg-green-900/20 border-green-500 shadow-sm opacity-60";
+                      textStyle = "text-green-700 dark:text-green-400";
+                    } else {
+                      cardStyle = "bg-red-50 dark:bg-red-900/20 border-red-500 shadow-sm";
+                      textStyle = "text-red-700 dark:text-red-400";
+                    }
+                  } else {
+                    cardStyle = "bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-700";
+                    textStyle = "text-indigo-700 dark:text-indigo-300";
+                  }
+                } else if (isSelected) {
+                  cardStyle = "bg-indigo-100 dark:bg-indigo-900/40 border-indigo-500 shadow-md -translate-y-1 ring-2 ring-indigo-500/20";
+                  textStyle = "text-indigo-800 dark:text-indigo-300";
+                }
+
+                return (
+                  <motion.button
+                    key={wordObj.index}
+                    layoutId={`word-${wordObj.index}`}
                     onClick={() => handleWordClick(wordObj)}
                     disabled={!!match || isChecked}
-                    className={`w-full p-6 rounded-xl text-lg font-semibold transition-all transform hover:scale-105 ${
-                      isChecked
-                        ? match &&
-                          isCorrectMatch(match.wordIndex, match.meaningIndex)
-                          ? "bg-green-500 text-white"
-                          : match &&
-                              isWrongMatch(match.wordIndex, match.meaningIndex)
-                            ? "bg-red-500 text-white"
-                            : "bg-white text-gray-800"
-                        : match
-                          ? "bg-blue-100 text-blue-800 border-2 border-blue-300"
-                          : isSelected
-                            ? "bg-blue-600 text-white shadow-xl scale-105"
-                            : "bg-white text-gray-800 hover:bg-blue-50 shadow-lg"
-                    }`}>
-                    <div className="flex justify-between items-center">
-                      <span>{wordObj.word}</span>
+                    className={`w-full text-left p-4 md:p-5 rounded-xl border-b-4 transition-all duration-200 relative overflow-hidden group active:border-b-0 active:translate-y-1 ${cardStyle}`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className={`text-lg md:text-xl font-bold ${textStyle}`}>{wordObj.word}</span>
+                      {match && matchedMeaning && (
+                        <span className="text-slate-400 mx-2">→</span>
+                      )}
+                      {match && matchedMeaning && (
+                        <span className={`text-lg md:text-xl font-medium ${textStyle}`}>{matchedMeaning.meaning}</span>
+                      )}
                     </div>
-                    {match && matchedMeaning && (
-                      <div className="text-sm mt-2 opacity-80">
-                        → {matchedMeaning.meaning}
+
+                    {/* Status Icon */}
+                    {isChecked && match && (
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                        {isCorrectMatch(match.wordIndex, match.meaningIndex) ? (
+                          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
+                            <CheckCircle2 className="w-6 h-6 text-green-600 fill-green-100" />
+                          </motion.div>
+                        ) : (
+                          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
+                            <XCircle className="w-6 h-6 text-red-600 fill-red-100" />
+                          </motion.div>
+                        )}
                       </div>
                     )}
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Nghĩa */}
-          <div className="space-y-4">
-            <h3 className="text-white text-xl font-bold text-center mb-4">
-              💡 Nghĩa
-            </h3>
-            {shuffledMeanings.map((meaningObj) => {
-              const match = matches.find(
-                (m) => m.meaningIndex === meaningObj.index
-              );
-
-              return (
-                <button
-                  key={meaningObj.index}
-                  onClick={() => handleMeaningClick(meaningObj)}
-                  disabled={!!match || isChecked}
-                  className={`w-full p-6 rounded-xl text-lg font-semibold transition-all transform hover:scale-105 ${
-                    isChecked
-                      ? match &&
-                        isCorrectMatch(match.wordIndex, match.meaningIndex)
-                        ? "bg-green-500 text-white"
-                        : match &&
-                            isWrongMatch(match.wordIndex, match.meaningIndex)
-                          ? "bg-red-500 text-white"
-                          : "bg-white text-gray-800"
-                      : match
-                        ? "bg-blue-100 text-blue-800 border-2 border-blue-300"
-                        : selectedWord
-                          ? "bg-white text-gray-800 hover:bg-blue-50 shadow-lg cursor-pointer"
-                          : "bg-gray-100 text-gray-500 cursor-not-allowed"
-                  }`}>
-                  {meaningObj.meaning}
-                  {isChecked &&
-                    match &&
-                    isWrongMatch(match.wordIndex, match.meaningIndex) && (
-                      <div className="text-sm mt-2 text-green-200">
-                        ✓ Đáp án đúng: {game.words[meaningObj.index]}
-                      </div>
-                    )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Complete Modal */}
-        {isChecked && correctCount === 4 && (
-          <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl p-8 max-w-md w-full text-center shadow-2xl">
-              <div className="text-6xl mb-4">🎉</div>
-              <h2 className="text-3xl font-bold mb-4 text-gray-800">
-                Hoàn hảo!
-              </h2>
-              <p className="text-lg text-gray-600 mb-6">
-                Bạn đã ghép đúng tất cả 4 cặp!
-              </p>
-
-              <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-5 mb-6 border-2 border-green-200">
-                <div className="text-5xl font-bold text-green-600">
-                  100 điểm
-                </div>
-                <div className="text-sm text-gray-600 mt-2">
-                  Độ chính xác: 100%
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <button
-                  onClick={playAgain}
-                  className="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 font-semibold transition">
-                  Chơi tiếp
-                </button>
-                <button
-                  onClick={resetGame}
-                  className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg hover:bg-gray-300 font-semibold transition">
-                  Chủ đề khác
-                </button>
-              </div>
+                  </motion.button>
+                );
+              })}
             </div>
           </div>
-        )}
+
+          {/* Meanings Column */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 mb-4 px-2">
+              <div className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                <Lightbulb className="w-5 h-5" />
+              </div>
+              <h2 className="text-xl font-bold text-slate-700 dark:text-slate-200">Nghĩa</h2>
+            </div>
+
+            <div className="grid gap-3">
+              {shuffledMeanings.map((meaningObj) => {
+                const match = matches.find((p) => p.meaningIndex === meaningObj.index);
+
+                // Determine Card Style
+                let cardStyle = "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-amber-400 dark:hover:border-amber-500 hover:-translate-y-1 hover:shadow-md";
+                let textStyle = "text-slate-700 dark:text-slate-200";
+
+                if (match) {
+                  if (isChecked) {
+                    if (isCorrectMatch(match.wordIndex, match.meaningIndex)) {
+                      cardStyle = "bg-green-50 dark:bg-green-900/20 border-green-500 shadow-sm opacity-60";
+                      textStyle = "text-green-700 dark:text-green-400";
+                    } else {
+                      cardStyle = "bg-red-50 dark:bg-red-900/20 border-red-500 shadow-sm";
+                      textStyle = "text-red-700 dark:text-red-400";
+                    }
+                  } else {
+                    cardStyle = "bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-700";
+                    textStyle = "text-indigo-700 dark:text-indigo-300";
+                  }
+                } else if (selectedWord && !match) {
+                  // Hint that this is clickable
+                  cardStyle += " cursor-pointer";
+                }
+
+                return (
+                  <motion.button
+                    key={meaningObj.index}
+                    layoutId={`meaning-${meaningObj.index}`}
+                    onClick={() => handleMeaningClick(meaningObj)}
+                    disabled={!!match || isChecked || !selectedWord}
+                    className={`w-full text-left p-4 md:p-5 rounded-xl border-b-4 transition-all duration-200 relative overflow-hidden active:border-b-0 active:translate-y-1 ${cardStyle}`}
+                  >
+                    <div className="flex items-center justify-between w-full gap-2">
+                      <span className={`text-lg font-medium ${textStyle}`}>
+                        {meaningObj.meaning}
+                      </span>
+
+                      {isChecked && match && isWrongMatch(match.wordIndex, match.meaningIndex) && (
+                        <motion.div
+                          initial={{ opacity: 0, x: 10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          className="text-sm text-red-600 font-bold flex items-center gap-1 bg-red-50 dark:bg-red-900/20 px-2 py-1 rounded-lg"
+                        >
+                          <span className="uppercase text-[10px] tracking-wider opacity-70">Đúng:</span>
+                          {game.words[meaningObj.index]}
+                        </motion.div>
+                      )}
+                    </div>
+                  </motion.button>
+                );
+              })}
+            </div>
+          </div>
+
+        </div>
       </div>
+
+      {/* Result Overlay */}
+      <AnimatePresence>
+        {isChecked && correctCount === game.words.length && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="bg-background rounded-3xl shadow-2xl p-8 max-w-md w-full text-center border-2 border-primary/20 relative overflow-hidden"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-blue-500/10 pointer-events-none" />
+
+              <div className="relative z-10">
+                <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Trophy className="w-12 h-12 text-green-600" />
+                </div>
+
+                <h2 className="text-3xl font-bold mb-2">Xuất sắc!</h2>
+                <p className="text-muted-foreground mb-8">
+                  Bạn đã hoàn thành xuất sắc bài tập này!
+                </p>
+
+                <div className="grid grid-cols-2 gap-4 mb-8">
+                  <div className="bg-card p-4 rounded-xl border">
+                    <div className="text-3xl font-bold text-primary">100%</div>
+                    <div className="text-xs text-muted-foreground uppercase">Chính xác</div>
+                  </div>
+                  <div className="bg-card p-4 rounded-xl border">
+                    <div className="text-3xl font-bold text-primary">{correctCount}/{game.words.length}</div>
+                    <div className="text-xs text-muted-foreground uppercase">Câu đúng</div>
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <Button onClick={playAgain} className="flex-1 h-12 text-lg">
+                    Chơi lại
+                  </Button>
+                  <Button onClick={resetGame} variant="outline" className="flex-1 h-12 text-lg">
+                    Thoát
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -76,7 +76,7 @@ export function AppSidebar() {
             <span className="text-primary-foreground font-bold text-lg">E</span>
           </div>
           <h1 className="text-lg font-bold text-sidebar-foreground">
-            English Hub
+            TestKiller
           </h1>
         </div>
       </SidebarHeader>

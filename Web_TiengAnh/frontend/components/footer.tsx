@@ -7,7 +7,7 @@ export default function Footer() {
   const currentYear = new Date().getFullYear()
 
   return (
-    <footer className="bg-primary text-primary-foreground mt-20">
+    <footer className="bg-primary text-primary-foreground">
       {/* Main Footer Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
@@ -17,7 +17,7 @@ export default function Footer() {
               <div className="w-8 h-8 bg-primary-foreground rounded-lg flex items-center justify-center">
                 <span className="text-primary font-bold text-lg">E</span>
               </div>
-              <h3 className="text-xl font-bold">English Hub</h3>
+              <h3 className="text-xl font-bold">TestKiller</h3>
             </div>
             <p className="text-primary-foreground/80 text-sm">
               Master English with interactive lessons, games, and comprehensive assessments.
@@ -87,7 +87,7 @@ export default function Footer() {
             <ul className="space-y-3 text-sm">
               <li className="flex items-start gap-3">
                 <Mail size={18} className="flex-shrink-0 mt-0.5" />
-                <span>support@englishhub.com</span>
+                <span>support@testkiller.com</span>
               </li>
               <li className="flex items-start gap-3">
                 <Phone size={18} className="flex-shrink-0 mt-0.5" />
@@ -106,7 +106,7 @@ export default function Footer() {
 
         {/* Bottom Footer */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-          <p className="text-sm text-primary-foreground/70">&copy; {currentYear} English Hub. All rights reserved.</p>
+          <p className="text-sm text-primary-foreground/70">&copy; {currentYear} TestKiller. All rights reserved.</p>
 
           {/* Social Links */}
           <div className="flex items-center gap-4">

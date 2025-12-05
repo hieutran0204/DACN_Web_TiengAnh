@@ -6,6 +6,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { ChatBox } from "@/components/chat-box";
 import "./globals.css";
+import { ThemeProvider } from "@/components/theme-provider";
 
 import ConditionalNavbar from "@/components/conditional-navbar";
 import ConditionalFooter from "@/components/conditional-footer";
@@ -43,16 +44,23 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className="font-sans antialiased">
-        <SidebarProvider defaultOpen={false}>
-          <AppSidebar />
-          <div className="flex flex-col flex-1 w-full">
-            <ConditionalNavbar />
-            {children}
-            <ConditionalFooter />
-          </div>
-        </SidebarProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem={false}
+          disableTransitionOnChange
+        >
+          <SidebarProvider defaultOpen={false}>
+            <AppSidebar />
+            <div className="flex flex-col flex-1 w-full">
+              <ConditionalNavbar />
+              {children}
+              <ConditionalFooter />
+            </div>
+          </SidebarProvider>
+        </ThemeProvider>
 
         {/* ✅ Global Chat + Analytics (bỏ toast) */}
         <ChatBox />

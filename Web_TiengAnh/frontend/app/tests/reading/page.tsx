@@ -54,8 +54,8 @@ export default function ReadingListPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-2xl">Đang tải đề Reading...</p>
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
+        <p className="text-2xl text-slate-600 dark:text-slate-400">Đang tải đề Reading...</p>
       </div>
     );
   }
@@ -63,24 +63,24 @@ export default function ReadingListPage() {
   return (
     <>
 
-      <main className="min-h-screen pt-20 pb-16">
+      <main className="min-h-screen pt-20 pb-16 bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-12">
-            <h1 className="text-6xl font-bold mb-4">
+            <h1 className="text-6xl font-bold mb-4 text-slate-900 dark:text-slate-100">
               IELTS Reading Practice Tests
             </h1>
-            <p className="text-2xl text-gray-600">
+            <p className="text-2xl text-slate-600 dark:text-slate-400">
               Các đề Reading chính thức – chuẩn Cambridge
             </p>
           </div>
 
           {exams.length === 0 ? (
             <div className="text-center py-32">
-              <Lock className="w-20 h-20 mx-auto mb-8 text-gray-400" />
-              <p className="text-4xl font-bold text-gray-500 mb-6">
+              <Lock className="w-20 h-20 mx-auto mb-8 text-slate-400 dark:text-slate-600" />
+              <p className="text-4xl font-bold text-slate-500 dark:text-slate-400 mb-6">
                 Chưa có đề Reading nào
               </p>
-              <p className="text-lg text-gray-400">
+              <p className="text-lg text-slate-400 dark:text-slate-500">
                 Admin đang cập nhật thêm đề mới...
               </p>
             </div>
@@ -89,44 +89,47 @@ export default function ReadingListPage() {
               {exams.map((exam) => (
                 <Card
                   key={exam._id}
-                  className="hover:shadow-2xl transition-all hover:scale-105 duration-300 border-2 border-emerald-200 bg-white">
-                  <CardHeader className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-t-xl">
-                    <CardTitle className="text-2xl font-bold">
+                  className="group hover:shadow-2xl transition-all hover:-translate-y-2 duration-300 border-2 border-emerald-200 dark:border-emerald-900 bg-white dark:bg-slate-900 p-0 gap-0 overflow-hidden">
+                  <div className="h-2 bg-gradient-to-r from-emerald-600 to-teal-600" />
+                  <CardHeader className="pt-6 pb-4">
+                    <CardTitle className="text-2xl font-bold group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors text-slate-900 dark:text-slate-100">
                       {exam.title}
                     </CardTitle>
-                    <Badge variant="secondary" className="mt-2 bg-white/20">
-                      Reading Test
-                    </Badge>
+                    <div className="flex justify-between items-center mt-2">
+                      <Badge variant="secondary" className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-200 dark:hover:bg-emerald-900/50">
+                        Reading Test
+                      </Badge>
+                    </div>
                   </CardHeader>
 
-                  <CardContent className="pt-6">
-                    <CardDescription className="text-gray-600 mb-6 min-h-20">
+                  <CardContent className="pt-0 pb-6 space-y-6">
+                    <CardDescription className="text-slate-600 dark:text-slate-400 min-h-[3rem] line-clamp-2">
                       {exam.description ||
                         "Đề Reading chuẩn IELTS – 3 passages"}
                     </CardDescription>
 
-                    <div className="flex justify-between items-center mb-8 text-emerald-700 font-bold">
-                      <div className="flex items-center gap-3">
-                        <BookOpen className="w-7 h-7" />
-                        <span className="text-2xl">
+                    <div className="flex justify-between items-center text-emerald-700 dark:text-emerald-400 font-bold border-t border-emerald-100 dark:border-emerald-900/50 pt-4">
+                      <div className="flex items-center gap-2">
+                        <BookOpen className="w-5 h-5" />
+                        <span className="text-lg">
                           {exam.questionCount.reading} câu
                         </span>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <Clock className="w-7 h-7" />
-                        <span className="text-2xl">60 phút</span>
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-5 h-5" />
+                        <span className="text-lg">60 phút</span>
                       </div>
                     </div>
 
                     <Button
                       asChild
                       size="lg"
-                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-xl font-bold py-8 rounded-xl">
+                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-lg font-bold py-6 rounded-xl shadow-lg shadow-emerald-200 dark:shadow-none group-hover:scale-[1.02] transition-transform">
                       <Link
                         href={`/tests/reading/exam/${exam._id}`}
-                        className="flex items-center justify-center gap-4">
+                        className="flex items-center justify-center gap-2">
                         Làm bài ngay
-                        <ChevronRight className="w-7 h-7" />
+                        <ChevronRight className="w-5 h-5" />
                       </Link>
                     </Button>
                   </CardContent>
