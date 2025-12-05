@@ -22,6 +22,7 @@ import {
   Play,
   GraduationCap,
   ChevronLeft,
+  Target,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -486,7 +487,7 @@ export default function MatchingGamePlay() {
 
       {/* Result Overlay */}
       <AnimatePresence>
-        {isChecked && correctCount === game.words.length && (
+        {isChecked && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -496,32 +497,70 @@ export default function MatchingGamePlay() {
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="bg-background rounded-3xl shadow-2xl p-8 max-w-md w-full text-center border-2 border-primary/20 relative overflow-hidden"
+              className="bg-background rounded-3xl shadow-2xl p-8 max-w-lg w-full text-center border-2 border-primary/20 relative overflow-hidden flex flex-col max-h-[90vh]"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-blue-500/10 pointer-events-none" />
 
-              <div className="relative z-10">
-                <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Trophy className="w-12 h-12 text-green-600" />
+              <div className="relative z-10 flex flex-col min-h-0 flex-1">
+                <div className="flex-shrink-0">
+                  <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 ${correctCount === game.words.length ? "bg-green-100 text-green-600" : "bg-orange-100 text-orange-600"}`}>
+                    {correctCount === game.words.length ? (
+                      <Trophy className="w-10 h-10" />
+                    ) : (
+                      <Target className="w-10 h-10" />
+                    )}
+                  </div>
+
+                  <h2 className="text-2xl font-bold mb-2">
+                    {correctCount === game.words.length ? "Xuất sắc!" : "Hoàn thành!"}
+                  </h2>
+                  <p className="text-muted-foreground mb-6">
+                    Bạn đã trả lời đúng <span className="font-bold text-primary">{correctCount}/{game.words.length}</span> câu hỏi
+                  </p>
                 </div>
 
-                <h2 className="text-3xl font-bold mb-2">Xuất sắc!</h2>
-                <p className="text-muted-foreground mb-8">
-                  Bạn đã hoàn thành xuất sắc bài tập này!
-                </p>
+                <div className="flex-1 overflow-y-auto pr-2 mb-6 space-y-3 text-left custom-scrollbar">
+                  {matches.map((match, index) => {
+                    const isCorrect = match.wordIndex === match.meaningIndex;
+                    const word = game.words[match.wordIndex];
+                    const userMeaning = game.meanings[match.meaningIndex];
+                    const correctMeaning = game.meanings[match.wordIndex];
 
-                <div className="grid grid-cols-2 gap-4 mb-8">
-                  <div className="bg-card p-4 rounded-xl border">
-                    <div className="text-3xl font-bold text-primary">100%</div>
-                    <div className="text-xs text-muted-foreground uppercase">Chính xác</div>
-                  </div>
-                  <div className="bg-card p-4 rounded-xl border">
-                    <div className="text-3xl font-bold text-primary">{correctCount}/{game.words.length}</div>
-                    <div className="text-xs text-muted-foreground uppercase">Câu đúng</div>
-                  </div>
+                    return (
+                      <div key={index} className={`p-4 rounded-xl border ${isCorrect
+                        ? "bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-900/30"
+                        : "bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-900/30"
+                        }`}>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-bold text-foreground">{word}</span>
+                          {isCorrect ? (
+                            <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
+                          ) : (
+                            <XCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
+                          )}
+                        </div>
+                        <div className="text-sm space-y-1">
+                          <div className="flex gap-2">
+                            <span className="text-muted-foreground min-w-[70px]">Bạn chọn:</span>
+                            <span className={`font-medium ${isCorrect ? "text-green-700 dark:text-green-400" : "text-red-700 dark:text-red-400"}`}>
+                              {userMeaning}
+                            </span>
+                          </div>
+                          {!isCorrect && (
+                            <div className="flex gap-2">
+                              <span className="text-muted-foreground min-w-[70px]">Đáp án:</span>
+                              <span className="text-green-700 dark:text-green-400 font-medium">
+                                {correctMeaning}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
 
-                <div className="flex gap-3">
+                <div className="flex gap-3 flex-shrink-0">
                   <Button onClick={playAgain} className="flex-1 h-12 text-lg">
                     Chơi lại
                   </Button>

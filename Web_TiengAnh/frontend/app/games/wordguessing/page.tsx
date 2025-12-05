@@ -345,105 +345,138 @@ export default function WordGuessingGame() {
                 </div>
               </div>
 
-              {/* Controls */}
-              {!showAnswer ? (
-                <div className="space-y-6 max-w-md mx-auto">
-                  <div className="flex gap-2 justify-center">
-                    <Button
-                      onClick={useHint}
-                      disabled={hintLevel >= 3}
-                      variant="outline"
-                      className="border-yellow-200 dark:border-yellow-800 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400"
-                    >
-                      <Lightbulb className="w-4 h-4 mr-2" />
-                      Gợi ý ({3 - hintLevel})
-                    </Button>
-                  </div>
-
-                  <div className="relative">
-                    <Input
-                      value={userAnswer}
-                      onChange={(e) => setUserAnswer(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && checkAnswer()}
-                      placeholder="Nhập từ vựng..."
-                      className="text-center text-xl h-14 rounded-xl border-2 focus-visible:ring-indigo-500 bg-white dark:bg-slate-950 text-slate-900 dark:text-white"
-                      autoFocus
-                    />
-                  </div>
-
-                  {feedback === "incorrect" && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="text-center text-red-500 font-medium flex items-center justify-center gap-2"
-                    >
-                      <XCircle className="w-4 h-4" />
-                      Sai rồi, thử lại xem!
-                    </motion.div>
-                  )}
-
-                  <div className="flex gap-3">
-                    <Button
-                      onClick={handleDontKnow}
-                      variant="secondary"
-                      className="flex-1 h-12 text-lg hover:bg-red-100 dark:hover:bg-red-900/20 hover:text-red-700 dark:hover:text-red-400 transition-colors"
-                    >
-                      <Eye className="w-5 h-5 mr-2" />
-                      Không biết
-                    </Button>
-                    <Button
-                      onClick={checkAnswer}
-                      disabled={!userAnswer.trim()}
-                      className="flex-1 h-12 text-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-lg shadow-indigo-500/20 text-white"
-                    >
-                      <CheckCircle2 className="w-5 h-5 mr-2" />
-                      Kiểm tra
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="space-y-6 text-center"
-                >
-                  <div
-                    className={`p-6 rounded-2xl border-2 ${feedback === "correct"
-                      ? "bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-900/30"
-                      : "bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700"
-                      }`}
-                  >
-                    <div className="flex items-center justify-center gap-3 mb-2">
-                      {feedback === "correct" ? (
-                        <CheckCircle2 className="w-8 h-8 text-green-600" />
-                      ) : (
-                        <HelpCircle className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
-                      )}
-                      <span
-                        className={`text-2xl font-bold ${feedback === "correct" ? "text-green-700 dark:text-green-400" : "text-indigo-700 dark:text-indigo-400"
-                          }`}
-                      >
-                        {feedback === "correct" ? "Chính xác! 🎉" : "Đáp án đúng là:"}
-                      </span>
-                    </div>
-                    <p className="text-3xl font-bold text-slate-900 dark:text-white mt-4 tracking-wider">
-                      {card.keyword}
-                    </p>
-                  </div>
-
+              <div className="space-y-6 max-w-md mx-auto">
+                <div className="flex gap-2 justify-center">
                   <Button
-                    onClick={nextCard}
-                    className="w-full max-w-md h-14 text-lg rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-lg shadow-indigo-500/20 text-white"
+                    onClick={useHint}
+                    disabled={hintLevel >= 3 || showAnswer}
+                    variant="outline"
+                    className="border-yellow-200 dark:border-yellow-800 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400"
                   >
-                    <ArrowRight className="w-6 h-6 mr-2" />
-                    Từ tiếp theo
+                    <Lightbulb className="w-4 h-4 mr-2" />
+                    Gợi ý ({3 - hintLevel})
                   </Button>
-                </motion.div>
-              )}
+                </div>
+
+                <div className="relative">
+                  <Input
+                    value={userAnswer}
+                    onChange={(e) => setUserAnswer(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && !showAnswer && checkAnswer()}
+                    placeholder="Nhập từ vựng..."
+                    className="text-center text-xl h-14 rounded-xl border-2 focus-visible:ring-indigo-500 bg-white dark:bg-slate-950 text-slate-900 dark:text-white"
+                    autoFocus
+                    disabled={showAnswer}
+                  />
+                </div>
+
+                {feedback === "incorrect" && !showAnswer && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-center text-red-500 font-medium flex items-center justify-center gap-2"
+                  >
+                    <XCircle className="w-4 h-4" />
+                    Sai rồi, thử lại xem!
+                  </motion.div>
+                )}
+
+                <div className="flex gap-3">
+                  <Button
+                    onClick={handleDontKnow}
+                    disabled={showAnswer}
+                    variant="secondary"
+                    className="flex-1 h-12 text-lg hover:bg-red-100 dark:hover:bg-red-900/20 hover:text-red-700 dark:hover:text-red-400 transition-colors"
+                  >
+                    <Eye className="w-5 h-5 mr-2" />
+                    Không biết
+                  </Button>
+                  <Button
+                    onClick={checkAnswer}
+                    disabled={!userAnswer.trim() || showAnswer}
+                    className="flex-1 h-12 text-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-lg shadow-indigo-500/20 text-white"
+                  >
+                    <CheckCircle2 className="w-5 h-5 mr-2" />
+                    Kiểm tra
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
         </motion.div>
       </div>
+
+      {/* Result Popup */}
+      <AnimatePresence>
+        {showAnswer && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl p-8 max-w-lg w-full border-2 border-slate-200 dark:border-slate-700 relative overflow-hidden max-h-[90vh] overflow-y-auto"
+            >
+              <div className="space-y-6">
+                <div
+                  className={`p-6 rounded-2xl border-2 ${feedback === "correct"
+                    ? "bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-900/30"
+                    : "bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-900/30"
+                    }`}
+                >
+                  <div className="flex flex-col items-center gap-4">
+                    <div className={`p-4 rounded-full ${feedback === "correct" ? "bg-green-100 dark:bg-green-900/30 text-green-600" : "bg-red-100 dark:bg-red-900/30 text-red-600"}`}>
+                      {feedback === "correct" ? <CheckCircle2 className="w-10 h-10" /> : <XCircle className="w-10 h-10" />}
+                    </div>
+
+                    <div className="text-center">
+                      <h3 className={`text-2xl font-bold mb-2 ${feedback === "correct" ? "text-green-700 dark:text-green-400" : "text-red-700 dark:text-red-400"}`}>
+                        {feedback === "correct" ? "Chính xác! Xuất sắc!" : "Chưa đúng rồi!"}
+                      </h3>
+                      <p className="text-lg text-slate-600 dark:text-slate-400">
+                        Đáp án đúng là: <span className="font-bold text-slate-900 dark:text-white text-xl">{card.keyword}</span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid gap-4 text-left">
+                  <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl flex gap-4 items-start border border-slate-100 dark:border-slate-700">
+                    <div className="p-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded-lg shrink-0">
+                      <Brain className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Định nghĩa</span>
+                      <p className="text-base text-slate-800 dark:text-slate-200 font-medium mt-1">{card.hintSentence}</p>
+                    </div>
+                  </div>
+
+                  <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl flex gap-4 items-start border border-slate-100 dark:border-slate-700">
+                    <div className="p-2 bg-purple-100 dark:bg-purple-900/30 text-purple-600 rounded-lg shrink-0">
+                      <Target className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Ví dụ</span>
+                      <p className="text-base text-slate-800 dark:text-slate-200 font-medium mt-1">{card.sentenceWithBlank.replace("___", card.keyword)}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <Button
+                  onClick={nextCard}
+                  className="w-full h-14 text-lg font-bold rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  Từ tiếp theo <ArrowRight className="w-5 h-5 ml-2" />
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

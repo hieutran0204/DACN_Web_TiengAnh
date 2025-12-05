@@ -7,6 +7,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { ChatBox } from "@/components/chat-box";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "@/components/ui/sonner";
 
 import ConditionalNavbar from "@/components/conditional-navbar";
 import ConditionalFooter from "@/components/conditional-footer";
@@ -65,6 +66,7 @@ export default function RootLayout({
         {/* ✅ Global Chat + Analytics (bỏ toast) */}
         <ChatBox />
         <Analytics />
+        <Toaster />
       </body>
     </html>
   );

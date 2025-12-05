@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, ArrowRight, CheckCircle2 } from "lucide-react";
+import { toast } from "sonner";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -30,10 +31,10 @@ export default function LoginPage() {
       if (!res.ok) throw new Error(data.message || "Đăng nhập thất bại");
 
       localStorage.setItem("token", data.token);
-      alert("Đăng nhập thành công!");
+      toast.success("Đăng nhập thành công!");
       router.push("/");
     } catch (err: any) {
-      alert(err.message);
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }
