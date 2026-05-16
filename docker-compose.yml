@@ -1,0 +1,54 @@
+# services:
+#   neo4j:
+#     image: neo4j:5.12.0
+#     container_name: neo4j-graphrag
+#     ports:
+#       - "7474:7474"   # Neo4j Browser (HTTP)
+#       - "7687:7687"   # Bolt protocol
+#     environment:
+#       - NEO4J_AUTH=neo4j/password123
+#       - NEO4J_PLUGINS=["apoc"]
+#       - NEO4J_apoc_export_file_enabled=true
+#       - NEO4J_apoc_import_file_enabled=true
+#       - NEO4J_apoc_import_file_use__neo4j__config=true
+#       - NEO4J_dbms_security_procedures_unrestricted=apoc.*
+#       - NEO4J_dbms_security_procedures_allowlist=apoc.*
+#     volumes:
+#       - ./infra/neo4j/data:/data
+#       - ./infra/neo4j/logs:/logs
+#       - ./infra/neo4j/import:/var/lib/neo4j/import
+#       - ./infra/neo4j/plugins:/plugins
+#     healthcheck:
+#       test: ["CMD", "wget", "-O", "-", "http://localhost:7474"]
+#       interval: 30s
+#       timeout: 10s
+#       retries: 5
+services:
+  neo4j:
+    image: neo4j:5.12.0
+    container_name: neo4j-graphrag
+    ports:
+      - "7474:7474"   # Neo4j Browser (HTTP)
+      - "7687:7687"   # Bolt/Neo4j protocol
+    environment:
+      - NEO4J_AUTH=neo4j/password123
+
+      - NEO4J_PLUGINS=["apoc"]
+      - NEO4J_apoc_export_file_enabled=true
+      - NEO4J_apoc_import_file_enabled=true
+      - NEO4J_apoc_import_file_use__neo4j__config=true
+      - NEO4J_dbms_security_procedures_unrestricted=apoc.*
+      - NEO4J_dbms_security_procedures_allowlist=apoc.*
+    volumes:
+      - ./infra/neo4j/data:/data
+      - ./infra/neo4j/logs:/logs
+      - ./infra/neo4j/import:/var/lib/neo4j/import
+      # TẠM THỜI ĐÓNG DÒNG NÀY LẠI: 
+      # Nếu chỉ dùng APOC thì không cần map thư mục plugins ra ngoài, 
+      # để container tự dùng thư mục ảo của nó sẽ tránh được lỗi Permission Denied.
+      # - ./infra/neo4j/plugins:/plugins
+    healthcheck:
+      test: ["CMD", "wget", "-O", "-", "http://localhost:7474"]
+      interval: 30s
+      timeout: 10s
+      retries: 5

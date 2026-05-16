@@ -98,11 +98,20 @@ class ReadingQuestionRepository {
     return await ReadingQuestion.findByIdAndDelete(id);
   }
 
-  async getPaginated(page = 1, limit = 10) {
+  async getPaginated(page = 1, limit = 10, search = "") {
     const skip = (page - 1) * limit;
+    
+    const query = {};
+    if (search) {
+      query.$or = [
+        { passage: { $regex: search, $options: "i" } },
+        { passageNumber: { $regex: search, $options: "i" } },
+      ];
+    }
+
     const [data, total] = await Promise.all([
-      ReadingQuestion.find().sort({ createdAt: -1 }).skip(skip).limit(limit),
-      ReadingQuestion.countDocuments(),
+      ReadingQuestion.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit),
+      ReadingQuestion.countDocuments(query),
     ]);
     return { data, total };
   }

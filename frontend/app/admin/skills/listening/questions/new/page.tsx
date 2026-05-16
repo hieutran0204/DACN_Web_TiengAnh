@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Navbar from "@/components/navbar";
-import Footer from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,13 +14,20 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Headphones, Plus, Trash2, AlertCircle } from "lucide-react";
+import { Headphones, Plus, Trash2, AlertCircle, ChevronLeft, Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { apiFetch } from "@/lib/api";
 
 interface SubQuestion {
   question: string;
   correctAnswers: string[];
   options?: string[];
+}
+
+interface Segment {
+  start: number;
+  end: number;
+  text: string;
 }
 
 export default function NewListeningQuestion() {
@@ -31,17 +36,17 @@ export default function NewListeningQuestion() {
   // Form states
   const [title, setTitle] = useState("");
   const [section, setSection] = useState("");
-  const [type, setType] = useState<string>("multiple_choice");
+  const [type, setType] = useState<string>("dictation");
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [audioPreview, setAudioPreview] = useState<string | null>(null);
   const [transcript, setTranscript] = useState("");
   const [explanation, setExplanation] = useState("");
 
-  // Riêng cho Fill / Note / Sentence: 1 đoạn văn + nhiều đáp án
+  // Fill / Note / Sentence
   const [questionText, setQuestionText] = useState("");
   const [answers, setAnswers] = useState<string[]>([""]);
 
-  // Cho Multiple Choice & Matching
+  // Multiple Choice & Matching
   const [subQuestions, setSubQuestions] = useState<SubQuestion[]>([
     { question: "", correctAnswers: [], options: ["", "", "", ""] },
   ]);
@@ -50,6 +55,10 @@ export default function NewListeningQuestion() {
     "",
     "",
   ]);
+
+  // Dictation
+  const [segments, setSegments] = useState<Segment[]>([]);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -106,12 +115,23 @@ export default function NewListeningQuestion() {
     setError("");
   };
 
+  const handleAutoGenerate = async () => {
+    if (!audioFile) {
+      alert("Vui lòng chọn file audio trước!");
+      return;
+    }
+    
+    alert("Vui lòng LƯU câu hỏi trước, sau đó vào chế độ CHỈNH SỬA để dùng tính năng AI tạo Transcript!");
+  };
+
   const validate = () => {
     if (!title.trim()) return "Tiêu đề không được để trống!";
     if (!section) return "Chọn Section!";
     if (!audioFile) return "Upload file audio!";
 
-    if (
+    if (type === "dictation") {
+        if (segments.length === 0) return "Chưa có nội dung cho phần nghe chép!";
+    } else if (
       ["fill_in_the_blank", "note_completion", "sentence_completion"].includes(
         type
       )
@@ -159,12 +179,15 @@ export default function NewListeningQuestion() {
     formData.append("transcript", transcript.trim());
     formData.append("explanation", explanation.trim());
 
-    if (
+    if (type === "dictation") {
+       formData.append("segments", JSON.stringify(segments));
+       formData.append("subQuestions", "[]");
+    }
+    else if (
       ["fill_in_the_blank", "note_completion", "sentence_completion"].includes(
         type
       )
     ) {
-      // GỬI ĐÚNG FORMAT BẠN MUỐN: 1 object duy nhất
       formData.append(
         "subQuestions",
         JSON.stringify([
@@ -175,7 +198,6 @@ export default function NewListeningQuestion() {
         ])
       );
     } else {
-      // Multiple Choice & Matching
       const cleaned = subQuestions.map((sq) => ({
         question: sq.question.trim(),
         correctAnswers:
@@ -197,23 +219,12 @@ export default function NewListeningQuestion() {
     formData.append("audio", audioFile!);
 
     try {
-      const res = await fetch(
-        "http://localhost:3000/api/admin/questions/listening/listening-questions",
-        {
-          method: "POST",
-          body: formData,
-          credentials: "include",
-        }
-      );
+      await apiFetch("/admin/questions/listening/listening-questions", {
+        method: "POST",
+        body: formData,
+      });
 
-      const text = await res.text();
-      if (text.includes("<html") || text.includes("<!DOCTYPE"))
-        throw new Error("Phiên hết hạn! Đăng nhập lại.");
-
-      const result = JSON.parse(text);
-      if (!res.ok) throw new Error(result.message || "Tạo thất bại");
-
-      alert("TẠO CÂU HỎI LISTENING THÀNH CÔNG!");
+      alert("TẠO CÂU HỎI THÀNH CÔNG!");
       router.push("/admin/skills/listening/questions");
     } catch (err: any) {
       setError(err.message || "Lỗi hệ thống!");
@@ -223,400 +234,486 @@ export default function NewListeningQuestion() {
   };
 
   return (
-    <main className="min-h-screen bg-background">
-      <Navbar />
-      <div className="mt-16 py-10">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="mb-12 text-center">
-            <h1 className="text-5xl font-bold text-foreground mb-4">
-              Tạo Câu Hỏi Listening Mới
-            </h1>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-800 tracking-tight">
+            Create Listening Question
+          </h1>
+          <p className="text-slate-500 mt-1">Design a new listening practice exercise.</p>
+        </div>
+        <Button 
+          variant="outline" 
+          onClick={() => router.back()}
+          className="gap-2"
+        >
+          <ChevronLeft className="w-4 h-4" /> Back to List
+        </Button>
+      </div>
+
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            {error}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-8 pb-10">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* CỘT TRÁI */}
+          <div className="space-y-6">
+            <Card className="shadow-sm border-slate-200">
+              <CardHeader className="bg-slate-50 border-b border-slate-100 pb-4">
+                <CardTitle className="text-lg font-medium text-slate-800">Basic Info</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4 pt-4">
+                <div className="space-y-2">
+                  <Label>Title</Label>
+                  <Input
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="e.g. Cambridge 18 Test 1 - Section 2"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Section</Label>
+                  <Select value={section} onValueChange={setSection}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Section" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {["1", "2", "3", "4"].map((s) => (
+                        <SelectItem key={s} value={`Section ${s}`}>
+                          Section {s}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Type</Label>
+                  <Select
+                    value={type}
+                    onValueChange={(v) => {
+                      setType(v);
+                      if (v === "dictation") setSegments([]);
+                    }}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="dictation">⭐ Dictation</SelectItem>
+                      <SelectItem value="multiple_choice">Multiple Choice</SelectItem>
+                      <SelectItem value="fill_in_the_blank">Fill in the Blank</SelectItem>
+                      <SelectItem value="note_completion">Note Completion</SelectItem>
+                      <SelectItem value="sentence_completion">Sentence Completion</SelectItem>
+                      <SelectItem value="matching">Matching</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="shadow-sm border-slate-200">
+              <CardHeader className="bg-slate-50 border-b border-slate-100 pb-4 flex flex-row items-center gap-2">
+                <Headphones className="w-5 h-5 text-blue-600" />
+                <CardTitle className="text-lg font-medium text-slate-800">Audio Source</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4 pt-4">
+                <Input
+                  type="file"
+                  accept="audio/*"
+                  onChange={handleAudioChange}
+                />
+                {audioFile && (
+                  <div className="bg-slate-50 p-3 rounded-lg text-sm border border-slate-100">
+                    <p className="font-medium text-slate-700 truncate">{audioFile.name}</p>
+                    <p className="text-xs text-slate-400">
+                      {(audioFile.size / 1024 / 1024).toFixed(2)} MB
+                    </p>
+                  </div>
+                )}
+                {audioPreview && (
+                  <audio controls className="w-full h-8">
+                    <source src={audioPreview} />
+                  </audio>
+                )}
+              </CardContent>
+            </Card>
           </div>
 
-          {error && (
-            <Alert variant="destructive" className="max-w-4xl mx-auto mb-10">
-              <AlertCircle className="h-6 w-6" />
-              <AlertDescription className="text-lg font-medium">
-                {error}
-              </AlertDescription>
-            </Alert>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-10">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-              {/* CỘT TRÁI */}
-              <div className="space-y-8">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-2xl">Thông tin cơ bản</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div>
-                      <Label className="text-lg">Tiêu đề</Label>
-                      <Input
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        placeholder="Cambridge 18 Test 1 - Section 2"
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-lg">Section</Label>
-                      <Select value={section} onValueChange={setSection}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Chọn Section" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {["1", "2", "3", "4"].map((s) => (
-                            <SelectItem key={s} value={`Section ${s}`}>
-                              Section {s}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label className="text-lg">Loại câu hỏi</Label>
-                      <Select
-                        value={type}
-                        onValueChange={(v) => {
-                          setType(v);
-                          if (
-                            [
-                              "fill_in_the_blank",
-                              "note_completion",
-                              "sentence_completion",
-                            ].includes(v)
-                          ) {
-                            setQuestionText("");
-                            setAnswers([""]);
-                          }
-                          if (v !== "matching")
-                            setMatchingOptions(["", "", ""]);
-                        }}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Chọn loại" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="multiple_choice">
-                            Multiple Choice
-                          </SelectItem>
-                          <SelectItem value="fill_in_the_blank">
-                            Fill in the Blank
-                          </SelectItem>
-                          <SelectItem value="note_completion">
-                            Note Completion
-                          </SelectItem>
-                          <SelectItem value="sentence_completion">
-                            Sentence Completion
-                          </SelectItem>
-                          <SelectItem value="matching">Matching</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="border-2 border-dashed border-primary/30">
-                  <CardHeader className="flex flex-row items-center gap-3">
-                    <Headphones className="w-8 h-8 text-primary" />
-                    <CardTitle className="text-2xl">File Audio</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <Input
-                      type="file"
-                      accept="audio/*"
-                      onChange={handleAudioChange}
-                    />
-                    {audioFile && (
-                      <div className="bg-muted p-4 rounded-lg text-sm">
-                        <p className="font-medium">{audioFile.name}</p>
-                        <p className="text-muted-foreground">
-                          {(audioFile.size / 1024 / 1024).toFixed(2)} MB
-                        </p>
-                      </div>
-                    )}
-                    {audioPreview && (
-                      <audio controls className="w-full mt-4">
-                        <source src={audioPreview} />
-                      </audio>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* CỘT PHẢI */}
-              <div className="lg:col-span-2 space-y-10">
-                {/* 3 LOẠI MỚI: DÙNG 1 ĐOẠN VĂN + NHIỀU ĐÁP ÁN */}
-                {[
-                  "fill_in_the_blank",
-                  "note_completion",
-                  "sentence_completion",
-                ].includes(type) && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-2xl">Nội dung bài</CardTitle>
+          {/* CỘT PHẢI */}
+          <div className="lg:col-span-2 space-y-8">
+            {type === "dictation" && (
+                <Card className="border-blue-200 shadow-md overflow-hidden">
+                    <CardHeader className="bg-blue-50/50 border-b border-blue-100 py-4">
+                        <div className="flex justify-between items-center">
+                            <CardTitle className="text-lg font-bold text-blue-700 flex items-center gap-2">
+                                Transcript Editor 
+                            </CardTitle>
+                            <Button 
+                                type="button" 
+                                onClick={handleAutoGenerate}
+                                variant="secondary"
+                                size="sm"
+                                className="bg-white text-blue-700 hover:bg-blue-50 border border-blue-200"
+                            >
+                                ✨ Auto-Generate (AI)
+                            </Button>
+                        </div>
                     </CardHeader>
-                    <CardContent className="space-y-6">
-                      <div>
-                        <Label className="text-lg">Đoạn văn / câu / note</Label>
-                        <Textarea
-                          rows={10}
-                          placeholder="Nhập đoạn văn có chỗ trống, ví dụ:\nThe library opens at ___ on weekdays.\nProtein comes from ___ and ___."
-                          value={questionText}
-                          onChange={(e) => setQuestionText(e.target.value)}
-                          className="text-lg font-mono"
-                        />
-                      </div>
-
-                      <div>
-                        <Label className="text-lg font-semibold">
-                          Danh sách đáp án đúng (theo thứ tự chỗ trống)
-                        </Label>
-                        <div className="space-y-4 mt-4">
-                          {answers.map((ans, index) => (
-                            <div
-                              key={index}
-                              className="flex gap-4 items-center">
-                              <Input
-                                value={ans}
-                                onChange={(e) => {
-                                  const updated = [...answers];
-                                  updated[index] = e.target.value;
-                                  setAnswers(updated);
-                                }}
-                                placeholder={`Đáp án ${index + 1} (có thể nhiều: fish OR meat)`}
-                              />
-                              {answers.length > 1 && (
-                                <Button
-                                  variant="destructive"
-                                  size="icon"
-                                  onClick={() =>
-                                    setAnswers(
-                                      answers.filter((_, i) => i !== index)
-                                    )
-                                  }>
-                                  <Trash2 className="w-5 h-5" />
+                    <CardContent className="space-y-4 p-6">
+                        {segments.length === 0 ? (
+                            <div className="text-center py-10 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50/50">
+                                <p className="text-slate-500 mb-4">No segments yet. Enter manually or use AI.</p>
+                                <Button type="button" onClick={() => setSegments([{start: 0, end: 0, text: ""}])} variant="outline">
+                                    <Plus className="w-4 h-4 mr-2" /> Add First Segment
                                 </Button>
-                              )}
                             </div>
-                          ))}
-                          <Button
-                            variant="outline"
-                            onClick={() => setAnswers([...answers, ""])}>
-                            <Plus className="w-4 h-4 mr-2" /> Thêm đáp án
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-
-                {/* Multiple Choice & Matching: giữ nguyên */}
-                {![
-                  "fill_in_the_blank",
-                  "note_completion",
-                  "sentence_completion",
-                ].includes(type) && (
-                  <Card>
-                    <CardHeader>
-                      <div className="flex justify-between items-center">
-                        <CardTitle className="text-2xl">
-                          Câu hỏi con ({subQuestions.length})
-                        </CardTitle>
-                        <Button
-                          type="button"
-                          onClick={addSubQuestion}
-                          size="lg">
-                          <Plus className="w-5 h-5 mr-2" /> Thêm câu
-                        </Button>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-8">
-                      {subQuestions.map((sq, i) => (
-                        <div key={i} className="border rounded-xl p-8 relative">
-                          <div className="flex justify-between items-start mb-6">
-                            <h3 className="text-xl font-bold">Câu {i + 1}</h3>
-                            {subQuestions.length > 1 && (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => removeSubQuestion(i)}>
-                                <Trash2 className="w-5 h-5" />
-                              </Button>
-                            )}
-                          </div>
-
-                          <Label>Nội dung câu hỏi</Label>
-                          <Textarea
-                            value={sq.question}
-                            onChange={(e) =>
-                              updateSubQuestion(i, "question", e.target.value)
-                            }
-                            rows={3}
-                            className="mt-2"
-                          />
-
-                          {/* Multiple Choice */}
-                          {type === "multiple_choice" && (
-                            <>
-                              <div className="grid grid-cols-2 gap-4 mt-6">
-                                {["A", "B", "C", "D"].map((l, idx) => (
-                                  <div key={l}>
-                                    <Label>Đáp án {l}</Label>
-                                    <Input
-                                      value={sq.options?.[idx] || ""}
-                                      onChange={(e) =>
-                                        updateOption(i, idx, e.target.value)
-                                      }
-                                    />
-                                  </div>
+                        ) : (
+                            <div className="space-y-2">
+                                {segments.map((seg, idx) => (
+                                    <div key={idx} className="flex gap-2 items-start group">
+                                        <div className="flex flex-col gap-1 w-24 shrink-0">
+                                            <Input 
+                                                type="number" step="0.1" 
+                                                value={seg.start} 
+                                                onChange={e => {
+                                                    const newSegs = [...segments];
+                                                    newSegs[idx].start = parseFloat(e.target.value);
+                                                    setSegments(newSegs);
+                                                }}
+                                                className="h-9 text-xs font-mono"
+                                                placeholder="Start"
+                                            />
+                                            <Input 
+                                                type="number" step="0.1" 
+                                                value={seg.end} 
+                                                onChange={e => {
+                                                    const newSegs = [...segments];
+                                                    newSegs[idx].end = parseFloat(e.target.value);
+                                                    setSegments(newSegs);
+                                                }}
+                                                className="h-9 text-xs font-mono"
+                                                placeholder="End"
+                                            />
+                                        </div>
+                                        <Textarea 
+                                            value={seg.text} 
+                                            onChange={e => {
+                                                const newSegs = [...segments];
+                                                newSegs[idx].text = e.target.value;
+                                                setSegments(newSegs);
+                                            }}
+                                            className="flex-1 min-h-[5rem]"
+                                            rows={2}
+                                            placeholder="Transcript text..."
+                                        />
+                                        <Button 
+                                            variant="ghost" size="icon" className="text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                            onClick={() => setSegments(segments.filter((_, i) => i !== idx))}
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                    </div>
                                 ))}
-                              </div>
-                              <div className="mt-6">
-                                <Label>Đáp án đúng</Label>
-                                <Select
-                                  value={sq.correctAnswers[0] || ""}
-                                  onValueChange={(v) => {
-                                    const updated = [...subQuestions];
-                                    updated[i].correctAnswers = [v];
-                                    setSubQuestions(updated);
-                                  }}>
-                                  <SelectTrigger className="w-64">
-                                    <SelectValue placeholder="Chọn" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {["A", "B", "C", "D"].map((x) => (
-                                      <SelectItem key={x} value={x}>
-                                        {x}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                            </>
-                          )}
-
-                          {/* Matching */}
-                          {type === "matching" && (
-                            <div className="mt-6">
-                              <Label>Đáp án đúng (A, B, C...)</Label>
-                              <Input
-                                value={sq.correctAnswers.join(", ")}
-                                onChange={(e) => {
-                                  const vals = e.target.value
-                                    .split(",")
-                                    .map((s) => s.trim())
-                                    .filter(Boolean);
-                                  const updated = [...subQuestions];
-                                  updated[i].correctAnswers = vals;
-                                  setSubQuestions(updated);
-                                }}
-                                placeholder="B, A, C"
-                              />
+                                <Button type="button" variant="outline" onClick={() => setSegments([...segments, {start: 0, end: 0, text: ""}])} className="w-full border-dashed">
+                                    <Plus className="w-4 h-4 mr-2" /> Add Segment
+                                </Button>
                             </div>
-                          )}
-                        </div>
-                      ))}
+                        )}
                     </CardContent>
-                  </Card>
-                )}
+                </Card>
+            )}
 
-                {/* Matching Options */}
-                {type === "matching" && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Lựa chọn (A, B, C...)</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      {matchingOptions.map((opt, idx) => (
-                        <div key={idx} className="flex gap-3 items-center">
-                          <div className="w-10 font-bold">
-                            {String.fromCharCode(65 + idx)}
-                          </div>
+            {[
+              "fill_in_the_blank",
+              "note_completion",
+              "sentence_completion",
+            ].includes(type) && (
+              <Card className="shadow-sm border-slate-200">
+                <CardHeader className="bg-slate-50 border-b border-slate-100 pb-4">
+                  <CardTitle className="text-lg font-medium">Question Content</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6 pt-6">
+                  <div className="space-y-2">
+                    <Label className="text-base">Text / Note / Sentence</Label>
+                    <Textarea
+                      rows={10}
+                      placeholder="Enter text with blanks, e.g.:\nThe library opens at ___ on weekdays.\nProtein comes from ___ and ___."
+                      value={questionText}
+                      onChange={(e) => setQuestionText(e.target.value)}
+                      className="font-mono text-base bg-slate-50"
+                    />
+                  </div>
+
+                  <div className="space-y-4">
+                    <Label className="text-base font-medium">
+                      Correct Answers <span className="text-slate-400 font-normal text-sm ml-2">(In order of blanks)</span>
+                    </Label>
+                    <div className="space-y-3">
+                      {answers.map((ans, index) => (
+                        <div
+                          key={index}
+                          className="flex gap-3 items-center">
+                          <span className="text-sm font-mono text-slate-400 w-6 text-right">{index + 1}.</span>
                           <Input
-                            value={opt}
+                            value={ans}
                             onChange={(e) => {
-                              const updated = [...matchingOptions];
-                              updated[idx] = e.target.value;
-                              setMatchingOptions(updated);
+                              const updated = [...answers];
+                              updated[index] = e.target.value;
+                              setAnswers(updated);
                             }}
+                            placeholder={`Answer for blank ${index + 1}`}
                           />
-                          {matchingOptions.length > 3 && (
+                          {answers.length > 1 && (
                             <Button
-                              variant="destructive"
+                              variant="ghost"
                               size="icon"
+                              className="text-slate-400 hover:text-red-500"
                               onClick={() =>
-                                setMatchingOptions(
-                                  matchingOptions.filter((_, i) => i !== idx)
+                                setAnswers(
+                                  answers.filter((_, i) => i !== index)
                                 )
                               }>
-                              <Trash2 className="w-5 h-5" />
+                              <Trash2 className="w-4 h-4" />
                             </Button>
                           )}
                         </div>
                       ))}
                       <Button
                         variant="outline"
-                        onClick={() =>
-                          setMatchingOptions([...matchingOptions, ""])
-                        }>
-                        <Plus className="w-4 h-4 mr-2" /> Thêm lựa chọn
+                        size="sm"
+                        onClick={() => setAnswers([...answers, ""])}
+                        className="ml-9 border-dashed"
+                      >
+                        <Plus className="w-3 h-3 mr-2" /> Add Answer
                       </Button>
-                    </CardContent>
-                  </Card>
-                )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
-                <div className="grid md:grid-cols-2 gap-8">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-2xl">Transcript</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <Textarea
-                        value={transcript}
-                        onChange={(e) => setTranscript(e.target.value)}
-                        rows={10}
-                        className="font-mono text-sm"
-                      />
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-2xl">Giải thích</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <Textarea
-                        value={explanation}
-                        onChange={(e) => setExplanation(e.target.value)}
-                        rows={10}
-                      />
-                    </CardContent>
-                  </Card>
-                </div>
-
-                <div className="flex justify-center gap-8 pt-10">
-                  <Button
-                    type="submit"
-                    size="lg"
-                    className="text-2xl px-20 py-8 font-bold"
-                    disabled={isSubmitting}>
-                    {isSubmitting ? "ĐANG TẠO..." : "TẠO CÂU HỎI NGAY"}
-                  </Button>
+            {![
+              "fill_in_the_blank",
+              "note_completion",
+              "sentence_completion",
+              "dictation"
+            ].includes(type) && (
+              <Card className="shadow-sm border-slate-200">
+                <CardHeader className="bg-slate-50 border-b border-slate-100 pb-4 flex flex-row justify-between items-center">
+                  <CardTitle className="text-lg font-medium">
+                    Questions ({subQuestions.length})
+                  </CardTitle>
                   <Button
                     type="button"
                     variant="outline"
-                    size="lg"
-                    onClick={() => router.back()}
-                    disabled={isSubmitting}>
-                    Hủy bỏ
+                    size="sm"
+                    onClick={addSubQuestion}
+                    className="gap-2"
+                  >
+                    <Plus className="w-4 h-4" /> Add Question
                   </Button>
-                </div>
-              </div>
+                </CardHeader>
+                <CardContent className="space-y-8 pt-6">
+                  {subQuestions.map((sq, i) => (
+                    <div key={i} className="border border-slate-200 rounded-xl p-6 relative bg-slate-50/50">
+                      <div className="flex justify-between items-start mb-4">
+                        <h3 className="text-base font-bold text-slate-700">Question {i + 1}</h3>
+                        {subQuestions.length > 1 && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-slate-400 hover:text-red-500 h-8 w-8"
+                            onClick={() => removeSubQuestion(i)}>
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Question Text</Label>
+                        <Textarea
+                          value={sq.question}
+                          onChange={(e) =>
+                            updateSubQuestion(i, "question", e.target.value)
+                          }
+                          rows={2}
+                          className="bg-white"
+                        />
+                      </div>
+
+                      {type === "multiple_choice" && (
+                        <>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                            {["A", "B", "C", "D"].map((l, idx) => (
+                              <div key={l}>
+                                <Label className="text-xs text-slate-500 mb-1.5 block">Option {l}</Label>
+                                <Input
+                                  value={sq.options?.[idx] || ""}
+                                  onChange={(e) =>
+                                    updateOption(i, idx, e.target.value)
+                                  }
+                                  className="bg-white"
+                                />
+                              </div>
+                            ))}
+                          </div>
+                          <div className="mt-4">
+                            <Label>Correct Answer</Label>
+                            <Select
+                              value={sq.correctAnswers[0] || ""}
+                              onValueChange={(v) => {
+                                const updated = [...subQuestions];
+                                updated[i].correctAnswers = [v];
+                                setSubQuestions(updated);
+                              }}>
+                              <SelectTrigger className="w-full md:w-48 bg-white mt-1">
+                                <SelectValue placeholder="Select Answer" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {["A", "B", "C", "D"].map((x) => (
+                                  <SelectItem key={x} value={x}>
+                                    Option {x}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </>
+                      )}
+
+                      {type === "matching" && (
+                        <div className="mt-4">
+                          <Label>Correct Answer Sequence (e.g. A, C)</Label>
+                          <Input
+                            value={sq.correctAnswers.join(", ")}
+                            onChange={(e) => {
+                              const vals = e.target.value
+                                .split(",")
+                                .map((s) => s.trim())
+                                .filter(Boolean);
+                              const updated = [...subQuestions];
+                              updated[i].correctAnswers = vals;
+                              setSubQuestions(updated);
+                            }}
+                            placeholder="A, C"
+                            className="bg-white mt-1"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+
+            {type === "matching" && (
+              <Card className="shadow-sm border-slate-200">
+                <CardHeader className="bg-slate-50 border-b border-slate-100 pb-4">
+                  <CardTitle className="text-lg font-medium">Matching Options (A, B, C...)</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3 pt-6">
+                  {matchingOptions.map((opt, idx) => (
+                    <div key={idx} className="flex gap-3 items-center">
+                      <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-600 text-sm border border-slate-200">
+                        {String.fromCharCode(65 + idx)}
+                      </div>
+                      <Input
+                        value={opt}
+                        onChange={(e) => {
+                          const updated = [...matchingOptions];
+                          updated[idx] = e.target.value;
+                          setMatchingOptions(updated);
+                        }}
+                        className="flex-1"
+                      />
+                      {matchingOptions.length > 3 && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-slate-400 hover:text-red-500"
+                          onClick={() =>
+                            setMatchingOptions(
+                              matchingOptions.filter((_, i) => i !== idx)
+                            )
+                          }>
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="ml-11 border-dashed"
+                    onClick={() =>
+                      setMatchingOptions([...matchingOptions, ""])
+                    }>
+                    <Plus className="w-4 h-4 mr-2" /> Add Option
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+
+            <div className="grid md:grid-cols-2 gap-8">
+              <Card className="shadow-sm border-slate-200">
+                <CardHeader className="bg-slate-50 border-b border-slate-100 pb-4">
+                  <CardTitle className="text-lg font-medium">Full Transcript</CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0 p-0">
+                  <Textarea
+                    value={transcript}
+                    onChange={(e) => setTranscript(e.target.value)}
+                    rows={8}
+                    className="font-mono text-sm border-0 focus-visible:ring-0 resize-none p-4"
+                    placeholder="Enter full transcript here..."
+                  />
+                </CardContent>
+              </Card>
+              <Card className="shadow-sm border-slate-200">
+                <CardHeader className="bg-slate-50 border-b border-slate-100 pb-4">
+                  <CardTitle className="text-lg font-medium">Explanation</CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0 p-0">
+                  <Textarea
+                    value={explanation}
+                    onChange={(e) => setExplanation(e.target.value)}
+                    rows={8}
+                    className="border-0 focus-visible:ring-0 resize-none p-4"
+                    placeholder="Enter explanation/key notes..."
+                  />
+                </CardContent>
+              </Card>
             </div>
-          </form>
+
+            <div className="flex justify-end gap-4 pt-6 pb-20">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.back()}
+                disabled={isSubmitting}>
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                className="bg-blue-600 hover:bg-blue-700 min-w-[200px]"
+                disabled={isSubmitting}>
+                {isSubmitting ? (
+                    <>
+                        <Loader2 className="mr-2 w-4 h-4 animate-spin" /> Creating...
+                    </>
+                ) : (
+                    "Create Question"
+                )}
+              </Button>
+            </div>
+          </div>
         </div>
-      </div>
-      <Footer />
-    </main>
+      </form>
+    </div>
   );
 }

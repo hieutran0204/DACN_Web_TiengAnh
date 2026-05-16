@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { PenTool, Clock, ChevronRight, FileText, Lock, Trophy } from "lucide-react";
+import { PenTool, Clock, ChevronRight, FileText, Lock, Trophy, BrainCircuit } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 
 interface Exam {
@@ -110,12 +110,20 @@ export default function WritingListPage() {
             <p className="text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed mb-8">
               Bộ đề chuẩn Cambridge • Task 1 & Task 2 • Chấm điểm AI chi tiết
             </p>
-            <Button asChild variant="outline" size="lg" className="border-purple-200 hover:bg-purple-50 hover:text-purple-700 dark:border-purple-800 dark:hover:bg-purple-900/20 dark:hover:text-purple-300">
-               <Link href="/tests/writing/history">
-                  <Clock className="w-4 h-4 mr-2" />
-                  Lịch sử làm bài
-               </Link>
-            </Button>
+            <div className="flex justify-center gap-4">
+              <Button asChild variant="outline" size="lg" className="border-purple-200 hover:bg-purple-50 hover:text-purple-700 dark:border-purple-800 dark:hover:bg-purple-900/20 dark:hover:text-purple-300">
+                <Link href="/tests/writing/history">
+                    <Clock className="w-4 h-4 mr-2" />
+                    Lịch sử làm bài
+                </Link>
+              </Button>
+              <Button asChild variant="default" size="lg" className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-lg shadow-purple-500/20">
+                <Link href="/tests/writing/dashboard">
+                    <BrainCircuit className="w-4 h-4 mr-2" />
+                    Phân tích năng lực (AI)
+                </Link>
+              </Button>
+            </div>
           </motion.div>
 
           {/* Test Grid */}

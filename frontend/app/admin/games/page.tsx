@@ -41,7 +41,7 @@ const gameModules = [
         icon: Gamepad2,
         color: "text-amber-500",
         bg: "bg-amber-50 dark:bg-amber-900/20",
-        href: "/admin/wordguessing" // Separate route based on backend structure
+        href: "/admin/wordguessing/cards" // Separate route based on backend structure
     }
 ];
 

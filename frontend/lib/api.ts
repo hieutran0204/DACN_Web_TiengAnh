@@ -25,6 +25,13 @@ export async function apiFetch(path: string, options: RequestInit = {}) {
   });
 
   if (!res.ok) {
+    if (res.status === 401 || res.status === 403) {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("token");
+        window.location.href = "/auth/login";
+      }
+    }
+
     let errText = "";
     try {
       errText = await res.text();

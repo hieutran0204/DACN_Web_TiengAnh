@@ -1,408 +1,389 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-
-
+import Navbar from "@/components/navbar";
+import Footer from "@/components/footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
-  Headphones,
-  Clock,
+  Loader2,
+  Play,
+  Pause,
+  RotateCcw,
   CheckCircle2,
-  Volume2,
-  ChevronLeft,
-  ChevronRight,
-  RotateCw,
+  HelpCircle,
+  ArrowRight,
+  ArrowLeft,
+  Settings
 } from "lucide-react";
-import { apiFetch } from "@/lib/api";
+import { cn } from "@/lib/utils";
 
-// Band score chuẩn IELTS Listening
-const listeningBandScore: Record<number, number> = {
-  39: 9.0,
-  38: 8.5,
-  37: 8.5,
-  36: 8.0,
-  35: 8.0,
-  34: 7.5,
-  33: 7.5,
-  32: 7.0,
-  31: 7.0,
-  30: 6.5,
-  29: 6.5,
-  28: 6.0,
-  27: 6.0,
-  26: 5.5,
-  25: 5.5,
-  24: 5.0,
-  23: 5.0,
-  22: 5.0,
-  21: 4.5,
-  20: 4.5,
-  19: 4.0,
-  18: 4.0,
-  17: 3.5,
-  16: 3.5,
-};
-
-interface SubQuestion {
-  _id: string;
-  question: string;
-  correctAnswer?: string;
-  correctAnswers?: string[];
-  options?: string[];
+interface Segment {
+  start: number;
+  end: number;
+  text: string;
 }
 
-interface ListeningQuestion {
-  _id: string;
-  section: string;
-  type:
-  | "multiple_choice"
-  | "fill_in_the_blank"
-  | "note_completion"
-  | "sentence_completion"
-  | "matching";
-  title: string;
-  audio?: string;
-  subQuestions: SubQuestion[];
-}
-
-interface Exam {
+interface QuestionData {
   _id: string;
   title: string;
-  description?: string;
-  skills: { listening: ListeningQuestion[] };
+  audio: string;
+  type: string;
+  transcript: string;
+  segments: Segment[];
+  section?: string; // Added section property based on usage in the new code
 }
 
-export default function ListeningExamPage() {
-  const { id } = useParams();
-  const [exam, setExam] = useState<Exam | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [currentQIndex, setCurrentQIndex] = useState(0);
-  const [userAnswers, setUserAnswers] = useState<Record<string, string>>({});
-  const [showResult, setShowResult] = useState(false);
-  const [finalScore, setFinalScore] = useState(0);
+export default function DictationPlayerPage() {
+  const { id } = useParams() as { id: string };
+  const router = useRouter();
   const { toast } = useToast();
+
+  const [question, setQuestion] = useState<QuestionData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  // Audio State
   const audioRef = useRef<HTMLAudioElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
 
-  const totalQuestions =
-    exam?.skills.listening.reduce((acc, q) => acc + q.subQuestions.length, 0) ||
-    0;
+  // Dictation State
+  const [currentSegmentIndex, setCurrentSegmentIndex] = useState(0);
+  const [userInput, setUserInput] = useState("");
+  const [results, setResults] = useState<{status: 'correct' | 'incorrect' | 'pending'}[]>([]);
+  const [showFullTranscript, setShowFullTranscript] = useState(false);
+  const [isLooping, setIsLooping] = useState(true);
+  const [feedback, setFeedback] = useState<{ status: 'correct' | 'incorrect'; message: string } | null>(null);
 
+  // Load Data
   useEffect(() => {
-    if (!id) return;
-
-    apiFetch(`/exam/${id}?populate=true`)
-      .then((res: any) => {
-        const data = res?.success ? res.data : res;
-        if (!data?.skills?.listening?.length) {
-          toast({
-            variant: "destructive",
-            title: "Lỗi",
-            description: "Không có phần Listening",
-          });
-          return;
+    fetch(`http://localhost:3000/api/listening-questions/${id}`)
+      .then(res => res.json())
+      .then(data => {
+        if (!data.success) throw new Error(data.message);
+        const q = data.data;
+        // Transform audio URL if needed
+        if (q.audio && !q.audio.startsWith("http")) {
+            q.audio = `http://localhost:3000${q.audio}`;
         }
-
-        const fixedData = {
-          ...data,
-          skills: {
-            listening: data.skills.listening.map((q: any) => ({
-              ...q,
-              audio: q.audio?.startsWith("http")
-                ? q.audio
-                : `http://localhost:3000${q.audio || ""}`,
-            })),
-          },
-        };
-
-        setExam(fixedData);
-        toast({
-          title: "Thành công",
-          description: "Đề đã tải xong – bạn có thể nghe lại thoải mái!",
-        });
+        setQuestion(q);
+        // Initialize results array based on segments length
+        setResults(new Array(q.segments?.length || 0).fill({ status: 'pending' }));
       })
-      .catch(() => {
-        toast({
-          variant: "destructive",
-          title: "Lỗi",
-          description: "Không tải được đề thi",
-        });
-      })
+      .catch(err => setError(err.message))
       .finally(() => setLoading(false));
-  }, [id, toast]);
+  }, [id]);
 
-  const currentQuestion = exam?.skills.listening[currentQIndex];
-  const progress = exam
-    ? ((currentQIndex + 1) / exam.skills.listening.length) * 100
-    : 0;
-
-  const handleAnswer = (subQId: string, answer: string) => {
-    setUserAnswers((prev) => ({ ...prev, [subQId]: answer }));
-  };
-
-  const replayAudio = () => {
+  // Audio Events
+  const onTimeUpdate = () => {
     if (audioRef.current) {
-      audioRef.current.currentTime = 0;
-      audioRef.current.play();
+      const time = audioRef.current.currentTime;
+      setCurrentTime(time);
+
+      // Loop Logic for Current Segment
+      if (question && question.segments && question.segments.length > 0 && isLooping && !showFullTranscript) {
+           const seg = question.segments[currentSegmentIndex];
+           if (seg && time >= seg.end) {
+               audioRef.current.currentTime = seg.start;
+               audioRef.current.play();
+           }
+      }
     }
   };
 
-  const calculateScore = () => {
-    if (!exam) return 0;
-    let correct = 0;
+  const onLoadedMetadata = () => {
+    if (audioRef.current) setDuration(audioRef.current.duration);
+  };
 
-    exam.skills.listening.forEach((q) => {
-      q.subQuestions.forEach((sq) => {
-        const userAns = userAnswers[sq._id]?.trim().toLowerCase() || "";
-        if (sq.correctAnswers && sq.correctAnswers.length > 0) {
-          const correctSet = new Set(
-            sq.correctAnswers.map((a) => a.trim().toLowerCase())
-          );
-          if (correctSet.has(userAns)) correct++;
-        } else if (sq.correctAnswer) {
-          if (userAns === sq.correctAnswer.trim().toLowerCase()) correct++;
+  // Handlers
+  const handlePlayPause = () => {
+    if (audioRef.current) {
+      if (isPlaying) audioRef.current.pause();
+      else audioRef.current.play();
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  const handleSegmentChange = (index: number) => {
+    if (!question?.segments) return;
+    if (index < 0 || index >= question.segments.length) return;
+
+    setCurrentSegmentIndex(index);
+    setUserInput(""); // Reset input for new segment
+    setFeedback(null); // Clear feedback
+    
+    // Jump audio to start of new segment
+    if (audioRef.current) {
+        audioRef.current.currentTime = question.segments[index].start;
+        if (!isPlaying) {
+             audioRef.current.play();
+             setIsPlaying(true);
         }
-      });
-    });
-    return correct;
+    }
   };
 
-  const handleSubmit = () => {
-    const score = calculateScore();
-    setFinalScore(score);
-    setShowResult(true);
-    const band = listeningBandScore[score] || 0;
-    toast({
-      title: "HOÀN THÀNH!",
-      description: `Đúng ${score}/${totalQuestions} → Band ${band.toFixed(1)}`,
-    });
+  const checkAnswer = () => {
+      if (!question?.segments) return;
+      
+      // If already correct, move next
+      if (feedback?.status === 'correct') {
+          handleSegmentChange(currentSegmentIndex + 1);
+          return;
+      }
+
+      const targetText = question.segments[currentSegmentIndex].text.trim().toLowerCase().replace(/[.,?!]/g, "");
+      const userText = userInput.trim().toLowerCase().replace(/[.,?!]/g, "");
+
+      if (userText === targetText) {
+          // Correct
+          setFeedback({ status: 'correct', message: "Bạn đã nghe rất tốt! Nhấn Enter hoặc nút Tiếp tục để qua câu tiếp theo." });
+          const newResults = [...results];
+          newResults[currentSegmentIndex] = { status: 'correct' };
+          setResults(newResults);
+          
+          // Optional: Auto move logic could start here if desired, but user might want to see the green result first.
+          // Let's keep manual advance for now or auto after a longer delay?
+          // User asked for "show result", so manual advance with clear button is safer UX.
+      } else {
+          // Incorrect
+          setFeedback({ status: 'incorrect', message: "Hãy nghe lại kỹ hơn nhé. Chú ý các âm đuôi và mạo từ." });
+      }
+  };
+  
+  const handleReveal = () => {
+      if (!question?.segments) return;
+      setUserInput(question.segments[currentSegmentIndex].text);
   };
 
-  if (loading) return <LoadingScreen />;
-  if (!exam || !currentQuestion) return <NotFoundScreen />;
+  if (loading) return (
+      <div className="h-screen flex items-center justify-center bg-slate-50">
+          <Loader2 className="w-16 h-16 animate-spin text-blue-600" />
+      </div>
+  );
+
+  if (error || !question) return (
+      <div className="h-screen flex items-center justify-center">
+          <Alert variant="destructive" className="max-w-md">
+              <AlertDescription>{error || "Không tìm thấy bài tập"}</AlertDescription>
+          </Alert>
+      </div>
+  );
+
+  const currentSegment = question.segments?.[currentSegmentIndex];
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-indigo-50 via-blue-50 to-cyan-50">
+    <main className="min-h-screen bg-slate-50 flex flex-col">
+       <Navbar />
 
-      <div className="pt-20 pb-16 max-w-7xl mx-auto px-4">
-        <div className="text-center mb-10">
-          <h1 className="text-5xl font-bold text-gray-800 mb-3">
-            {exam.title}
-          </h1>
-          <p className="text-xl text-gray-600">
-            IELTS Listening – Luyện tập thoải mái, nghe lại không giới hạn
-          </p>
-        </div>
-
-        <div className="flex flex-wrap justify-center gap-4 mb-6 mb-10">
-          <Badge variant="secondary" className="text-lg px-8 py-3">
-            <Headphones className="w-5 h-5 mr-2" />
-            Listening
-          </Badge>
-          <Badge variant="outline" className="text-lg px-8 py-3">
-            <Clock className="w-5 h-5 mr-2" />
-            ~30 phút
-          </Badge>
-          <Badge variant="outline" className="text-lg px-8 py-3">
-            {totalQuestions} câu
-          </Badge>
-        </div>
-
-        {showResult ? (
-          <ResultScreen score={finalScore} total={totalQuestions} />
-        ) : (
-          <Card className="shadow-2xl border-0 overflow-hidden">
-            <CardHeader className="bg-gradient-to-r from-blue-700 to-cyan-600 text-white">
-              <div className="flex justify-between items-start">
+       <div className="flex-1 container mx-auto px-4 py-8 mt-16 max-w-5xl">
+            {/* Header */}
+            <div className="mb-8 flex justify-between items-center">
                 <div>
-                  <CardTitle className="text-3xl font-bold">
-                    {currentQuestion.section} - {currentQuestion.title}
-                  </CardTitle>
-                  <p className="text-blue-100 mt-2">
-                    Câu {currentQIndex + 1} / {exam.skills.listening.length}
-                  </p>
+                     <Badge variant="outline" className="mb-2 text-blue-600 border-blue-200 bg-blue-50">
+                        {question.section || "Dictation Practice"}
+                     </Badge>
+                     <h1 className="text-3xl font-bold text-slate-800">{question.title}</h1>
                 </div>
-                <span className="text-3xl font-bold">
-                  {Math.round(progress)}%
-                </span>
-              </div>
-              <Progress value={progress} className="mt-4 h-5 bg-white/30" />
-            </CardHeader>
+                <Button variant="outline" onClick={() => router.back()}>Thoát</Button>
+            </div>
 
-            <CardContent className="p-8 space-y-10">
-              {/* AUDIO PLAYER – NGHE LẠI THOẢI MÁI */}
-              {currentQuestion.audio && (
-                <div className="bg-black/90 rounded-2xl p-8 shadow-2xl text-center">
-                  <div className="flex items-center justify-center gap-6 mb-6">
-                    <Button
-                      size="lg"
-                      variant="secondary"
-                      onClick={replayAudio}
-                      className="rounded-full w-16 h-16 p-0">
-                      <RotateCw className="w-8 h-8" />
-                    </Button>
-                    <audio
-                      ref={audioRef}
-                      controls
-                      controlsList="nodownload"
-                      className="w-full max-w-3xl h-16 text-white">
-                      <source src={currentQuestion.audio} type="audio/mpeg" />
-                      Trình duyệt không hỗ trợ.
-                    </audio>
-                  </div>
-                  <p className="text-white/90 text-lg font-medium">
-                    Nghe lại thoải mái – luyện tập mà bro!
-                  </p>
-                </div>
-              )}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Left: Player & Input */}
+                <div className="lg:col-span-2 space-y-6">
+                    <Card className="shadow-lg border-slate-200 overflow-hidden">
+                        <div className="bg-slate-900 p-8 text-center relative overflow-hidden group">
+                           {/* Audio Visualization / Decoration */}
+                           <div className="absolute inset-0 bg-blue-500/10 flex items-center justify-center gap-1 opacity-30">
+                              {[...Array(20)].map((_, i) => (
+                                  <div key={i} className="w-2 bg-blue-500 h-10 animate-pulse" style={{ animationDelay: `${i * 0.1}s`, height: `${Math.random() * 100}%` }} />
+                              ))}
+                           </div>
 
-              {/* SUB QUESTIONS */}
-              <div className="space-y-8">
-                {currentQuestion.subQuestions.map((sq, idx) => (
-                  <div
-                    key={sq._id}
-                    className="bg-gray-50 rounded-2xl p-8 border-2 border-gray-200">
-                    <Label className="text-xl font-semibold mb-6 block">
-                      {idx + 1}. {sq.question}
-                    </Label>
+                           <div className="relative z-10">
+                                <Button 
+                                    size="icon" 
+                                    className="w-20 h-20 rounded-full text-white bg-blue-600 hover:bg-blue-500 shadow-xl transition-transform hover:scale-105"
+                                    onClick={handlePlayPause}
+                                >
+                                    {isPlaying ? <Pause className="w-10 h-10" /> : <Play className="w-10 h-10 pl-1" />}
+                                </Button>
+                                <p className="mt-4 text-blue-200 font-mono text-sm">
+                                    {new Date(currentTime * 1000).toISOString().substr(14, 5)} / {new Date(duration * 1000).toISOString().substr(14, 5)}
+                                </p>
+                           </div>
 
-                    {/* Multiple Choice */}
-                    {currentQuestion.type === "multiple_choice" &&
-                      sq.options && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {sq.options.map((opt) => (
-                            <Button
-                              key={opt}
-                              variant={
-                                userAnswers[sq._id] === opt
-                                  ? "default"
-                                  : "outline"
-                              }
-                              size="lg"
-                              className="h-16 text-lg justify-start"
-                              onClick={() => handleAnswer(sq._id, opt)}>
-                              {opt}
-                            </Button>
-                          ))}
+                           <audio 
+                                ref={audioRef}
+                                src={question.audio}
+                                onTimeUpdate={onTimeUpdate}
+                                onLoadedMetadata={onLoadedMetadata}
+                           />
                         </div>
-                      )}
 
-                    {/* Fill / Note / Sentence Completion */}
-                    {(currentQuestion.type === "fill_in_the_blank" ||
-                      currentQuestion.type === "note_completion" ||
-                      currentQuestion.type === "sentence_completion") && (
-                        <Input
-                          type="text"
-                          placeholder="Gõ đáp án vào đây..."
-                          value={userAnswers[sq._id] || ""}
-                          onChange={(e) => handleAnswer(sq._id, e.target.value)}
-                          className="text-xl h-16"
-                        />
-                      )}
-                  </div>
-                ))}
-              </div>
+                        {/* Progress Bar for whole audio */}
+                        <Progress value={(currentTime / duration) * 100} className="h-1 rounded-none bg-slate-100" />
+                        
+                        <CardContent className="p-8">
+                             {/* Segment Navigation */}
+                             <div className="flex justify-between items-center mb-8">
+                                 <Button 
+                                    variant="ghost" 
+                                    onClick={() => handleSegmentChange(currentSegmentIndex - 1)}
+                                    disabled={currentSegmentIndex === 0}
+                                 >
+                                    <ArrowLeft className="mr-2 w-4 h-4" /> Câu trước
+                                 </Button>
+                                 <div className="text-center">
+                                     <span className="text-sm text-slate-400 uppercase font-bold tracking-wider">Câu {currentSegmentIndex + 1} / {question.segments?.length || 0}</span>
+                                     <div className="flex gap-1 justify-center mt-2">
+                                         {question.segments?.map((_, idx) => (
+                                             <div 
+                                                key={idx} 
+                                                className={cn(
+                                                    "w-2 h-2 rounded-full cursor-pointer transition-colors",
+                                                    idx === currentSegmentIndex ? "bg-blue-600 scale-125" : 
+                                                    results[idx]?.status === 'correct' ? "bg-green-400" : "bg-slate-200"
+                                                )}
+                                                onClick={() => handleSegmentChange(idx)}
+                                             />
+                                         ))}
+                                     </div>
+                                 </div>
+                                 <Button 
+                                    variant="ghost"
+                                    onClick={() => handleSegmentChange(currentSegmentIndex + 1)}
+                                    disabled={currentSegmentIndex === (question.segments?.length || 0) - 1}
+                                 >
+                                    Câu sau <ArrowRight className="ml-2 w-4 h-4" />
+                                 </Button>
+                             </div>
 
-              {/* NAVIGATION */}
-              <div className="flex justify-between items-center pt-8 border-t-2">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  disabled={currentQIndex === 0}
-                  onClick={() => setCurrentQIndex((i) => i - 1)}>
-                  <ChevronLeft className="mr-2" /> Câu trước
-                </Button>
+                             {/* Dictation Input Area */}
+                             <div className="space-y-6">
+                                  {!currentSegment ? (
+                                      <div className="text-center py-10 text-slate-400">
+                                          Không có dữ liệu segments cho bài này.
+                                      </div>
+                                  ) : (
+                                      <>
+                                          <div className="space-y-4">
+                                              <p className="text-sm font-medium text-slate-500 flex justify-between">
+                                                  <span>Nghe và chép lại câu này:</span>
+                                                  <span className="flex items-center gap-2 cursor-pointer text-blue-600 hover:text-blue-800" onClick={() => setIsLooping(!isLooping)}>
+                                                      <RotateCcw className={cn("w-4 h-4", isLooping && "text-blue-600")} /> 
+                                                      {isLooping ? "Tự động lặp lại" : "Không lặp"}
+                                                  </span>
+                                              </p>
+                                              
+                                              <Input 
+                                                  value={userInput}
+                                                  onChange={e => {
+                                                      setUserInput(e.target.value);
+                                                      setFeedback(null); // Clear feedback on type
+                                                  }}
+                                                  onKeyDown={e => e.key === 'Enter' && checkAnswer()}
+                                                  placeholder="Type what you hear..."
+                                                  className={cn(
+                                                      "text-lg p-6 h-16 border-2 focus-visible:ring-blue-500 transition-all",
+                                                      feedback?.status === 'correct' ? "border-green-500 bg-green-50" : 
+                                                      feedback?.status === 'incorrect' ? "border-red-500 bg-red-50" : ""
+                                                  )}
+                                                  autoFocus
+                                              />
 
-                {currentQIndex === exam.skills.listening.length - 1 ? (
-                  <Button
-                    size="lg"
-                    className="bg-green-600 hover:bg-green-700 text-xl px-16"
-                    onClick={handleSubmit}>
-                    <CheckCircle2 className="mr-3" /> Nộp Bài & Xem Band
-                  </Button>
-                ) : (
-                  <Button
-                    size="lg"
-                    className="text-xl px-16"
-                    onClick={() => setCurrentQIndex((i) => i + 1)}>
-                    Câu tiếp theo <ChevronRight className="ml-2" />
-                  </Button>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
+                                              {/* Inline Feedback */}
+                                              {feedback && (
+                                                  <div className={cn(
+                                                      "p-4 rounded-lg flex items-start gap-3 animate-in fade-in slide-in-from-top-2",
+                                                      feedback.status === 'correct' ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                                                  )}>
+                                                      {feedback.status === 'correct' ? (
+                                                          <CheckCircle2 className="w-6 h-6 shrink-0 text-green-600" />
+                                                      ) : (
+                                                          <HelpCircle className="w-6 h-6 shrink-0 text-red-600" />
+                                                      )}
+                                                      <div className="flex-1">
+                                                          <p className="font-bold text-lg mb-1">
+                                                              {feedback.status === 'correct' ? "Chính xác! 🎉" : "Chưa đúng"}
+                                                          </p>
+                                                          <p>{feedback.message}</p>
+                                                      </div>
+                                                  </div>
+                                              )}
+                                          </div>
 
+                                          <div className="flex gap-4">
+                                              <Button 
+                                                  size="lg" 
+                                                  className={cn(
+                                                      "flex-1 h-12 text-lg transition-colors",
+                                                      feedback?.status === 'correct' ? "bg-green-600 hover:bg-green-700" : 
+                                                      feedback?.status === 'incorrect' ? "bg-red-600 hover:bg-red-700" : ""
+                                                  )} 
+                                                  onClick={checkAnswer}
+                                              >
+                                                  {feedback?.status === 'correct' ? "Tiếp tục" : 
+                                                   feedback?.status === 'incorrect' ? "Thử lại" : "Check Answer"}
+                                              </Button>
+                                              <Button size="lg" variant="secondary" className="h-12 w-12 p-0" onClick={handleReveal} title="Reveal Answer">
+                                                  <HelpCircle className="w-6 h-6 text-slate-600" />
+                                              </Button>
+                                          </div>
+                                      </>
+                                  )}
+                             </div>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                {/* Right: Transcript / Playlist */}
+                <div className="space-y-6 h-full flex flex-col">
+                     <Card className="flex-1 border-slate-200 flex flex-col shadow-sm">
+                         <CardHeader className="border-b border-slate-100 bg-slate-50">
+                             <CardTitle className="text-lg flex justify-between items-center">
+                                 Full Transcript
+                                 <Button variant="ghost" size="sm" onClick={() => setShowFullTranscript(!showFullTranscript)}>
+                                     {showFullTranscript ? "Hide" : "Show"}
+                                 </Button>
+                             </CardTitle>
+                         </CardHeader>
+                         <CardContent className="p-0 flex-1 overflow-y-auto max-h-[calc(100vh-200px)] relative">
+                             {showFullTranscript ? (
+                                 <div className="p-6 space-y-4">
+                                     {question.transcript ? (
+                                         <p className="leading-relaxed text-slate-700 whitespace-pre-wrap">{question.transcript}</p>
+                                     ) : (
+                                         question.segments?.map((seg, idx) => (
+                                             <div key={idx} className={cn("p-2 rounded hover:bg-slate-100 cursor-pointer transition-colors", currentSegmentIndex === idx && "bg-blue-50 border-l-4 border-blue-500 pl-3")} onClick={() => handleSegmentChange(idx)}>
+                                                 <span className="text-xs text-blue-400 font-bold mr-2">{new Date(seg.start * 1000).toISOString().substr(14, 5)}</span>
+                                                 <span className={cn(currentSegmentIndex === idx ? "font-medium text-slate-900" : "text-slate-600")}>{seg.text}</span>
+                                             </div>
+                                         ))
+                                     )}
+                                 </div>
+                             ) : (
+                                 <div className="h-full flex flex-col items-center justify-center p-8 text-center text-slate-400 space-y-4">
+                                     <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center">
+                                         <span className="text-2xl">🔒</span>
+                                     </div>
+                                     <p>Transcript is hidden to help you practice.<br/>Focus on listening!</p>
+                                     <Button variant="outline" onClick={() => setShowFullTranscript(true)}>Peek Transcript</Button>
+                                 </div>
+                             )}
+                         </CardContent>
+                     </Card>
+                </div>
+            </div>
+       </div>
     </main>
   );
 }
-
-// Các screen phụ giữ nguyên đẹp như cũ
-const LoadingScreen = () => (
-  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-cyan-50">
-    <div className="text-center">
-      <div className="w-24 h-24 border-8 border-blue-600 border-t-transparent rounded-full animate-spin mb-8" />
-      <p className="text-3xl font-bold text-blue-800">Đang tải đề thi...</p>
-    </div>
-  </div>
-);
-
-const NotFoundScreen = () => (
-  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-pink-50">
-    <p className="text-6xl font-bold text-red-600">Không tìm thấy đề thi</p>
-  </div>
-);
-
-const ResultScreen = ({ score, total }: { score: number; total: number }) => {
-  const band = listeningBandScore[score] || 0;
-  const message =
-    band >= 8
-      ? "THIÊN TÀI!"
-      : band >= 7
-        ? "XUẤT SẮC!"
-        : band >= 6
-          ? "TỐT!"
-          : "CỐ GẮNG THÊM NHÉ!";
-
-  return (
-    <Card className="max-w-3xl mx-auto text-center py-20 shadow-3xl border-4 border-green-500">
-      <CardHeader>
-        <CardTitle className="text-7xl font-bold text-green-600">
-          HOÀN THÀNH!
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-8">
-        <div className="text-9xl font-black text-blue-600">
-          {score}
-          <span className="text-5xl text-gray-600">/{total}</span>
-        </div>
-        <div className="text-5xl font-bold">
-          Band ước tính:{" "}
-          <span className="text-8xl text-green-600">{band.toFixed(1)}</span>
-        </div>
-        <div className="text-4xl font-bold text-purple-600">{message}</div>
-
-        <div className="flex gap-8 justify-center mt-16">
-          <Button asChild size="lg" className="text-2xl px-12 py-8">
-            <Link href="/tests/listening">Làm đề khác</Link>
-          </Button>
-          <Button
-            asChild
-            size="lg"
-            variant="outline"
-            className="text-2xl px-12 py-8">
-            <Link href="/tests">Trang chủ</Link>
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
-  );
-};

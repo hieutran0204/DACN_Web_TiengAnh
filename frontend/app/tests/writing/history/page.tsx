@@ -19,11 +19,18 @@ import { apiFetch } from "@/lib/api";
 
 interface Submission {
     _id: string;
-    exam: {
+    status: string; // 'pending', 'processing', 'completed', 'failed'
+    exam?: {
         _id: string;
         title: string;
     };
-    overallBand: number;
+    question?: {
+        task: string;
+        topic: string;
+    };
+    result: {
+        overall_band: number;
+    };
     submittedAt: string;
 }
 
@@ -77,40 +84,57 @@ export default function WritingHistoryPage() {
                     </div>
                 ) : (
                     <div className="grid gap-4">
-                        {submissions.map((sub) => (
-                            <Link key={sub._id} href={`/tests/writing/result/${sub._id}`}>
-                                <Card className="hover:shadow-md transition-all group border-l-4 border-l-primary hover:border-l-purple-500">
-                                    <div className="flex items-center justify-between p-6">
-                                        <div className="flex items-start gap-4">
-                                            <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-full text-purple-600 dark:text-purple-300">
-                                                <Trophy className="w-6 h-6" />
-                                            </div>
-                                            <div>
-                                                <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100 group-hover:text-primary transition-colors">
-                                                    {sub.exam?.title || "Unknown Exam"}
-                                                </h3>
-                                                <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                                                    <div className="flex items-center gap-1">
-                                                        <Calendar className="w-4 h-4" />
-                                                        {format(new Date(sub.submittedAt), "PPP p")}
+                        {submissions.map((sub) => {
+                            const isProcessing = sub.status === "processing" || sub.status === "pending";
+                            return (
+                                <Link key={sub._id} href={isProcessing ? "#" : `/tests/writing/result/${sub._id}`} 
+                                      className={isProcessing ? "cursor-default" : ""}>
+                                    <Card className={`hover:shadow-md transition-all group border-l-4 ${isProcessing ? 'border-l-blue-400' : 'border-l-primary'} hover:border-l-purple-500`}>
+                                        <div className="flex items-center justify-between p-6">
+                                            <div className="flex items-start gap-4">
+                                                <div className={`p-3 rounded-full ${isProcessing ? 'bg-blue-100 text-blue-600 animate-pulse' : 'bg-purple-100 text-purple-600'}`}>
+                                                    <Trophy className="w-6 h-6" />
+                                                </div>
+                                                <div>
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <Badge variant="outline" className="text-xs">{sub.question?.task || "Task"}</Badge>
+                                                        <span className="text-xs text-muted-foreground">{sub.exam?.title || "Independent Practice"}</span>
+                                                    </div>
+                                                    <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100 group-hover:text-primary transition-colors">
+                                                        {sub.question?.topic || "Writing Exercise"}
+                                                    </h3>
+                                                    <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                                                        <div className="flex items-center gap-1">
+                                                            <Calendar className="w-4 h-4" />
+                                                            {format(new Date(sub.submittedAt), "PPP p")}
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
 
-                                        <div className="flex items-center gap-6">
-                                            <div className="text-center">
-                                                <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-1">Band</div>
-                                                <Badge variant="secondary" className="text-xl px-3 py-1 bg-purple-50 text-purple-700 border-purple-200">
-                                                    {sub.overallBand}
-                                                </Badge>
+                                            <div className="flex items-center gap-6">
+                                                <div className="text-center">
+                                                    {isProcessing ? (
+                                                        <div className="flex flex-col items-center">
+                                                            <Loader2 className="w-4 h-4 animate-spin text-blue-500 mb-1" />
+                                                            <span className="text-[10px] font-bold text-blue-500 uppercase">Grading...</span>
+                                                        </div>
+                                                    ) : (
+                                                        <>
+                                                            <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-1">Band</div>
+                                                            <Badge variant="secondary" className="text-xl px-3 py-1 bg-purple-50 text-purple-700 border-purple-200">
+                                                                {sub.result?.overall_band || "N/A"}
+                                                            </Badge>
+                                                        </>
+                                                    )}
+                                                </div>
+                                                {!isProcessing && <ChevronLeft className="w-5 h-5 text-muted-foreground rotate-180 group-hover:translate-x-1 transition-transform" />}
                                             </div>
-                                            <ChevronLeft className="w-5 h-5 text-muted-foreground rotate-180 group-hover:translate-x-1 transition-transform" />
                                         </div>
-                                    </div>
-                                </Card>
-                            </Link>
-                        ))}
+                                    </Card>
+                                </Link>
+                            );
+                        })}
                     </div>
                 )}
             </div>

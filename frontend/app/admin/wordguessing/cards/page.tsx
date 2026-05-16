@@ -1,6 +1,21 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Gamepad2, PenSquare, Trash2, Plus, Loader2 } from "lucide-react";
+import { apiFetch } from "@/lib/api";
 
 interface WordTopic {
   _id: string;
@@ -38,19 +53,17 @@ export default function AdminWordCardsPage() {
   const [editingCard, setEditingCard] = useState<WordCard | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [filterTopic, setFilterTopic] = useState("");
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     fetchCards();
     fetchTopics();
   }, []);
 
   const fetchCards = async () => {
     try {
-      // FIX: Đổi từ /wordcards sang /cards
-      const response = await fetch(
-        "http://localhost:3000/api/admin/wordguessing/cards"
-      );
-      const data = await response.json();
+      const data = await apiFetch<any>("/admin/wordguessing/cards");
       setCards(data.data || []);
     } catch (error) {
       console.error("Error fetching cards:", error);
@@ -59,11 +72,7 @@ export default function AdminWordCardsPage() {
 
   const fetchTopics = async () => {
     try {
-      // FIX: Đổi từ /wordtopics sang /topics
-      const response = await fetch(
-        "http://localhost:3000/api/admin/wordguessing/topics"
-      );
-      const data = await response.json();
+      const data = await apiFetch<any>("/admin/wordguessing/topics");
       setTopics(data.data || []);
     } catch (error) {
       console.error("Error fetching topics:", error);
@@ -77,44 +86,36 @@ export default function AdminWordCardsPage() {
       !formData.hintSentence ||
       !formData.sentenceWithBlank
     ) {
-      alert("Vui lòng điền đầy đủ thông tin!");
+      alert("Please fill all required fields!");
       return;
     }
 
     setIsLoading(true);
     try {
-      // FIX: Đổi từ /wordcards sang /cards
       const url = editingCard
-        ? `http://localhost:3000/api/admin/wordguessing/cards/${editingCard._id}`
-        : "http://localhost:3000/api/admin/wordguessing/cards";
+        ? `/admin/wordguessing/cards/${editingCard._id}`
+        : "/admin/wordguessing/cards";
 
       const method = editingCard ? "PUT" : "POST";
 
-      const response = await fetch(url, {
+      await apiFetch<any>(url, {
         method,
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
 
-      const result = await response.json();
-
-      if (response.ok) {
-        setFormData({
-          topic: "",
-          keyword: "",
-          hintSentence: "",
-          sentenceWithBlank: "",
-          difficulty: "medium",
-        });
-        setEditingCard(null);
-        await fetchCards();
-        await fetchTopics();
-        alert(editingCard ? "Cập nhật thành công!" : "Tạo card thành công!");
-      } else {
-        alert(result.message || "Lỗi khi lưu");
-      }
-    } catch (error) {
-      alert("Lỗi kết nối server");
+      setFormData({
+        topic: "",
+        keyword: "",
+        hintSentence: "",
+        sentenceWithBlank: "",
+        difficulty: "medium",
+      });
+      setEditingCard(null);
+      await fetchCards();
+      await fetchTopics(); // Update topic counts if changed (backend logic might handle this but client refresh is safer)
+      alert(editingCard ? "Updated successfully!" : "Created successfully!");
+    } catch (error: any) {
+      alert("Error: " + error.message);
     } finally {
       setIsLoading(false);
     }
@@ -132,25 +133,19 @@ export default function AdminWordCardsPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Bạn có chắc muốn xóa card này?")) return;
+    if (!confirm("Are you sure you want to delete this card?")) return;
 
     setIsLoading(true);
     try {
-      // FIX: Đổi từ /wordcards sang /cards
-      const response = await fetch(
-        `http://localhost:3000/api/admin/wordguessing/cards/${id}`,
-        {
-          method: "DELETE",
-        }
-      );
+      await apiFetch(`/admin/wordguessing/cards/${id}`, {
+        method: "DELETE",
+      });
 
-      if (response.ok) {
-        await fetchCards();
-        await fetchTopics();
-        alert("Xóa thành công!");
-      }
-    } catch (error) {
-      alert("Lỗi kết nối server");
+      await fetchCards();
+      await fetchTopics();
+      alert("Deleted successfully!");
+    } catch (error: any) {
+      alert("Error: " + error.message);
     } finally {
       setIsLoading(false);
     }
@@ -160,210 +155,214 @@ export default function AdminWordCardsPage() {
     ? cards.filter((c) => c.topic._id === filterTopic)
     : cards;
 
+  if(!mounted) return null;
+
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6">Quản lý Word Cards</h1>
+    <div className="container mx-auto p-8 max-w-7xl">
+      <div className="flex items-center gap-3 mb-8">
+         <Gamepad2 className="w-8 h-8 text-amber-500" />
+         <h1 className="text-3xl font-bold text-slate-800">WordGuessing Cards</h1>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold mb-4">
-                {editingCard ? "Chỉnh sửa Card" : "Tạo Card Mới"}
-              </h2>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* FORM */}
+         <div className="lg:col-span-1">
+             <Card className="border-slate-200 shadow-sm h-fit sticky top-8">
+                <CardHeader className="bg-slate-50 border-b border-slate-100 pb-4">
+                  <CardTitle className="text-lg">
+                    {editingCard ? "Edit Card" : "Create Card"}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-6 space-y-4">
+                     <div>
+                        <Label>Topic *</Label>
+                        <Select
+                            value={formData.topic}
+                            onValueChange={(v) =>
+                              setFormData({ ...formData, topic: v })
+                            }
+                            disabled={isLoading}
+                        >
+                            <SelectTrigger className="bg-white mt-1.5"><SelectValue placeholder="Select topic"/></SelectTrigger>
+                            <SelectContent>
+                                {topics.map((t) => (
+                                    <SelectItem key={t._id} value={t._id}>{t.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                     </div>
 
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Topic *
-                  </label>
-                  <select
-                    value={formData.topic}
-                    onChange={(e) =>
-                      setFormData({ ...formData, topic: e.target.value })
-                    }
-                    className="w-full border rounded-lg px-3 py-2"
-                    disabled={isLoading}>
-                    <option value="">Chọn topic</option>
-                    {topics.map((t) => (
-                      <option key={t._id} value={t._id}>
-                        {t.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                     <div>
+                        <Label>Keyword *</Label>
+                        <Input
+                            value={formData.keyword}
+                            onChange={(e) =>
+                              setFormData({ ...formData, keyword: e.target.value })
+                            }
+                            placeholder="e.g. beautiful"
+                            disabled={isLoading}
+                            className="bg-white mt-1.5"
+                        />
+                     </div>
+                     
+                     <div>
+                         <Label>Difficulty</Label>
+                         <Select
+                            value={formData.difficulty}
+                            onValueChange={(v: "easy" | "medium" | "hard") =>
+                                setFormData({ ...formData, difficulty: v })
+                            }
+                            disabled={isLoading}
+                        >
+                            <SelectTrigger className="bg-white mt-1.5"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="easy">Easy</SelectItem>
+                                <SelectItem value="medium">Medium</SelectItem>
+                                <SelectItem value="hard">Hard</SelectItem>
+                            </SelectContent>
+                        </Select>
+                     </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Từ cần đoán (Keyword) *
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.keyword}
-                    onChange={(e) =>
-                      setFormData({ ...formData, keyword: e.target.value })
-                    }
-                    className="w-full border rounded-lg px-3 py-2"
-                    placeholder="Ví dụ: beautiful"
-                    disabled={isLoading}
-                  />
-                </div>
+                     <div>
+                        <Label>Hint Sentence *</Label>
+                        <Textarea
+                            value={formData.hintSentence}
+                            onChange={(e) =>
+                              setFormData({ ...formData, hintSentence: e.target.value })
+                            }
+                            rows={2}
+                            placeholder="e.g. Pleasing to the eye..."
+                            disabled={isLoading}
+                            className="bg-white mt-1.5 resize-none"
+                        />
+                     </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Câu gợi ý (Hint) *
-                  </label>
-                  <textarea
-                    value={formData.hintSentence}
-                    onChange={(e) =>
-                      setFormData({ ...formData, hintSentence: e.target.value })
-                    }
-                    className="w-full border rounded-lg px-3 py-2"
-                    rows={2}
-                    placeholder="Ví dụ: Pleasing to the eye; attractive"
-                    disabled={isLoading}
-                  />
-                </div>
+                     <div>
+                        <Label>Sentence with Blank (___) *</Label>
+                        <Textarea
+                            value={formData.sentenceWithBlank}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                sentenceWithBlank: e.target.value,
+                              })
+                            }
+                            rows={2}
+                            placeholder="e.g. The sunset is ___."
+                            disabled={isLoading}
+                            className="bg-white mt-1.5 resize-none"
+                        />
+                        <p className="text-xs text-slate-400 mt-1">Use 3 underscores (___) for the blank.</p>
+                     </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Câu có chỗ trống *
-                  </label>
-                  <textarea
-                    value={formData.sentenceWithBlank}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        sentenceWithBlank: e.target.value,
-                      })
-                    }
-                    className="w-full border rounded-lg px-3 py-2"
-                    rows={2}
-                    placeholder="Ví dụ: The sunset is ___."
-                    disabled={isLoading}
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Dùng ___ để đánh dấu chỗ trống
-                  </p>
-                </div>
-
-                <button
-                  onClick={handleSubmit}
-                  className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:bg-gray-400"
-                  disabled={isLoading}>
-                  {editingCard ? "Cập nhật" : "Tạo mới"}
-                </button>
-
-                {editingCard && (
-                  <button
-                    onClick={() => {
-                      setEditingCard(null);
-                      setFormData({
-                        topic: "",
-                        keyword: "",
-                        hintSentence: "",
-                        sentenceWithBlank: "",
-                        difficulty: "medium",
-                      });
-                    }}
-                    className="w-full border py-2 rounded-lg hover:bg-gray-50"
-                    disabled={isLoading}>
-                    Hủy
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">
-                  Danh sách Cards ({filteredCards.length})
-                </h2>
-                <select
-                  value={filterTopic}
-                  onChange={(e) => setFilterTopic(e.target.value)}
-                  className="border rounded-lg px-3 py-2">
-                  <option value="">Tất cả topics</option>
-                  {topics.map((t) => (
-                    <option key={t._id} value={t._id}>
-                      {t.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="space-y-4">
-                {filteredCards.length === 0 ? (
-                  <p className="text-center text-gray-500 py-8">
-                    Chưa có card nào
-                  </p>
-                ) : (
-                  filteredCards.map((card) => (
-                    <div key={card._id} className="border rounded-lg p-4">
-                      <div className="flex justify-between items-start mb-3">
-                        <div>
-                          <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
-                            {card.topic.name}
-                          </span>
-                          <span
-                            className={`ml-2 inline-block text-xs px-2 py-1 rounded ${
-                              card.difficulty === "easy"
-                                ? "bg-green-100 text-green-800"
-                                : card.difficulty === "medium"
-                                  ? "bg-yellow-100 text-yellow-800"
-                                  : "bg-red-100 text-red-800"
-                            }`}>
-                            {card.difficulty}
-                          </span>
-                        </div>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleEdit(card)}
-                            className="px-3 py-1 text-sm bg-yellow-100 text-yellow-700 rounded hover:bg-yellow-200"
-                            disabled={isLoading}>
-                            Sửa
-                          </button>
-                          <button
-                            onClick={() => handleDelete(card._id)}
-                            className="px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200"
-                            disabled={isLoading}>
-                            Xóa
-                          </button>
-                        </div>
+                      <div className="pt-2">
+                            <Button onClick={handleSubmit} className="w-full bg-amber-600 hover:bg-amber-700" disabled={isLoading}>
+                                {isLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2"/> : <Plus className="w-4 h-4 mr-2"/> }
+                                {editingCard ? "Update Card" : "Create Card"}
+                            </Button>
+                            
+                            {editingCard && (
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    className="w-full mt-2"
+                                    onClick={() => {
+                                        setEditingCard(null);
+                                        setFormData({
+                                            topic: "",
+                                            keyword: "",
+                                            hintSentence: "",
+                                            sentenceWithBlank: "",
+                                            difficulty: "medium",
+                                        });
+                                    }}
+                                    disabled={isLoading}
+                                >
+                                    Cancel
+                                </Button>
+                            )}
                       </div>
+                </CardContent>
+             </Card>
+         </div>
 
-                      <div className="space-y-2">
-                        <div>
-                          <span className="font-semibold text-sm">
-                            Keyword:
-                          </span>
-                          <span className="ml-2 text-lg font-bold text-blue-600">
-                            {card.keyword}
-                          </span>
+        {/* LIST */}
+        <div className="lg:col-span-2">
+            <Card className="border-slate-200 shadow-sm">
+                 <CardHeader className="bg-slate-50 border-b border-slate-100 pb-4">
+                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <CardTitle>Card List ({filteredCards.length})</CardTitle>
+                         <select
+                            value={filterTopic}
+                            onChange={(e) => setFilterTopic(e.target.value)}
+                            className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-slate-950 min-w-[200px]">
+                            <option value="">All Topics</option>
+                            {topics.map((t) => (
+                                <option key={t._id} value={t._id}>
+                                {t.name}
+                                </option>
+                            ))}
+                        </select>
+                     </div>
+                 </CardHeader>
+                 <CardContent className="p-0">
+                    {filteredCards.length === 0 ? (
+                        <div className="text-center py-20">
+                            <div className="bg-slate-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100">
+                                <Gamepad2 className="w-8 h-8 text-slate-300" />
+                            </div>
+                            <h3 className="text-slate-900 font-medium">No cards found</h3>
+                            <p className="text-slate-500 text-sm mt-1">Select a topic or create a new card.</p>
                         </div>
-                        <div>
-                          <span className="font-semibold text-sm">Hint:</span>
-                          <p className="text-gray-700 text-sm italic">
-                            {card.hintSentence}
-                          </p>
-                        </div>
-                        <div>
-                          <span className="font-semibold text-sm">
-                            Sentence:
-                          </span>
-                          <p className="text-gray-700 text-sm">
-                            {card.sentenceWithBlank}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-          </div>
+                    ) : (
+                         <div className="divide-y divide-slate-100">
+                             {filteredCards.map((card) => (
+                                 <div key={card._id} className="p-5 hover:bg-slate-50 transition-colors group">
+                                     <div className="flex justify-between items-start mb-3">
+                                         <div className="flex items-center gap-2">
+                                             <Badge variant="outline" className="bg-slate-50 font-normal text-slate-600 border-slate-200">{card.topic.name}</Badge>
+                                             <Badge variant="outline" className={`font-normal capitalize ${
+                                                  card.difficulty === "easy"
+                                                    ? "bg-green-50 text-green-700 border-green-200"
+                                                    : card.difficulty === "medium"
+                                                      ? "bg-yellow-50 text-yellow-700 border-yellow-200"
+                                                      : "bg-red-50 text-red-700 border-red-200"
+                                                }`}>
+                                                {card.difficulty}
+                                             </Badge>
+                                         </div>
+                                         <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                             <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-amber-600" onClick={() => handleEdit(card)}>
+                                                <PenSquare className="w-4 h-4" />
+                                             </Button>
+                                             <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-red-600" onClick={() => handleDelete(card._id)}>
+                                                <Trash2 className="w-4 h-4" />
+                                             </Button>
+                                         </div>
+                                     </div>
+
+                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                         <div className="md:col-span-1">
+                                            <div className="text-lg font-bold text-amber-600 mb-1">{card.keyword}</div>
+                                            <div className="text-xs text-slate-400">Keyword</div>
+                                         </div>
+                                         <div className="md:col-span-2 space-y-2">
+                                            <div>
+                                                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Hint</span>
+                                                <p className="text-sm text-slate-700 italic">{card.hintSentence}</p>
+                                            </div>
+                                            <div>
+                                                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Blank Sentence</span>
+                                                <p className="text-sm text-slate-800 font-medium bg-slate-100/50 p-2 rounded border border-slate-100">{card.sentenceWithBlank}</p>
+                                            </div>
+                                         </div>
+                                     </div>
+                                 </div>
+                             ))}
+                         </div>
+                    )}
+                 </CardContent>
+            </Card>
         </div>
       </div>
     </div>

@@ -86,9 +86,9 @@ class WritingQuestionService {
   }
 
   // PHÂN TRANG – ĐẸP NHƯ SPEAKING
-  async getPaginatedQuestions(page = 1, limit = 10) {
-    const data = await repo.getPaginated(page, limit);
-    const total = await repo.countTotal();
+  async getPaginatedQuestions(page = 1, limit = 10, search = "") {
+    const data = await repo.getPaginated(page, limit, search);
+    const total = await repo.countTotal(search);
     return {
       data,
       total,

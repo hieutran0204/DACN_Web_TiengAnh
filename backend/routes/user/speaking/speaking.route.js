@@ -1,9 +1,10 @@
-const router = require("express").Router();
-const { verifyToken } = require("../../../middlewares/auth");
-const ctrl = require("../../../controllers/speaking/speakingQuestion.controller");
+const express = require("express");
+const router = express.Router();
+const speakingController = require("../../../controllers/user/speaking/speaking.controller");
+const { uploadAudio } = require("../../../middlewares/upload.middleware");
 
-router.get("/", verifyToken, ctrl.getAllPaginated);
-router.get("/:id", verifyToken, ctrl.getById);
-router.get("/part/:partId", verifyToken, ctrl.getByPart);
+// Route chat với AI
+router.post("/chat", uploadAudio, speakingController.chatWithAI);
+router.post("/grade", speakingController.gradeConversation);
 
 module.exports = router;

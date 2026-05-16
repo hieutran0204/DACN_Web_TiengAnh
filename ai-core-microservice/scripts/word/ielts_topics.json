@@ -1,0 +1,7 @@
+{
+    "environment": ["pollution", "climate", "nature", "ecosystem", "sustainability", "renewable", "global warming", "biodiversity", "conservation", "ecology", "emissions", "greenhouse"],
+    "education": ["curriculum", "pedagogy", "literacy", "scholarship", "academic", "tuition", "discipline", "knowledge", "qualification", "vocational", "undergraduate", "pedagogical"],
+    "technology": ["innovation", "automation", "digital", "artificial intelligence", "software", "hardware", "cybersecurity", "interface", "algorithm", "bandwidth", "telecommunications"],
+    "health": ["epidemic", "nutrition", "well-being", "medicine", "diagnosis", "therapy", "hygiene", "chronic", "immune", "metabolism", "vaccination", "prevention"],
+    "government": ["legislation", "policy", "democracy", "bureaucracy", "regulation", "authority", "governance", "administration", "electoral", "diplomacy", "infrastructure"]
+}

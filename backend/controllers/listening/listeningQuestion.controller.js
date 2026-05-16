@@ -26,10 +26,17 @@ class ListeningQuestionController {
       subQuestions = subQuestions.map((sq) => {
         // MULTIPLE CHOICE
         if (type === "multiple_choice") {
+          // Fix: Allow correctAnswers array for MC questions too
+          let finalCorrectAnswer = sq.correctAnswer;
+          if (Array.isArray(sq.correctAnswers) && sq.correctAnswers.length > 0) {
+             finalCorrectAnswer = sq.correctAnswers[0];
+          }
+
           return {
             question: sq.question,
             options: sq.options,
-            correctAnswer: sq.correctAnswer,
+            correctAnswer: finalCorrectAnswer,
+            correctAnswers: sq.correctAnswers
           };
         }
 
@@ -59,6 +66,14 @@ class ListeningQuestionController {
         return sq;
       });
 
+      // Parse segments (cho Dictation)
+      let segments = [];
+      if (req.body.segments) {
+        segments = typeof req.body.segments === "string" 
+          ? JSON.parse(req.body.segments) 
+          : req.body.segments;
+      }
+
       const questionData = {
         title,
         section,
@@ -68,6 +83,7 @@ class ListeningQuestionController {
         transcript: transcript || "",
         explanation: explanation || "",
         subQuestions,
+        segments, // New field
       };
 
       const question =
@@ -100,13 +116,30 @@ class ListeningQuestionController {
           ? JSON.parse(req.body.subQuestions)
           : req.body.subQuestions;
 
+      // Parse segments
+      let segments = [];
+      if (req.body.segments) {
+        segments = typeof req.body.segments === "string" 
+          ? JSON.parse(req.body.segments) 
+          : req.body.segments;
+      }
+
       // Chuẩn hóa y hệt phần create
       subQuestions = subQuestions.map((sq) => {
+        // MULTIPLE CHOICE
         if (type === "multiple_choice") {
+          // Fix: Allow correctAnswers array for MC questions too
+          // Fallback to correctAnswer if array is missing
+          let finalCorrectAnswer = sq.correctAnswer;
+          if (Array.isArray(sq.correctAnswers) && sq.correctAnswers.length > 0) {
+             finalCorrectAnswer = sq.correctAnswers[0];
+          }
+
           return {
             question: sq.question,
             options: sq.options,
-            correctAnswer: sq.correctAnswer,
+            correctAnswer: finalCorrectAnswer,
+            correctAnswers: sq.correctAnswers // Pass this through so Mongoose pre-validate can see it if needed
           };
         }
 
@@ -141,6 +174,7 @@ class ListeningQuestionController {
         transcript: transcript || "",
         explanation: explanation || "",
         subQuestions,
+        segments, // New field
       };
 
       if (req.body.audio) updateData.audio = req.body.audio;
@@ -249,9 +283,11 @@ class ListeningQuestionController {
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 10;
 
+      const search = req.query.search || "";
       const result = await ListeningQuestionService.getPaginatedQuestions(
         page,
-        limit
+        limit,
+        search
       );
 
       res.json({
@@ -276,6 +312,72 @@ class ListeningQuestionController {
       res.json({ success: true, message: "Xóa thành công" });
     } catch (error) {
       res.status(404).json({ success: false, message: error.message });
+    }
+  }
+
+  // =========================
+  // 🔥 AUTO GENERATE TRANSCRIPT (GEMINI AI)
+  // =========================
+  async generateTranscript(req, res) {
+    try {
+      const { GoogleGenerativeAI } = require("@google/generative-ai");
+      const fs = require("fs");
+      const path = require("path");
+
+      const audioUrl = req.body.audioUrl; 
+      if (!audioUrl) throw new Error("Missing audioUrl");
+
+      // Verify API Key
+      if (!process.env.GEMINI_API_KEY) {
+         throw new Error("Missing GEMINI_API_KEY in server environment");
+      }
+
+      // 1. Resolve file path
+      // Remove leading slash if present to join correctly
+      const relativePath = audioUrl.startsWith("/") ? audioUrl.slice(1) : audioUrl;
+      const filePath = path.join(__dirname, "../../public", relativePath);
+
+      if (!fs.existsSync(filePath)) {
+        throw new Error("Audio file not found on server at: " + filePath);
+      }
+
+      // 2. Prepare Gemini
+      const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+      // 3. Convert file to GenerativePart
+      const fileBuffer = fs.readFileSync(filePath);
+      const audioPart = {
+        inlineData: {
+          data: fileBuffer.toString("base64"),
+          mimeType: "audio/mp3", // Adjust if needed
+        },
+      };
+
+      const prompt = `
+        Listen to this audio and generate a precise timestamped transcript.
+        Return ONLY a raw JSON array (no markdown block) with this format:
+        [
+          { "start": 0.0, "end": 2.5, "text": "Hello world" },
+          ...
+        ]
+        "start" and "end" are in seconds. Text should be accurate.
+      `;
+
+      const result = await model.generateContent([prompt, audioPart]);
+      const response = await result.response;
+      let text = response.text();
+
+      // Clean up markdown code blocks if Gemini sends them
+      text = text.replace(/```json/g, "").replace(/```/g, "").trim();
+
+      const segments = JSON.parse(text);
+
+      res.json({ success: true, data: segments });
+
+    } catch (error) {
+      console.error("Gemini Error:", error);
+      res.status(500).json({ success: false, message: error.message });
     }
   }
 }

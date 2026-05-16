@@ -10,8 +10,8 @@ const wordCategorySchema = new Schema(
         default: "Intermediate" 
     },
     wordCount: { type: Number, default: 0 },
-    words: [{ type: String }], // Array of word strings
-    image: { type: String }, // URL to icon/image
+    words: [{ type: String }], 
+    image: { type: String }, 
     description: { type: String }
   },
   { timestamps: true }

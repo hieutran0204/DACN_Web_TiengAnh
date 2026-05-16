@@ -122,11 +122,7 @@ export default function ListeningTestsPage() {
             <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6 tracking-tight">
               Listening Practice Tests
             </h1>
-            <p className="text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
-              Luyện nghe chuẩn IELTS với audio chất lượng cao từ British Council
-              & Cambridge • 4 phần đầy đủ • Chấm điểm tự động • Giải thích chi
-              tiết từng câu
-            </p>
+            
           </motion.div>
 
           {/* Test Grid */}

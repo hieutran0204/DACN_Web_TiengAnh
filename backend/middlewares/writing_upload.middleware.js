@@ -4,10 +4,9 @@ const fs = require("fs");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    if (file.fieldname !== "image") {
-      return cb(new Error("Trường file không hợp lệ"));
-    }
 
+    // Check removed to allow upload.any() to work with any field name
+    
     const basePath = path.join(__dirname, "../public");
     const uploadPath = path.join(basePath, "uploads", "writing", "image");
     console.log(`📂 Base path: ${basePath}`);
@@ -47,16 +46,16 @@ const storage = multer.diskStorage({
 
 const fileFilter = (req, file, cb) => {
   console.log(
-    `📋 Kiểm tra file: ${file.originalname}, mimetype: ${file.mimetype}`
+    `📋 Kiểm tra file: ${file.originalname}, mimetype: ${file.mimetype}, field: ${file.fieldname}`
   );
   const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
-  if (file.fieldname === "image" && allowedTypes.includes(file.mimetype)) {
+  if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
     console.error(
       `❌ File ${file.originalname} không hợp lệ: ${file.mimetype}`
     );
-    cb(new Error("❌ File không hợp lệ: Chỉ chấp nhận ảnh (jpg, png, webp)"));
+    cb(new Error("File không phải là ảnh hợp lệ (chỉ chấp nhận jpg, png, webp)"));
   }
 };
 
@@ -67,18 +66,38 @@ const upload = multer({
 });
 
 const writing_upload = (req, res, next) => {
-  upload.single("image")(req, res, (err) => {
+  console.log("🔥 [DEBUG] ENTERING WRITING UPLOAD MIDDLEWARE (UPLOAD.ANY) 🔥");
+  // Use upload.any() to avoid "Unexpected field" errors caused by name mismatches
+  // We will manually filter and collect files in the callback
+  const uploadMiddleware = upload.any();
+
+  uploadMiddleware(req, res, (err) => {
     if (err) {
-      console.error(`❌ Lỗi upload: ${err.message}`);
-      return res.status(400).json({ success: false, message: err.message });
+      console.error(`❌ [DEBUG] Lỗi upload chi tiết:`, err);
+      console.error(`❌ [DEBUG] Error Code:`, err.code);
+      console.error(`❌ [DEBUG] Error Field:`, err.field);
+      return res.status(400).json({ success: false, message: `Upload Error: ${err.message} (${err.code})` });
     }
-    if (!req.file && req.body.image) {
-      console.log(`📝 Giữ URL image cũ: ${req.body.image}`);
+
+    // Collect all uploaded files regardless of field name
+    let newUrls = [];
+    if (req.files && req.files.length > 0) {
+      newUrls = req.files.map((f) => `/uploads/writing/image/${f.filename}`);
+      console.log(`📤 Đã upload ${req.files.length} file (bất kể field name):`, newUrls);
     }
-    if (req.file) {
-      req.body.image = `/uploads/writing/image/${req.file.filename}`;
-      console.log(`📤 Đã upload file mới: ${req.body.image}`);
+
+    // Initialize req.body.images
+    if (!req.body.images) req.body.images = [];
+    else if (!Array.isArray(req.body.images)) req.body.images = [req.body.images];
+
+    // Append new URLs
+    req.body.images.push(...newUrls);
+
+    // Also populate legacy 'image' field if empty and we have images
+    if (!req.body.image && newUrls.length > 0) {
+        req.body.image = newUrls[0];
     }
+
     console.log(`📦 Dữ liệu gửi tiếp:`, req.body);
     next();
   });

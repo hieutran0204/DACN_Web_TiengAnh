@@ -12,7 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Sparkles, RotateCcw, CheckCircle, XCircle } from "lucide-react";
+import { Sparkles, CheckCircle, XCircle } from "lucide-react";
+import { apiFetch } from "@/lib/api";
 
 interface Category {
   _id: string;
@@ -47,14 +48,9 @@ export default function WordScrambleGame() {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch(
-        "http://localhost:3000/api/user/game/categories"
-      ); // SỬA: Full URL backend
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      setCategories(data.data || data || []);
+      const res = await apiFetch<any>("/user/game/categories");
+      const data = res.data || res || [];
+      setCategories(data);
     } catch (error) {
       console.error("Error fetching categories:", error);
     }
@@ -65,14 +61,9 @@ export default function WordScrambleGame() {
 
     setIsLoading(true);
     try {
-      const response = await fetch(
-        `http://localhost:3000/api/user/game/random-word/${selectedCategory}`
-      ); // SỬA: Full URL
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      setCurrentWord(data.data);
+      const res = await apiFetch<any>(`/user/game/random-word/${selectedCategory}`);
+      const data = res.data || res;
+      setCurrentWord(data);
       setUserAnswer("");
       setShowResult(false);
     } catch (error) {
@@ -86,22 +77,18 @@ export default function WordScrambleGame() {
     if (!currentWord || !userAnswer) return;
 
     try {
-      const response = await fetch(
-        "http://localhost:3000/api/user/game/check-answer",
-        {
-          // SỬA: Full URL
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ wordId: currentWord._id, userAnswer }),
-        }
-      );
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      setIsCorrect(data.isCorrect);
+      const res = await apiFetch<any>("/user/game/check-answer", {
+        method: "POST",
+        body: JSON.stringify({ wordId: currentWord._id, userAnswer }),
+      });
+      
+      const data = res.data || res; // Assuming backend returns { isCorrect: boolean } directly or in data
+      // Check if data has isCorrect, usually it's nested or direct
+      const correct = data.isCorrect ?? false;
+      
+      setIsCorrect(correct);
       setShowResult(true);
-      if (data.isCorrect) setScore(score + 1);
+      if (correct) setScore(score + 1);
     } catch (error) {
       console.error("Error checking answer:", error);
     }
@@ -115,20 +102,20 @@ export default function WordScrambleGame() {
     <main className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
       <div className="container mx-auto p-6 max-w-4xl">
         <h1 className="text-3xl font-bold mb-8 text-center">
-          Trò chơi Xếp chữ
+          Word Scramble Game
         </h1>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
-              <CardTitle>Chọn Category</CardTitle>
+              <CardTitle>Select Category</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <Select
                 value={selectedCategory}
                 onValueChange={setSelectedCategory}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Chọn category" />
+                <SelectTrigger className="bg-white">
+                  <SelectValue placeholder="Choose a category" />
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map((category) => (
@@ -143,92 +130,95 @@ export default function WordScrambleGame() {
                 disabled={!selectedCategory || isLoading}
                 className="w-full">
                 <Sparkles className="w-4 h-4 mr-2" />
-                Bắt đầu trò chơi
+                Start Game
               </Button>
             </CardContent>
           </Card>
 
           {currentWord && (
-            <Card className="md:col-span-1">
+            <Card className="md:col-span-1 border-2 border-slate-100 shadow-lg">
               <CardHeader>
                 <CardTitle className="flex justify-between items-center">
-                  Từ xáo trộn
-                  <span className="text-sm text-muted-foreground">
-                    Điểm: {score}
+                  Scrambled Word
+                  <span className="text-sm font-normal px-2 py-1 bg-slate-100 rounded-full text-slate-600">
+                    Score: {score}
                   </span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="text-center">
-                  <p className="text-2xl font-bold mb-2">
+              <CardContent className="space-y-6">
+                <div className="text-center py-4 bg-slate-50 rounded-xl border border-slate-100">
+                  <p className="text-3xl font-black text-slate-800 tracking-widest uppercase mb-2">
                     {currentWord.shuffledWord}
                   </p>
-                  <p className="text-muted-foreground">
-                    Gợi ý: {currentWord.hint}
+                  <p className="text-slate-500 italic text-sm">
+                    Hint: {currentWord.hint}
                   </p>
                 </div>
 
                 {!showResult ? (
                   <div className="space-y-4">
-                    <Label htmlFor="answer">Đáp án của bạn</Label>
+                    <Label htmlFor="answer">Your Answer</Label>
                     <Input
                       id="answer"
                       value={userAnswer}
                       onChange={(e) => setUserAnswer(e.target.value)}
-                      placeholder="Nhập từ đúng..."
+                      placeholder="Type the correct word..."
+                      className="text-lg bg-white"
+                      onKeyDown={(e) => {
+                          if(e.key === "Enter") checkAnswer();
+                      }}
                     />
                     <Button
                       onClick={checkAnswer}
-                      className="w-full"
+                      className="w-full bg-blue-600 hover:bg-blue-700"
                       disabled={!userAnswer}>
                       <CheckCircle className="w-4 h-4 mr-2" />
-                      Kiểm tra
+                      Check Answer
                     </Button>
                   </div>
                 ) : (
                   <div className="space-y-4">
                     <div
-                      className={`p-4 rounded-lg ${
+                      className={`p-4 rounded-lg flex items-start gap-3 ${
                         isCorrect
                           ? "bg-green-50 border border-green-200"
                           : "bg-red-50 border border-red-200"
                       }`}>
-                      <div className="flex items-center space-x-2 mb-2">
-                        {isCorrect ? (
-                          <CheckCircle className="w-5 h-5 text-green-600" />
+                         {isCorrect ? (
+                          <CheckCircle className="w-6 h-6 text-green-600 mt-0.5" />
                         ) : (
-                          <XCircle className="w-5 h-5 text-red-600" />
+                          <XCircle className="w-6 h-6 text-red-600 mt-0.5" />
                         )}
-                        <span
-                          className={`font-semibold ${
-                            isCorrect ? "text-green-800" : "text-red-800"
-                          }`}>
-                          {isCorrect ? "Chính xác! 🎉" : "Sai rồi! 😔"}
-                        </span>
-                      </div>
-                      {!isCorrect && (
-                        <p className="text-red-700">
-                          <strong>Đáp án đúng:</strong>{" "}
-                          {currentWord.originalWord}
-                        </p>
-                      )}
+                        <div>
+                             <span
+                                className={`font-bold block text-lg ${
+                                    isCorrect ? "text-green-800" : "text-red-800"
+                                }`}>
+                                {isCorrect ? "Correct! 🎉" : "Incorrect 😔"}
+                            </span>
+                             {!isCorrect && (
+                                <p className="text-red-700 mt-1">
+                                    The correct word was: <strong className="font-mono text-lg">{currentWord.originalWord}</strong>
+                                </p>
+                             )}
+                        </div>
                     </div>
 
-                    <div className="space-y-3 p-4 bg-blue-50 rounded-lg">
+                    <div className="space-y-3 p-4 bg-blue-50/50 rounded-lg text-sm border border-blue-100">
                       <div>
-                        <strong>Nghĩa:</strong> {currentWord.meaning}
+                        <strong className="text-blue-900">Meaning:</strong> <span className="text-blue-800">{currentWord.meaning}</span>
                       </div>
                       <div>
-                        <strong>Cách dùng:</strong> {currentWord.usage}
+                        <strong className="text-blue-900">Usage:</strong> <span className="text-blue-800">{currentWord.usage}</span>
                       </div>
                       <div>
-                        <strong>Ví dụ:</strong> {currentWord.example}
+                        <strong className="text-blue-900">Example:</strong> <span className="text-blue-800 italic">"{currentWord.example}"</span>
                       </div>
                     </div>
 
-                    <Button onClick={nextWord} className="w-full">
+                    <Button onClick={nextWord} className="w-full" variant="outline">
                       <Sparkles className="w-4 h-4 mr-2" />
-                      Từ tiếp theo
+                      Next Word
                     </Button>
                   </div>
                 )}

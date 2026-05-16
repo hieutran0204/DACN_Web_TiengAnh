@@ -28,6 +28,8 @@ class WritingExamController {
       const aiPayload = {
         task1: task1 ? { essay: task1.answer, question: task1.question, type: task1.type } : null,
         task2: task2 ? { essay: task2.answer, question: task2.question, type: task2.type } : null,
+        studentId: userId,
+        examId: examId
       };
 
       console.log(`[Backend] Calling AI Service for User ${userId}...`);
@@ -139,7 +141,19 @@ class WritingExamController {
             };
           });
 
-          res.json({ success: true, data: { ...result.toObject(), answers: formattedAnswers } });
+          // Map answers back to task1/task2 for Frontend compatibility
+          const task1 = formattedAnswers.find(a => a.userAnswer && a.userAnswer.length > 10 && (!a.maxPoints || a.maxPoints === 9)); // Simple heuristic
+          const task2 = formattedAnswers.find(a => a !== task1);
+
+          res.json({ 
+            success: true, 
+            data: { 
+                ...result.toObject(), 
+                task1: task1 ? { result: task1.feedback } : null,
+                task2: task2 ? { result: task2.feedback } : null,
+                overallBand: result.score
+            } 
+          });
       } catch (error) {
           res.status(500).json({ success: false, message: error.message });
       }

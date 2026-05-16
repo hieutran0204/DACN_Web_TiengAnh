@@ -507,21 +507,18 @@ const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
 class WritingQuestionController {
   // TẠO MỚI – CHUẨN NHƯ SPEAKING
   async create(req, res) {
+    console.log("🔥 [DEBUG] ENTERING CONTROLLER CREATE METHOD 🔥");
     try {
-      const imageFile = req.files?.image?.[0];
-      const imageUrl = imageFile
-        ? `${BASE_URL}/uploads/writing/image/${imageFile.filename}`
-        : null;
+      // Middleware has processed uploads and put URLs into req.body.images (if any)
+      const uploadedImages = req.body.images || [];
 
-      const { task, type, topic, question, sampleAnswer, difficulty } =
-        req.body;
+      // Combine with any provided image URLs (though create usually doesn't have them unless pure JSON)
+      const finalImages = [...uploadedImages];
 
-      if (!task || !type || !topic || !question) {
-        return res.status(400).json({
-          success: false,
-          message: "Thiếu thông tin bắt buộc: task, type, topic, question",
-        });
-      }
+      // Backward compatibility: set first image to 'image' field
+      const legacyImage = finalImages.length > 0 ? finalImages[0] : null;
+
+      const { task, type, topic, question, sampleAnswer, difficulty } = req.body;
 
       const questionData = {
         skill: "writing",
@@ -530,7 +527,8 @@ class WritingQuestionController {
         topic,
         question,
         sampleAnswer: sampleAnswer || "",
-        image: imageUrl,
+        image: legacyImage, 
+        images: finalImages,
         difficulty: difficulty || "medium",
       };
 
@@ -546,17 +544,23 @@ class WritingQuestionController {
   // CẬP NHẬT – CHUẨN NHƯ SPEAKING
   async update(req, res) {
     try {
-      const imageFile = req.files?.image?.[0];
-      const { task, type, topic, question, sampleAnswer, difficulty } =
-        req.body;
+      // UPDATED FOR MULTIPLE IMAGES
+      // DEBUG LOGGING
+      console.log("UPDATE WRITING - Req Body:", req.body);
+      console.log("UPDATE WRITING - Req Body Images (from middleware):", req.body.images);
 
-      if (!task || !type || !topic || !question) {
-        return res.status(400).json({
-          success: false,
-          message: "Thiếu thông tin bắt buộc: task, type, topic, question",
-        });
-      }
+      const { task, type, topic, question, sampleAnswer, difficulty } = req.body;
 
+      // Uploaded new files are in req.body.images (from middleware)
+      const newImages = req.body.images || [];
+      
+      // Existing images kept by user (sent as array of strings or single string)
+      let existing = req.body.existingImages || [];
+      if (typeof existing === 'string') existing = [existing];
+      if (!Array.isArray(existing)) existing = [];
+
+      const finalImages = [...existing, ...newImages];
+      
       const questionData = {
         skill: "writing",
         task,
@@ -565,11 +569,9 @@ class WritingQuestionController {
         question,
         sampleAnswer: sampleAnswer || "",
         difficulty: difficulty || "medium",
+        images: finalImages,
+        image: finalImages.length > 0 ? finalImages[0] : null // Sync legacy
       };
-
-      if (imageFile) {
-        questionData.image = `${BASE_URL}/uploads/writing/image/${imageFile.filename}`;
-      }
 
       const updated = await WritingQuestionService.updateWritingQuestion(
         req.params.id,
@@ -590,7 +592,16 @@ class WritingQuestionController {
       );
       if (!foundQuestion) throw new Error("Câu hỏi không tồn tại");
 
-      res.status(200).json({ success: true, data: foundQuestion });
+      // Backward compatibility fix for view
+      const data = foundQuestion.toObject ? foundQuestion.toObject() : foundQuestion;
+      if (data.image && (!data.images || data.images.length === 0)) {
+          data.images = [data.image];
+      }
+      // Ensure full URL if needed (User Service usually handles this but let's be safe)
+      // Actually standardizing on stored paths being relative or absolute?
+      // Mongoose doesn't transform by default. Assuming stored are relative paths '/uploads...'
+
+      res.status(200).json({ success: true, data: data });
     } catch (error) {
       res.status(404).json({ success: false, message: error.message });
     }
@@ -621,10 +632,12 @@ class WritingQuestionController {
     try {
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 10;
+      const search = req.query.search || "";
 
       const result = await WritingQuestionService.getPaginatedQuestions(
         page,
-        limit
+        limit,
+        search
       );
 
       res.status(200).json({

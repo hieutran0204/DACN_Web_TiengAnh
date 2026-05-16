@@ -88,10 +88,10 @@ export default function GamesPage() {
                   English
                 </span>
               </h1>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              {/* <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
                 Master new vocabulary and grammar through interactive challenges.
                 Learning has never been this fun!
-              </p>
+              </p> */}
             </motion.div>
           </div>
 

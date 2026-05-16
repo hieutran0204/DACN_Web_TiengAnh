@@ -1,5 +1,20 @@
 "use client";
+
 import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Puzzle, PenSquare, Trash2, Plus, Loader2 } from "lucide-react";
+import { apiFetch } from "@/lib/api";
 
 interface Category {
   _id: string;
@@ -38,18 +53,17 @@ export default function AdminMatchingGamePage() {
   const [editingGame, setEditingGame] = useState<MatchingGame | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [filterCategory, setFilterCategory] = useState("");
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     fetchGames();
     fetchCategories();
   }, []);
 
   const fetchGames = async () => {
     try {
-      const response = await fetch(
-        "http://localhost:3000/api/admin/game/matching"
-      );
-      const data = await response.json();
+      const data = await apiFetch<any>("/admin/game/matching");
       setGames(data.data || []);
     } catch (error) {
       console.error("Error fetching games:", error);
@@ -58,10 +72,7 @@ export default function AdminMatchingGamePage() {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch(
-        "http://localhost:3000/api/admin/game/categories"
-      );
-      const data = await response.json();
+      const data = await apiFetch<any>("/admin/game/categories");
       setCategories(data.data || []);
     } catch (error) {
       console.error("Error fetching categories:", error);
@@ -80,68 +91,56 @@ export default function AdminMatchingGamePage() {
     setFormData({ ...formData, meanings: newMeanings });
   };
 
-  // ... (giữ nguyên phần đầu)
-
   const handleSubmit = async () => {
     if (!formData.category) {
-      alert("Vui lòng chọn category!");
+      alert("Category is required!");
       return;
     }
     if (formData.words.some((w) => !w.trim())) {
-      alert("Vui lòng nhập đầy đủ 4 từ!");
+      alert("Please fill all 4 words!");
       return;
     }
     if (formData.meanings.some((m) => !m.trim())) {
-      alert("Vui lòng nhập đầy đủ 4 nghĩa!");
+      alert("Please fill all 4 meanings!");
       return;
     }
 
     setIsLoading(true);
     try {
       const url = editingGame
-        ? `http://localhost:3000/api/admin/game/matching/${editingGame._id}`
-        : "http://localhost:3000/api/admin/game/matching";
+        ? `/admin/game/matching/${editingGame._id}`
+        : "/admin/game/matching";
 
       const method = editingGame ? "PUT" : "POST";
 
-      const response = await fetch(url, {
+      const result = await apiFetch<any>(url, {
         method,
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
 
-      const result = await response.json();
+      const updatedGame = result.data; 
 
-      if (response.ok) {
-        const updatedGame = result.data; // Dữ liệu mới nhất từ server
-
-        if (editingGame) {
-          // Cập nhật ngay trong state mà không cần refresh
-          setGames((prev) =>
-            prev.map((g) => (g._id === editingGame._id ? updatedGame : g))
-          );
-        } else {
-          // Thêm game mới vào đầu danh sách
-          setGames((prev) => [updatedGame, ...prev]);
-        }
-
-        // Reset form
-        setFormData({
-          category: "",
-          words: ["", "", "", ""],
-          meanings: ["", "", "", ""],
-          difficulty: "medium",
-          status: "active",
-        });
-        setEditingGame(null);
-
-        alert(editingGame ? "Cập nhật thành công!" : "Tạo game thành công!");
+      if (editingGame) {
+        setGames((prev) =>
+          prev.map((g) => (g._id === editingGame._id ? updatedGame : g))
+        );
       } else {
-        alert(result.message || "Lỗi khi lưu");
+        setGames((prev) => [updatedGame, ...prev]);
       }
-    } catch (error) {
+
+      setFormData({
+        category: "",
+        words: ["", "", "", ""],
+        meanings: ["", "", "", ""],
+        difficulty: "medium",
+        status: "active",
+      });
+      setEditingGame(null);
+
+      alert(editingGame ? "Updated successfully!" : "Created successfully!");
+    } catch (error: any) {
       console.error(error);
-      alert("Lỗi kết nối server");
+      alert("Error: " + error.message);
     } finally {
       setIsLoading(false);
     }
@@ -159,27 +158,18 @@ export default function AdminMatchingGamePage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Bạn có chắc muốn xóa game này?")) return;
+    if (!confirm("Are you sure you want to delete this game?")) return;
 
     setIsLoading(true);
     try {
-      const response = await fetch(
-        `http://localhost:3000/api/admin/game/matching/${id}`,
-        {
-          method: "DELETE",
-        }
-      );
+      await apiFetch(`/admin/game/matching/${id}`, {
+        method: "DELETE",
+      });
 
-      if (response.ok) {
-        // Refresh danh sách ngay lập tức
-        await fetchGames();
-        alert("Xóa thành công!");
-      } else {
-        const result = await response.json();
-        alert(result.message || "Lỗi khi xóa");
-      }
-    } catch (error) {
-      alert("Lỗi kết nối server");
+      await fetchGames();
+      alert("Deleted successfully!");
+    } catch (error: any) {
+      alert("Error: " + error.message);
     } finally {
       setIsLoading(false);
     }
@@ -191,251 +181,228 @@ export default function AdminMatchingGamePage() {
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case "easy":
-        return "bg-green-100 text-green-800";
-      case "medium":
-        return "bg-yellow-100 text-yellow-800";
-      case "hard":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
+      case "easy": return "bg-green-100 text-green-800 border-green-200";
+      case "medium": return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "hard": return "bg-red-100 text-red-800 border-red-200";
+      default: return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
 
   const getStatusColor = (status: string) => {
     return status === "active"
-      ? "bg-green-100 text-green-800"
-      : "bg-gray-100 text-gray-800";
+      ? "bg-green-50 text-green-700 border-green-200"
+      : "bg-slate-100 text-slate-700 border-slate-200";
   };
 
-  const getStatusText = (status: string) => {
-    return status === "active" ? "Đang hoạt động" : "Tạm ẩn";
-  };
+  if(!mounted) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6">Quản lý Matching Game</h1>
+    <div className="container mx-auto p-8 max-w-7xl">
+       <div className="flex items-center gap-3 mb-8">
+         <Puzzle className="w-8 h-8 text-cyan-500" />
+         <h1 className="text-3xl font-bold text-slate-800">Matching Game Management</h1>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* FORM */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold mb-4">
-                {editingGame ? "Chỉnh sửa Game" : "Tạo Game Mới"}
-              </h2>
-
-              <div className="space-y-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* FORM */}
+        <div className="lg:col-span-1">
+           <Card className="border-slate-200 shadow-sm h-fit sticky top-8">
+            <CardHeader className="bg-slate-50 border-b border-slate-100 pb-4">
+               <CardTitle className="text-lg">
+                 {editingGame ? "Edit Game Set" : "Create New Set"}
+               </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6 space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Category *
-                  </label>
-                  <select
+                  <Label>Category *</Label>
+                  <Select
                     value={formData.category}
-                    onChange={(e) =>
-                      setFormData({ ...formData, category: e.target.value })
+                    onValueChange={(v) =>
+                      setFormData({ ...formData, category: v })
                     }
-                    className="w-full border rounded-lg px-3 py-2"
-                    disabled={isLoading}>
-                    <option value="">Chọn category</option>
-                    {categories.map((cat) => (
-                      <option key={cat._id} value={cat._id}>
-                        {cat.name}
-                      </option>
-                    ))}
-                  </select>
+                    disabled={isLoading}
+                  >
+                    <SelectTrigger className="mt-1.5 bg-white">
+                        <SelectValue placeholder="Select Category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {categories.map((cat) => (
+                           <SelectItem key={cat._id} value={cat._id}>{cat.name}</SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Độ khó
-                  </label>
-                  <select
-                    value={formData.difficulty}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        difficulty: e.target.value as
-                          | "easy"
-                          | "medium"
-                          | "hard",
-                      })
-                    }
-                    className="w-full border rounded-lg px-3 py-2"
-                    disabled={isLoading}>
-                    <option value="easy">Dễ</option>
-                    <option value="medium">Trung bình</option>
-                    <option value="hard">Khó</option>
-                  </select>
+                <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>Difficulty</Label>
+                      <Select
+                        value={formData.difficulty}
+                        onValueChange={(v: "easy" | "medium" | "hard") =>
+                           setFormData({ ...formData, difficulty: v })
+                        }
+                        disabled={isLoading}
+                      >
+                         <SelectTrigger className="mt-1.5 bg-white"><SelectValue /></SelectTrigger>
+                         <SelectContent>
+                            <SelectItem value="easy">Easy</SelectItem>
+                            <SelectItem value="medium">Medium</SelectItem>
+                            <SelectItem value="hard">Hard</SelectItem>
+                         </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Status</Label>
+                      <Select
+                        value={formData.status}
+                        onValueChange={(v: "active" | "inactive") =>
+                            setFormData({ ...formData, status: v })
+                        }
+                        disabled={isLoading}
+                      >
+                         <SelectTrigger className="mt-1.5 bg-white"><SelectValue /></SelectTrigger>
+                         <SelectContent>
+                            <SelectItem value="active">Active</SelectItem>
+                            <SelectItem value="inactive">Inactive</SelectItem>
+                         </SelectContent>
+                      </Select>
+                    </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Trạng thái
-                  </label>
-                  <select
-                    value={formData.status}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        status: e.target.value as "active" | "inactive",
-                      })
-                    }
-                    className="w-full border rounded-lg px-3 py-2"
-                    disabled={isLoading}>
-                    <option value="active">Đang hoạt động</option>
-                    <option value="inactive">Tạm ẩn</option>
-                  </select>
-                </div>
-
-                <div className="border-t pt-4">
-                  <h3 className="font-medium mb-3">4 Từ và Nghĩa</h3>
+                <div className="border-t border-slate-100 pt-4 mt-2">
+                  <h3 className="font-semibold text-slate-700 mb-3 text-sm uppercase tracking-wide">4 Pairs (Word - Meaning)</h3>
                   {[0, 1, 2, 3].map((i) => (
-                    <div key={i} className="mb-4 p-3 bg-gray-50 rounded-lg">
-                      <label className="block text-xs font-medium mb-1">
-                        Từ tiếng Anh {i + 1} *
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.words[i]}
-                        onChange={(e) => handleWordChange(i, e.target.value)}
-                        className="w-full border rounded px-3 py-2 mb-2"
-                        placeholder="Ví dụ: cat, dog, apple..."
-                        disabled={isLoading}
-                      />
-                      <label className="block text-xs font-medium mb-1">
-                        Nghĩa tiếng Việt {i + 1} *
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.meanings[i]}
-                        onChange={(e) => handleMeaningChange(i, e.target.value)}
-                        className="w-full border rounded px-3 py-2"
-                        placeholder="Ví dụ: con mèo, con chó, quả táo..."
-                        disabled={isLoading}
-                      />
+                    <div key={i} className="mb-3 p-3 bg-slate-50/80 rounded-lg border border-slate-100">
+                       <div className="grid grid-cols-1 gap-2">
+                          <Input
+                            value={formData.words[i]}
+                            onChange={(e) => handleWordChange(i, e.target.value)}
+                            placeholder={`English Word ${i + 1}`}
+                            className="h-8 text-sm bg-white"
+                            disabled={isLoading}
+                          />
+                          <Input
+                            value={formData.meanings[i]}
+                            onChange={(e) => handleMeaningChange(i, e.target.value)}
+                            placeholder={`Vietnamese Meaning ${i + 1}`}
+                             className="h-8 text-sm bg-white"
+                             disabled={isLoading}
+                          />
+                       </div>
                     </div>
                   ))}
                 </div>
 
-                <button
-                  onClick={handleSubmit}
-                  className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:bg-gray-400"
-                  disabled={isLoading}>
-                  {editingGame ? "Cập nhật" : "Tạo mới"}
-                </button>
+                <div className="pt-2 flex flex-col gap-2">
+                    <Button onClick={handleSubmit} className="w-full bg-cyan-600 hover:bg-cyan-700" disabled={isLoading}>
+                       {isLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2"/> : <Plus className="w-4 h-4 mr-2"/> }
+                       {editingGame ? "Update Game Set" : "Create Game Set"}
+                    </Button>
+                    
+                    {editingGame && (
+                        <Button
+                            variant="outline"
+                            onClick={() => {
+                            setEditingGame(null);
+                            setFormData({
+                                category: "",
+                                words: ["", "", "", ""],
+                                meanings: ["", "", "", ""],
+                                difficulty: "medium",
+                                status: "active",
+                            });
+                            }}
+                            disabled={isLoading}
+                        >
+                            Cancel
+                        </Button>
+                    )}
+                </div>
+            </CardContent>
+          </Card>
+        </div>
 
-                {editingGame && (
-                  <button
-                    onClick={() => {
-                      setEditingGame(null);
-                      setFormData({
-                        category: "",
-                        words: ["", "", "", ""],
-                        meanings: ["", "", "", ""],
-                        difficulty: "medium",
-                        status: "active",
-                      });
-                    }}
-                    className="w-full border py-2 rounded-lg hover:bg-gray-50"
-                    disabled={isLoading}>
-                    Hủy
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* LIST */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">
-                  Danh sách Games ({filteredGames.length})
-                </h2>
-                <select
-                  value={filterCategory}
-                  onChange={(e) => setFilterCategory(e.target.value)}
-                  className="border rounded-lg px-3 py-2">
-                  <option value="">Tất cả categories</option>
-                  {categories.map((cat) => (
-                    <option key={cat._id} value={cat._id}>
-                      {cat.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="space-y-4">
+        {/* LIST */}
+        <div className="lg:col-span-2">
+           <Card className="border-slate-200 shadow-sm">
+            <CardHeader className="bg-slate-50 border-b border-slate-100 pb-4">
+               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                  <CardTitle>Game Sets ({filteredGames.length})</CardTitle>
+                   <select
+                      value={filterCategory}
+                      onChange={(e) => setFilterCategory(e.target.value)}
+                      className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-slate-950 min-w-[180px]">
+                      <option value="">All Categories</option>
+                      {categories.map((cat) => (
+                        <option key={cat._id} value={cat._id}>
+                          {cat.name}
+                        </option>
+                      ))}
+                    </select>
+               </div>
+            </CardHeader>
+             <CardContent className="p-6">
                 {filteredGames.length === 0 ? (
-                  <p className="text-center text-gray-500 py-8">
-                    Chưa có game nào
-                  </p>
+                   <div className="text-center py-20">
+                     <div className="bg-slate-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100">
+                       <Puzzle className="w-8 h-8 text-slate-300" />
+                     </div>
+                     <h3 className="text-slate-900 font-medium">No game sets found</h3>
+                     <p className="text-slate-500 text-sm mt-1">Select a different category or create a new set.</p>
+                   </div>
                 ) : (
-                  filteredGames.map((game) => (
-                    <div key={game._id} className="border rounded-lg p-4">
-                      <div className="flex justify-between items-start mb-3">
-                        <div>
-                          <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
-                            {game.category.name}
-                          </span>
-                          <span
-                            className={`ml-2 inline-block text-xs px-2 py-1 rounded ${getDifficultyColor(game.difficulty)}`}>
-                            {game.difficulty}
-                          </span>
-                          <span
-                            className={`ml-2 inline-block text-xs px-2 py-1 rounded ${getStatusColor(game.status)}`}>
-                            {getStatusText(game.status)}
-                          </span>
-                        </div>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleEdit(game)}
-                            className="px-3 py-1 text-sm bg-yellow-100 text-yellow-700 rounded hover:bg-yellow-200"
-                            disabled={isLoading}>
-                            Sửa
-                          </button>
-                          <button
-                            onClick={() => handleDelete(game._id)}
-                            className="px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200"
-                            disabled={isLoading}>
-                            Xóa
-                          </button>
-                        </div>
-                      </div>
+                   <div className="grid grid-cols-1 gap-4">
+                     {filteredGames.map((game) => (
+                       <div key={game._id} className="group border border-slate-200 rounded-xl p-5 hover:shadow-md hover:border-cyan-200 transition-all bg-white relative">
+                          <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleEdit(game)}>
+                                 <PenSquare className="w-4 h-4 text-slate-500" />
+                              </Button>
+                              <Button variant="outline" size="icon" className="h-8 w-8 hover:bg-red-50 hover:text-red-600 hover:border-red-200" onClick={() => handleDelete(game._id)}>
+                                 <Trash2 className="w-4 h-4" />
+                              </Button>
+                          </div>
 
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <h4 className="font-medium text-sm mb-2">
-                            Từ tiếng Anh:
-                          </h4>
-                          <ul className="text-sm space-y-1">
-                            {game.words.map((word, i) => (
-                              <li key={i} className="text-gray-700">
-                                • {word}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-sm mb-2">
-                            Nghĩa tiếng Việt:
-                          </h4>
-                          <ul className="text-sm space-y-1">
-                            {game.meanings.map((meaning, i) => (
-                              <li key={i} className="text-gray-700">
-                                • {meaning}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                  ))
+                          <div className="flex items-center gap-2 mb-3">
+                             <Badge variant="outline" className="bg-slate-50 font-normal text-slate-600 border-slate-200">
+                                {game.category.name}
+                             </Badge>
+                             <Badge variant="outline" className={`font-normal capitalize ${getDifficultyColor(game.difficulty)}`}>
+                                {game.difficulty}
+                             </Badge>
+                             <Badge variant="outline" className={`font-normal ${getStatusColor(game.status)}`}>
+                                {game.status === 'active' ? 'Active' : 'Inactive'}
+                             </Badge>
+                          </div>
+                          
+                          <div className="grid grid-cols-2 gap-x-8 gap-y-2">
+                             <div>
+                                <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">English</h4>
+                                <ul className="space-y-1.5">
+                                   {game.words.map((w, i) => (
+                                     <li key={i} className="text-sm font-medium text-slate-700 border-l-2 border-slate-200 pl-2">
+                                        {w}
+                                     </li>
+                                   ))}
+                                </ul>
+                             </div>
+                             <div>
+                                <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Vietnamese</h4>
+                                <ul className="space-y-1.5">
+                                   {game.meanings.map((m, i) => (
+                                     <li key={i} className="text-sm text-slate-600 border-l-2 border-slate-100 pl-2">
+                                        {m}
+                                     </li>
+                                   ))}
+                                </ul>
+                             </div>
+                          </div>
+                       </div>
+                     ))}
+                   </div>
                 )}
-              </div>
-            </div>
-          </div>
+             </CardContent>
+           </Card>
         </div>
       </div>
     </div>

@@ -1,0 +1,75 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+/coverage
+
+# Production
+/build
+/dist
+/.next/
+/out/
+
+# Next.js
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+
+# Env files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
+
+# Debug logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Editor settings
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Database / Infra data
+infra/neo4j/data/
+infra/neo4j/logs/
+infra/neo4j/import/
+infra/neo4j/plugins/
+
+# Backend uploads
+backend/public/uploads/
+
+# Backups and Temporary files
+*.bak
+*.tmp
+*.swp
+*~
+*.log
+*.sql
+*.sqlite
+
+# Testing scripts (local)
+test-*.js
+test-*.mjs
+test-*.ts
+debug-*.js
+
+# Misc
+.vercel
+.turbo

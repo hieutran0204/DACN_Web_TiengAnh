@@ -391,13 +391,6 @@ const submitExam = async (req, res) => {
     const { answers } = req.body; // { questionId: answerString }
     const userId = req.user ? req.user._id : null;
 
-    // DEBUG ENTRY
-    try {
-        const fs = require('fs');
-        const logPath = 'C:\\Users\\ACER\\.gemini\\antigravity\\brain\\3e01cc53-6130-4032-a4a9-51b04d2d44cb\\debug_grading.log';
-        fs.appendFileSync(logPath, `\n\n[ENTRY] Submit Exam: ${id} | Keys: ${Object.keys(answers || {}).join(',')}\n`);
-    } catch(e) { console.error(e); }
-
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ success: false, message: "ID không hợp lệ" });
     }
@@ -429,8 +422,13 @@ const submitExam = async (req, res) => {
                   writing: "writingQuestion.model",
                   speaking: "speakingQuestion.model"
                };
-               require(`../../models/${skillFileMap[skill]}`);
-               QuestionModel = mongoose.model(ModelName);
+               try {
+                  require(`../../models/${skillFileMap[skill]}`);
+                  QuestionModel = mongoose.model(ModelName);
+               } catch (reqErr) {
+                  console.error(`Failed to load model for ${skill}:`, reqErr);
+                  continue; // Skip this skill if model fails
+               }
             }
 
            const skillIds = exam.skills[skill];
@@ -442,8 +440,6 @@ const submitExam = async (req, res) => {
     // DEBUG QUESTIONS FOUND
     console.log(`[INFO] Questions found in DB: ${allQuestions.length}`);
 
-    // DEBUG: Log received answers (Removed)
-
     let score = 0;
     let totalQuestions = 0;
     const resultDetails = [];
@@ -453,9 +449,25 @@ const submitExam = async (req, res) => {
       if (q.subQuestions && q.subQuestions.length > 0) {
         for (const sq of q.subQuestions) {
           totalQuestions++;
+          
+          if (!sq._id) {
+             console.log(`[WARN] SubQuestion missing _id inside Question ${q._id}`);
+             console.log(`[WARN] SubQuestion Item:`, JSON.stringify(sq, null, 2));
+             // Fallback: Check if there's an 'id' instead of '_id'
+             if (sq.id) {
+                console.log(`[INFO] Found 'id' property: ${sq.id}. Using it as _id.`);
+                sq._id = sq.id;
+             } else {
+                 continue;
+             }
+          }
+
           const subQId = sq._id.toString();
           const userAnswer = answers[subQId] ? answers[subQId].trim() : "";
           let isCorrect = false;
+
+          // DEBUG
+          // console.log(`[GRADING] Processing ${subQId}. User Answer: "${userAnswer}"`);
 
           // LOGIC CHỌN ĐÁP ÁN ĐÚNG (Ưu tiên mảng, nếu rỗng thì dùng string)
           let validAnswers = [];
@@ -467,22 +479,21 @@ const submitExam = async (req, res) => {
 
           // Chuẩn hóa danh sách đáp án đúng
           const normalizedCorrectAnswers = validAnswers.map((a) =>
-            a.trim().toLowerCase()
-          );
+            (a !== null && a !== undefined) ? a.toString().trim().toLowerCase() : ""
+          ).filter(a => a !== "");
 
           // Chuẩn hóa câu trả lời của user
           let normalizedUserAnswer = userAnswer.toLowerCase();
 
           // MAP USER ANSWER CONTENT -> KEY (A, B, C...) if applicable
           // Nếu user gửi nội dung ("Cat") mà đáp án là Key ("A")
-          if (sq.options && sq.options.length > 0) {
-             const lowerOptions = sq.options.map(o => o.trim().toLowerCase());
+          if (sq.options && Array.isArray(sq.options)) {
+             // Safe map
+             const lowerOptions = sq.options.map(o => (o !== null && o !== undefined) ? o.toString().trim().toLowerCase() : "");
              const optionIndex = lowerOptions.findIndex(o => o === normalizedUserAnswer);
              
              if (optionIndex !== -1) {
                 // User gửi đúng nội dung của 1 option => Convert sang key correspondence (0->a, 1->b...)
-                // Đáp án trong DB thường lưu là "A", "B" hoặc "a", "b".
-                // Ta sẽ thêm Key vào danh sách check
                 const key = String.fromCharCode(97 + optionIndex); // 97 = 'a'
                 // Thử check xem key này có trong correctAnswers không
                 if (normalizedCorrectAnswers.includes(key)) {
@@ -491,17 +502,15 @@ const submitExam = async (req, res) => {
              }
           }
 
-          // 1. So sánh chính xác (Exact Match) - logic cũ vẫn giữ để cover trường hợp user gửi Key
+          // 1. So sánh chính xác (Exact Match)
           if (!isCorrect && normalizedCorrectAnswers.includes(normalizedUserAnswer)) {
             isCorrect = true;
           } else if (!isCorrect) {
-            // 2. So sánh tương đối (Loose Match for "A. Option content" vs "A")
-            // ... (keep existing loose match logic)
+            // 2. So sánh tương đối (Loose Match)
             for (const ca of normalizedCorrectAnswers) {
               if (
                 normalizedUserAnswer.startsWith(ca + ".") ||
                 normalizedUserAnswer.startsWith(ca + " ") ||
-                // Case: Expect "A. Content" but got "A" (User sent Key, DB has Key+Content)
                 ca.startsWith(normalizedUserAnswer + ".") ||
                 ca.startsWith(normalizedUserAnswer + " ")
               ) {
@@ -515,21 +524,13 @@ const submitExam = async (req, res) => {
             score++;
           }
           
-          // DEBUG LOGGING
-          try {
-             const fs = require('fs');
-             const logPath = 'C:\\Users\\ACER\\.gemini\\antigravity\\brain\\3e01cc53-6130-4032-a4a9-51b04d2d44cb\\debug_grading.log';
-             const logLine = `[GRADING] Q: ${subQId} | User: "${userAnswer}" | Expect: ${JSON.stringify(validAnswers)} | Match: ${isCorrect}\n`;
-             fs.appendFileSync(logPath, logLine);
-          } catch(e) { console.error(e); }
-
           resultDetails.push({
             questionId: sq._id,
             userAnswer,
             isCorrect,
-            correctAnswer: validAnswers[0], // Lưu 1 đáp án đúng đại diện
+            correctAnswer: (validAnswers[0] || "").toString(), // Ensure string
             maxPoints: 1,
-            explanation: sq.explanation // Nếu có
+            // explanation: sq.explanation // Removed to avoid schema mismatch if strict
           });
         }
       }
@@ -552,13 +553,13 @@ const submitExam = async (req, res) => {
         score,
         totalQuestions,
         resultId: result._id,
-        details: resultDetails, // Trả về chi tiết để FE hiển thị
+        details: resultDetails,
       },
     });
 
   } catch (err) {
-    console.error("Submit error:", err);
-    res.status(500).json({ success: false, message: err.message });
+    console.error("Submit error details:", err);
+    res.status(500).json({ success: false, message: err.message || "Internal Server Error" });
   }
 };
 

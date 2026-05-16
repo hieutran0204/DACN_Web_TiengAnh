@@ -14,13 +14,27 @@ exports.update = async (id, data) =>
 
 exports.remove = async (id) => await SpeakingQuestion.findByIdAndDelete(id);
 
-exports.getPaginated = async (page = 1, limit = 10) => {
+exports.getPaginated = async (page = 1, limit = 10, search = "") => {
   const skip = (page - 1) * limit;
-  return await SpeakingQuestion.find()
-    .sort({ createdAt: -1 })
-    .skip(skip)
-    .limit(limit)
-    .lean();
+
+  const query = {};
+  if (search) {
+    query.$or = [
+      { topic: { $regex: search, $options: "i" } },
+      { question: { $regex: search, $options: "i" } },
+    ];
+  }
+
+  const [data, total] = await Promise.all([
+    SpeakingQuestion.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean(),
+    SpeakingQuestion.countDocuments(query),
+  ]);
+
+  return { data, total };
 };
 
 exports.countTotal = async () => await SpeakingQuestion.countDocuments();

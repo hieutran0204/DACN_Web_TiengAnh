@@ -16,7 +16,8 @@ import {
   Menu,
   X,
   ChevronRight,
-  ShieldCheck
+  ShieldCheck,
+  Book
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 // import { ThemeToggle } from "@/components/theme-toggle"; // Assuming this exists or similar
@@ -25,6 +26,8 @@ import { Button } from "@/components/ui/button";
 const adminNavItems = [
   { title: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { title: "Users", href: "/admin/users", icon: Users },
+  { title: "Knowledge Base", href: "/admin/knowledge", icon: Book },
+  { title: "Vocabulary", href: "/admin/vocabulary", icon: BookOpen },
   { title: "Exams", href: "/admin/exams", icon: FileText },
   { title: "Questions", href: "/admin/questions", icon: BookOpen },
   { title: "News", href: "/admin/news", icon: Newspaper },

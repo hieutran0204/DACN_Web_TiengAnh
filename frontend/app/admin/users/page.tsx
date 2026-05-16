@@ -24,38 +24,76 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { apiFetch } from "@/lib/api";
 import { format } from "date-fns";
+import { PaginationControl } from "@/components/PaginationControl";
+
 
 interface User {
   _id: string;
   username: string;
   email: string;
-  role: string | { name: string }; // Handle both string and object populated role
+  role: string | { name: string };
   createdAt: string;
   name?: string;
+}
+
+interface PaginationData {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
 }
 
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [pagination, setPagination] = useState<PaginationData>({
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 0,
+  });
+  
+  // Custom debounce logic
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
   const { toast } = useToast();
+
+  // Debounce search term
+  useEffect(() => {
+    const timer = setTimeout(() => {
+        if (searchTerm !== debouncedSearch) {
+             setDebouncedSearch(searchTerm);
+             setPagination(prev => ({ ...prev, page: 1 })); // Reset to page 1 on search
+        }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [pagination.page, debouncedSearch]);
 
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const res = await apiFetch("/admin/users");
-      // Adjust depending on actual API response format
-      if (res && Array.isArray(res)) {
-        setUsers(res);
-      } else if (res && res.success && Array.isArray(res.data)) {
-        // Backend usually returns { success: true, data: [...] }
+      // Construct query
+      const queryParams = new URLSearchParams({
+        page: pagination.page.toString(),
+        limit: pagination.limit.toString(),
+        search: debouncedSearch,
+      });
+
+      const res = await apiFetch(`/admin/users?${queryParams.toString()}`);
+      
+      if (res && res.data) {
         setUsers(res.data);
-      } else if (res && Array.isArray(res.users)) {
-         setUsers(res.users);
+        if (res.pagination) {
+            setPagination(res.pagination);
+        }
+      } else if (Array.isArray(res)) {
+         // Fallback for old API if something goes wrong or mixed versions
+         setUsers(res);
       } else {
         setUsers([]);
       }
@@ -93,11 +131,6 @@ export default function UsersPage() {
       return "user";
   };
 
-  const filteredUsers = users.filter(user => 
-    (user.username?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
-    (user.email?.toLowerCase() || "").includes(searchTerm.toLowerCase())
-  );
-
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -125,7 +158,7 @@ export default function UsersPage() {
             </div>
             
             <div className="flex gap-2 text-sm text-slate-500">
-                <span>Total: <span className="font-bold text-slate-700 dark:text-slate-300">{users.length}</span></span>
+                <span>Total: <span className="font-bold text-slate-700 dark:text-slate-300">{pagination.total}</span></span>
             </div>
           </div>
 
@@ -150,17 +183,17 @@ export default function UsersPage() {
                         </div>
                     </TableCell>
                   </TableRow>
-                ) : filteredUsers.length === 0 ? (
+                ) : users.length === 0 ? (
                   <TableRow>
                      <TableCell colSpan={4} className="h-40 text-center text-slate-500">
                         <div className="flex flex-col items-center justify-center gap-2">
                              <Search className="w-8 h-8 opacity-20" />
-                             No users found matching "{searchTerm}".
+                             No users found matching "{debouncedSearch}".
                         </div>
                      </TableCell>
                   </TableRow>
                 ) : (
-                  filteredUsers.map((user) => (
+                  users.map((user) => (
                     <TableRow key={user._id} className="group hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
                       <TableCell className="pl-6 py-4">
                         <div className="flex items-center gap-3">
@@ -222,6 +255,12 @@ export default function UsersPage() {
               </TableBody>
             </Table>
           </div>
+
+          <PaginationControl 
+            currentPage={pagination.page}
+            totalPages={pagination.totalPages}
+            onPageChange={(page) => setPagination(prev => ({ ...prev, page }))}
+          />
         </CardContent>
       </Card>
     </div>

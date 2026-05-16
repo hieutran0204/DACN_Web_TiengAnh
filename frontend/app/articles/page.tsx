@@ -1,209 +1,269 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Calendar, User, Bookmark, ArrowUpRight, Newspaper, Clock } from "lucide-react";
-import Image from "next/image";
+import { Search, Newspaper } from "lucide-react";
+import { motion } from "framer-motion";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
-export default function ArticlesPage() {
-  const articles = [
-    {
-      id: 1,
-      title: "The Art of Effective Communication",
-      author: "Sarah Johnson",
-      date: "Dec 15, 2024",
-      level: "Intermediate",
-      readTime: "8 min read",
-      excerpt:
-        "Discover the key principles of effective communication in modern workplaces and how to master them.",
-      category: "Business",
-      image: "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&q=80",
-    },
-    {
-      id: 2,
-      title: "Climate Change: A Global Perspective",
-      author: "Dr. Michael Chen",
-      date: "Dec 10, 2024",
-      level: "Advanced",
-      readTime: "12 min read",
-      excerpt:
-        "An in-depth analysis of climate change impacts and innovative solutions being implemented worldwide.",
-      category: "Science",
-      image: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=800&q=80",
-    },
-    {
-      id: 3,
-      title: "Technology in Education",
-      author: "Emily Davis",
-      date: "Dec 5, 2024",
-      level: "Intermediate",
-      readTime: "7 min read",
-      excerpt:
-        "How digital tools and online platforms are revolutionizing the way students learn and grow.",
-      category: "Education",
-      image: "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800&q=80",
-    },
-    {
-      id: 4,
-      title: "Health Benefits of Regular Exercise",
-      author: "Dr. Robert Wilson",
-      date: "Nov 28, 2024",
-      level: "Beginner",
-      readTime: "6 min read",
-      excerpt:
-        "Learn why regular physical activity is essential for maintaining a healthy body and mind.",
-      category: "Health",
-      image: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80",
-    },
-    {
-      id: 5,
-      title: "The Future of Artificial Intelligence",
-      author: "Alex Turner",
-      date: "Nov 22, 2024",
-      level: "Advanced",
-      readTime: "11 min read",
-      excerpt:
-        "Exploring the latest developments in AI and what the future holds for this transformative technology.",
-      category: "Technology",
-      image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&q=80",
-    },
-    {
-      id: 6,
-      title: "Sustainable Living Tips",
-      author: "Green Earth Team",
-      date: "Nov 18, 2024",
-      level: "Beginner",
-      readTime: "5 min read",
-      excerpt:
-        "Simple yet effective ways to reduce your environmental footprint and live more sustainably.",
-      category: "Lifestyle",
-      image: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800&q=80",
-    },
-  ];
+interface News {
+  _id: string;
+  title: string;
+  image: string;
+  createdAt: string;
+}
 
-  const getLevelColor = (level: string) => {
-    switch (level) {
-      case "Beginner":
-        return "bg-green-500/10 text-green-500 border-green-500/20";
-      case "Intermediate":
-        return "bg-blue-500/10 text-blue-500 border-blue-500/20";
-      case "Advanced":
-        return "bg-purple-500/10 text-purple-500 border-purple-500/20";
-      default:
-        return "bg-gray-500/10 text-gray-500 border-gray-500/20";
+export default function NewsListPage() {
+  const [allNews, setAllNews] = useState<News[]>([]);
+  const [newsList, setNewsList] = useState<News[]>([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  
+  const itemsPerPage = 6;
+  const router = useRouter();
+
+  // Fetch all news once
+  useEffect(() => {
+    fetchNews();
+  }, []);
+
+  // Filter and Paginate whenever page, searchTerm, or allNews changes
+  useEffect(() => {
+    // 1. Filter by search term
+    let filtered = allNews;
+    if (searchTerm.trim()) {
+      filtered = allNews.filter((news) =>
+        news.title.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // 2. Calculate total pages
+    const total = Math.ceil(filtered.length / itemsPerPage);
+    setTotalPages(Math.max(1, total));
+
+    // 3. Update current page if out of bounds
+    if (page > total && total > 0) {
+      setPage(1);
+    }
+
+    // 4. Slice for current page
+    const startIndex = (page - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const paginated = filtered.slice(startIndex, endIndex);
+
+    setNewsList(paginated);
+  }, [page, searchTerm, allNews]);
+
+  const fetchNews = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`http://localhost:3000/api/user/news`);
+      const data = await response.json();
+      const fetchedNews = data.data || [];
+      setAllNews(fetchedNews);
+    } catch (error) {
+      console.error("Error fetching news:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  const handleNewsClick = (id: string) => {
+    router.push(`/articles/${id}`);
+  };
+
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+  };
+
   return (
-    <main className="min-h-screen bg-background relative overflow-hidden">
-      {/* Background Elements */}
+    <div className="min-h-screen bg-background relative overflow-hidden pt-20">
+      {/* Background Elements (copied from Games page) */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/3 w-[800px] h-[800px] bg-indigo-500/5 rounded-full blur-[120px]" />
-        <div className="absolute bottom-0 right-1/3 w-[800px] h-[800px] bg-rose-500/5 rounded-full blur-[120px]" />
+        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[100px] animate-pulse" />
+        <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[100px] animate-pulse delay-1000" />
       </div>
 
-      <div className="relative z-10 pt-24 pb-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          {/* Hero Section */}
+      <div className="relative z-10 pt-10 pb-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto">
+          
+          {/* Hero Section (styled like Games page) */}
           <div className="text-center mb-20">
-            <motion.div
+             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary font-medium mb-6">
                 <Newspaper className="w-4 h-4" />
-                <span>Featured Stories</span>
+                <span>Knowledge Hub</span>
               </div>
               <h1 className="text-5xl md:text-7xl font-extrabold text-foreground mb-6 tracking-tight">
-                Read, Learn &{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-rose-600">
-                  Grow
+                English{" "}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-600">
+                  News
                 </span>
               </h1>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                Explore engaging articles tailored to your English level. Improve your reading comprehension while staying informed.
-              </p>
+              
             </motion.div>
           </div>
 
-          {/* Articles Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {articles.map((article, index) => (
-              <motion.div
-                key={article.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
+          {/* Search Bar */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="max-w-md mx-auto mb-16 relative"
+          >
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Input
+                placeholder="Search articles..."
+                className="pl-10 h-12 rounded-full border-gray-200 shadow-sm focus-visible:ring-blue-500 bg-white/80 backdrop-blur-sm"
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setPage(1);
+                }}
+              />
+            </div>
+          </motion.div>
+
+          {/* Content Grid */}
+          {isLoading ? (
+            <div className="text-center py-12">
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+              <p className="mt-4 text-muted-foreground">Loading articles...</p>
+            </div>
+          ) : newsList.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground text-lg">
+                {searchTerm ? "No articles found matching your search." : "No articles available."}
+              </p>
+            </div>
+          ) : (
+            <>
+              <motion.div 
+                 initial={{ opacity: 0 }}
+                 animate={{ opacity: 1 }}
+                 transition={{ duration: 0.5, delay: 0.3 }}
+                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
               >
-                <div className="group relative h-full bg-card/50 backdrop-blur-sm border border-border/50 rounded-3xl overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 flex flex-col">
-                  {/* Image Section */}
-                  <div className="relative h-48 overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
-                    <Image
-                      src={article.image}
-                      alt={article.title}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <div className="absolute top-4 left-4 z-20">
-                      <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/90 text-black backdrop-blur-md">
-                        {article.category}
-                      </span>
+                {newsList.map((news, index) => (
+                  <motion.div
+                    key={news._id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.1 * index }}
+                    onClick={() => handleNewsClick(news._id)}
+                    className="group bg-card hover:bg-card/80 rounded-3xl shadow-sm hover:shadow-xl transition-all cursor-pointer overflow-hidden transform hover:-translate-y-1 border border-border/50"
+                  >
+                    <div className="relative h-56 overflow-hidden">
+                      <img
+                        src={news.image.startsWith("http") ? news.image : `http://localhost:3000${news.image}`}
+                        alt={news.title}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     </div>
-                  </div>
-
-                  <div className="p-6 flex flex-col flex-1">
-                    <div className="flex items-center gap-3 mb-4">
-                      <span
-                        className={`text-xs font-bold px-2 py-1 rounded-md border ${getLevelColor(
-                          article.level
-                        )}`}
-                      >
-                        {article.level}
-                      </span>
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Clock className="w-3 h-3" />
-                        <span>{article.readTime}</span>
+                    <div className="p-6">
+                      <h3 className="font-bold text-xl mb-3 line-clamp-2 text-foreground group-hover:text-primary transition-colors">
+                        {news.title}
+                      </h3>
+                      <div className="flex items-center text-xs font-medium text-muted-foreground">
+                        <span className="bg-primary/10 text-primary px-3 py-1 rounded-full uppercase tracking-wider">News</span>
+                        <span className="mx-2">•</span>
+                        <span>
+                          {new Date(news.createdAt).toLocaleDateString("vi-VN", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })}
+                        </span>
                       </div>
                     </div>
-
-                    <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors line-clamp-2">
-                      {article.title}
-                    </h3>
-                    <p className="text-muted-foreground text-sm mb-6 line-clamp-3 flex-1">
-                      {article.excerpt}
-                    </p>
-
-                    <div className="flex items-center justify-between pt-4 border-t border-border/50 mt-auto">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                          <User className="w-4 h-4 text-primary" />
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-xs font-medium text-foreground">
-                            {article.author}
-                          </span>
-                          <span className="text-[10px] text-muted-foreground">
-                            {article.date}
-                          </span>
-                        </div>
-                      </div>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="rounded-full hover:bg-primary/10 hover:text-primary"
-                      >
-                        <ArrowUpRight className="w-5 h-5" />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
+                  </motion.div>
+                ))}
               </motion.div>
-            ))}
-          </div>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="mt-16">
+                  <Pagination>
+                    <PaginationContent>
+                      <PaginationItem>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handlePageChange(Math.max(1, page - 1))}
+                          disabled={page === 1}
+                          className="gap-1 pl-2.5 hover:bg-primary/10"
+                        >
+                        <PaginationPrevious className="border-none hover:bg-transparent px-0"/>
+                        </Button>
+                      </PaginationItem>
+                      
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => {
+                         if (
+                           p === 1 ||
+                           p === totalPages ||
+                           (p >= page - 1 && p <= page + 1)
+                         ) {
+                           return (
+                             <PaginationItem key={p}>
+                               <PaginationLink
+                                 isActive={page === p}
+                                 onClick={() => handlePageChange(p)}
+                                 className={`cursor-pointer ${page === p ? "bg-primary text-primary-foreground hover:bg-primary/90" : "hover:bg-primary/10"}`}
+                               >
+                                 {p}
+                               </PaginationLink>
+                             </PaginationItem>
+                           );
+                         }
+                         if (
+                           (p === page - 2 && page > 3) ||
+                           (p === page + 2 && page < totalPages - 2)
+                         ) {
+                           return (
+                             <PaginationItem key={p}>
+                               <span className="px-4 py-2">...</span>
+                             </PaginationItem>
+                           );
+                         }
+                         return null;
+                      })}
+
+                      <PaginationItem>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handlePageChange(Math.min(totalPages, page + 1))}
+                          disabled={page === totalPages}
+                          className="gap-1 pr-2.5 hover:bg-primary/10"
+                        >
+                          <PaginationNext className="border-none hover:bg-transparent px-0" />
+                        </Button>
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                </div>
+              )}
+            </>
+          )}
         </div>
       </div>
-    </main>
+    </div>
   );
 }

@@ -117,8 +117,9 @@ const Role = require("../../../models/user/role.model");
 class AdminUserController {
   async getAll(req, res) {
     try {
-      const users = await adminUserService.getAllUsers();
-      res.json(users);
+      const { page, limit, search } = req.query;
+      const result = await adminUserService.getAllUsers({ page, limit, search });
+      res.json(result);
     } catch (err) {
       res.status(500).json({ message: err.message });
     }

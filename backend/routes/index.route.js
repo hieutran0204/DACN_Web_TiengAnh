@@ -1,32 +1,4 @@
-// const router = require("express").Router();
 
-// // === USER ROUTES – PHẢI ĐẶT TRƯỚC ADMIN ===
-// router.use("/user", require("./user/profile.route")); // ← /user/me, /user/me PUT
-// router.use("/exam", require("./user/exam/exam.route"));
-// router.use("/listening", require("./user/listening/listening.route"));
-// router.use("/reading", require("./user/reading/reading.route"));
-// router.use("/speaking", require("./user/speaking/speaking.route"));
-// router.use("/writing", require("./user/writing/writing.route"));
-// router.use("/skills", require("./user/skill.route"));
-// router.use("/news", require("./user/news/news.route"));
-
-// // === ADMIN ROUTES – ĐẶT SAU ĐỂ TRÁNH ĐÈ /user ===
-// // ADMIN USER – CHI TIẾT
-// router.get("/admin/users/roles", require("./admin/user.route"));
-// router.get("/admin/users", require("./admin/user.route"));
-// router.post("/admin/users", require("./admin/user.route"));
-// router.use("/admin/users/:id", require("./admin/user.route"));
-// router.use("/admin/users", require("./admin/user.route"));
-
-// // ADMIN KHÁC
-// router.use("/admin/questions", require("./admin/question/question.route"));
-// router.use("/admin/exam", require("./admin/exam/exam.route"));
-// router.use("/admin/part", require("./admin/part.route"));
-// router.use("/admin/news", require("./admin/news/news.route"));
-
-// module.exports = router;
-
-// routes/index.route.js
 const router = require("express").Router();
 console.log("--> Loading Index Routes...");
 // ======================= PUBLIC EXAMS (ai cũng vào làm được) =======================
@@ -38,12 +10,17 @@ router.use("/user/exam", require("./user/exam/exam.route")); // ← lịch sử 
 router.use("/user/writing-exam", require("./user/writing/exam.route")); // Writing Exam Submission & History
 
 router.use("/user", require("./user/profile.route"));
+router.use("/user/history", require("./user/history.route"));
 router.use("/user/skills", require("./user/skill.route"));
 router.use("/user/game", require("./user/game.route")); // SỬA: bỏ /api
 router.use("/user/game/categories", require("./admin/game/category.route")); // User lấy danh sách
 router.use("/user/game/matching", require("./user/game/matchingGame.route"));
 router.use("/user/wordguessing", require("./user/wordguessing/wordCard.route"));
+router.use("/listening-questions", require("./user/listening/listening.route")); // Public availability for Dictation
 // router.use("/user/vocabulary", require("./vocabulary/word.route")); // Moved to top
+router.use("/user/news", require("./user/news/news.route")); 
+router.use("/user/speaking", require("./user/speaking/speaking.route"));
+
 
 // ======================= ADMIN ROUTES =======================
 router.use("/admin/dashboard", require("./admin/dashboard.route")); // Dashboard Stats

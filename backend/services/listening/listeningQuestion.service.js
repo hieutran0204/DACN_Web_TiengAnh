@@ -51,18 +51,15 @@ class ListeningQuestionService {
     return await repo.getAll();
   }
 
-  async getPaginatedQuestions(page = 1, limit = 10) {
-    const [data, total] = await Promise.all([
-      repo.getPaginated(page, limit),
-      repo.countTotal(),
-    ]);
-
+  async getPaginatedQuestions(page = 1, limit = 10, search = "") {
+    const result = await repo.getPaginated(page, limit, search);
+    
     return {
-      data,
-      total,
+      data: result.data,
+      total: result.total,
       page,
       limit,
-      totalPages: Math.ceil(total / limit),
+      totalPages: Math.ceil(result.total / limit),
     };
   }
 

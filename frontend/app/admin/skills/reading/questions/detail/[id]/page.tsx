@@ -2,27 +2,32 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Navbar from "@/components/navbar";
-import Footer from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Edit3,
+  Edit,
   ChevronLeft,
   Eye,
   EyeOff,
   BookOpen,
   Image as ImageIcon,
   CheckCircle2,
+  AlertCircle
 } from "lucide-react";
+import Link from "next/link";
+import { apiFetch } from "@/lib/api";
+
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
 interface SubQuestion {
   type: string;
   question: string;
   options?: string[];
   correctAnswer?: string;
-  correctAnswers?: string[]; // ← Đã chắc chắn là mảng hoặc undefined
+  correctAnswers?: string[];
   headings?: string[];
   paragraphLabel?: string;
   wordLimit?: number;
@@ -48,27 +53,18 @@ export default function ReadingPassageDetail() {
   const [error, setError] = useState("");
   const [showAnswers, setShowAnswers] = useState(false);
 
-  const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-
   useEffect(() => {
     const fetchPassage = async () => {
       try {
-        // ĐÚNG ROUTE CỦA BACKEND CON ĐÃ CÓ
-        const res = await fetch(
-          `${API_BASE}/api/admin/questions/reading/reading-questions/${id}`,
-          { credentials: "include" }
-        );
-
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const result = await res.json();
+        const result = await apiFetch(`/admin/questions/reading/reading-questions/${id}`);
 
         if (result.success && result.data) {
           setPassage(result.data);
         } else {
-          throw new Error(result.message || "Dữ liệu không hợp lệ");
+          throw new Error(result.message || "Invalid data");
         }
       } catch (err: any) {
-        setError(err.message || "Lỗi tải passage");
+        setError(err.message || "Error loading passage");
       } finally {
         setLoading(false);
       }
@@ -79,278 +75,204 @@ export default function ReadingPassageDetail() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <BookOpen className="w-16 h-16 animate-pulse text-primary mx-auto mb-4" />
-          <p className="text-2xl font-bold">Đang tải Passage...</p>
-        </div>
-      </main>
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+         <div className="text-center space-y-4 w-full max-w-4xl px-6">
+             <div className="flex gap-6">
+                 <Skeleton className="h-[600px] w-1/2" />
+                 <div className="w-1/2 space-y-4">
+                     <Skeleton className="h-12 w-full" />
+                     <Skeleton className="h-[200px] w-full" />
+                     <Skeleton className="h-[300px] w-full" />
+                 </div>
+             </div>
+         </div>
+      </div>
     );
   }
 
   if (error || !passage) {
     return (
-      <main className="min-h-screen bg-background">
-        <Navbar />
-        <div className="mt-20 text-center py-20">
-          <Alert variant="destructive" className="max-w-md mx-auto">
-            <AlertDescription className="text-lg">
-              {error || "Không tìm thấy passage!"}
-            </AlertDescription>
-          </Alert>
-          <Button className="mt-8" onClick={() => router.back()}>
-            <ChevronLeft className="mr-2" />
-            Quay lại
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 p-6">
+        <div className="text-center space-y-4">
+             <Alert variant="destructive" className="max-w-md mx-auto">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                    {error || "Passage not found"}
+                </AlertDescription>
+            </Alert>
+          <Button variant="outline" onClick={() => router.back()}>
+            <ChevronLeft className="mr-2 w-4 h-4" /> Back to List
           </Button>
         </div>
-        <Footer />
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-background to-muted/30">
-      <Navbar />
-
-      <div className="mt-16 py-10 px-6 max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-10 flex flex-col md:flex-row justify-between items-start gap-6">
-          <div>
-            <h1 className="text-4xl font-bold text-foreground mb-3">
-              {passage.passageNumber}
-            </h1>
-            <div className="flex flex-wrap gap-4 text-lg">
-              <span className="font-semibold text-primary">
-                Độ khó: {(passage.difficulty || "medium").toUpperCase()}
-              </span>
-              <span className="bg-primary/10 px-4 py-2 rounded-full text-primary font-medium">
-                {passage.subQuestions.length} câu hỏi
-              </span>
+    <div className="space-y-6">
+        {/* HEADER */}
+       <div className="flex items-center justify-between">
+        <div className="space-y-1">
+             <div className="flex items-center gap-4">
+                <Button 
+                    variant="outline" 
+                    size="icon"
+                    onClick={() => router.back()}
+                    className="h-9 w-9 border-slate-200"
+                >
+                    <ChevronLeft className="w-5 h-5 text-slate-500" />
+                </Button>
+                <div>
+                     <h1 className="text-2xl font-bold text-slate-800 tracking-tight">
+                        {passage.passageNumber}
+                     </h1>
+                     <div className="flex items-center gap-2 mt-1">
+                        <Badge className={`${
+                            passage.difficulty === 'hard' ? 'bg-red-100 text-red-700' :
+                            passage.difficulty === 'easy' ? 'bg-green-100 text-green-700' :
+                            'bg-yellow-100 text-yellow-700'
+                        } border-transparent`}>
+                             {passage.difficulty.toUpperCase()}
+                        </Badge>
+                         <Badge variant="outline" className="text-slate-600">
+                             {passage.subQuestions.length} Questions
+                        </Badge>
+                     </div>
+                </div>
             </div>
-          </div>
-
-          <div className="flex flex-wrap gap-3">
-            <Button
-              size="lg"
-              variant="outline"
-              onClick={() => setShowAnswers(!showAnswers)}>
-              {showAnswers ? (
-                <EyeOff className="mr-2" />
-              ) : (
-                <Eye className="mr-2" />
-              )}
-              {showAnswers ? "Ẩn đáp án" : "Hiện đáp án"}
-            </Button>
-            <Button
-              size="lg"
-              onClick={() =>
-                router.push(`/admin/skills/reading/questions/${id}/edit`)
-              }>
-              <Edit3 className="mr-2" />
-              Chỉnh sửa
-            </Button>
-          </div>
         </div>
+        <div className="flex items-center gap-2">
+            <Button
+                variant="outline"
+                onClick={() => setShowAnswers(!showAnswers)}
+                className="gap-2"
+            >
+                {showAnswers ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showAnswers ? "Hide Answers" : "Show Answers"}
+            </Button>
 
-        {/* Hình ảnh */}
-        {passage.image && (
-          <Card className="mb-12 border-2 border-primary/20 shadow-lg">
-            <CardHeader className="bg-primary/5 pb-4">
-              <CardTitle className="flex items-center gap-3 text-2xl">
-                <ImageIcon className="w-9 h-9 text-primary" />
-                Hình ảnh minh họa
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-6">
-              <img
-                src={`${API_BASE}${passage.image}`}
-                alt="Illustration"
-                className="w-full max-h-96 object-contain rounded-lg shadow-md"
-              />
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Đoạn văn */}
-        <Card className="mb-12 shadow-xl">
-          <CardHeader>
-            <CardTitle className="text-2xl flex items-center gap-3">
-              <BookOpen className="w-8 h-8 text-primary" />
-              Đoạn văn
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="prose prose-lg max-w-none leading-relaxed text-foreground/90">
-              <pre className="whitespace-pre-wrap font-sans text-base">
-                {passage.passage}
-              </pre>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Câu hỏi */}
-        <div className="space-y-12">
-          {passage.subQuestions.map((sq, idx) => {
-            const qNum = idx + 1;
-            const type = sq.type;
-
-            return (
-              <Card key={idx} className="shadow-lg border-l-4 border-l-primary">
-                <CardHeader>
-                  <CardTitle className="text-xl font-semibold">
-                    Câu {qNum}: {type.replace(/_/g, " ").toUpperCase()}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="text-lg font-medium bg-muted/50 p-6 rounded-xl">
-                    {sq.question}
-                  </div>
-
-                  {/* Multiple Choice */}
-                  {type === "multiple_choice" && sq.options && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                      {sq.options.map((opt, i) => {
-                        const letter = String.fromCharCode(65 + i);
-                        const isCorrect =
-                          sq.correctAnswer === letter ||
-                          sq.correctAnswers?.includes(letter);
-
-                        return (
-                          <div
-                            key={i}
-                            className={`p-6 rounded-xl border-2 transition-all ${
-                              showAnswers && isCorrect
-                                ? "border-green-500 bg-green-50 shadow-lg"
-                                : "border-muted bg-card"
-                            }`}>
-                            <div className="flex items-start gap-4">
-                              <span className="font-bold text-2xl text-primary">
-                                {letter}.
-                              </span>
-                              <span className="text-lg">{opt}</span>
-                            </div>
-                            {showAnswers && isCorrect && (
-                              <div className="mt-4 flex items-center gap-2 text-green-600 font-bold">
-                                <CheckCircle2 className="w-6 h-6" />
-                                Đáp án đúng
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-
-                  {/* True/False/Not Given & Yes/No/Not Given */}
-                  {(type === "true_false_not_given" ||
-                    type === "yes_no_not_given") && (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                      {["True", "False", "Not Given"].map((opt) => {
-                        const display =
-                          type === "yes_no_not_given"
-                            ? opt.replace("True", "Yes").replace("False", "No")
-                            : opt;
-                        const isCorrect = sq.correctAnswers?.includes(display);
-
-                        return (
-                          <div
-                            key={opt}
-                            className={`p-8 text-center rounded-xl border-2 font-bold text-xl transition-all ${
-                              showAnswers && isCorrect
-                                ? "border-green-500 bg-green-50 shadow-lg"
-                                : "border-muted bg-card"
-                            }`}>
-                            {display}
-                            {showAnswers && isCorrect && (
-                              <CheckCircle2 className="w-8 h-8 text-green-600 mx-auto mt-4" />
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-
-                  {/* Completion types – ĐÃ FIX HOÀN TOÀN LỖI UNDEFINED */}
-                  {[
-                    "sentence_completion",
-                    "summary_completion",
-                    "note_completion",
-                    "table_completion",
-                    "flow_chart_completion",
-                    "diagram_label_completion",
-                  ].includes(type) &&
-                    showAnswers &&
-                    sq.correctAnswers && // ← Kiểm tra tồn tại
-                    sq.correctAnswers.length > 0 && ( // ← Kiểm tra có phần tử
-                      <div className="p-8 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-500 rounded-2xl">
-                        <p className="text-2xl font-bold text-green-800 text-center mb-6">
-                          Đáp án đúng
-                        </p>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                          {sq.correctAnswers.map((ans, i) => (
-                            <div
-                              key={i}
-                              className="bg-white px-8 py-5 rounded-xl shadow-lg text-xl font-bold text-green-900 text-center">
-                              {qNum + i}. {ans}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                  {/* Matching Headings – cũng đã an toàn */}
-                  {type === "matching_headings" &&
-                    sq.headings &&
-                    showAnswers &&
-                    sq.correctAnswers?.length && (
-                      <div className="bg-blue-50 p-8 rounded-xl border-2 border-blue-400">
-                        <p className="font-bold text-xl text-blue-800 mb-6">
-                          Ghép đúng
-                        </p>
-                        <div className="space-y-4">
-                          {sq.correctAnswers.map((ans, i) => (
-                            <div
-                              key={i}
-                              className="text-lg font-bold text-blue-900">
-                              Đoạn {qNum + i} → {ans}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-
-        {/* Giải thích chung */}
-        {passage.explanation && (
-          <Card className="mt-16 shadow-xl">
-            <CardHeader>
-              <CardTitle className="text-2xl">Giải thích chi tiết</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="prose prose-lg max-w-none text-foreground/90">
-                {passage.explanation}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        <div className="text-center mt-20">
-          <Button
-            size="lg"
-            variant="outline"
-            onClick={() => router.push("/admin/skills/reading/questions")}
-            className="text-xl px-12 py-6">
-            <ChevronLeft className="mr-2" />
-            Quay lại danh sách
-          </Button>
+            <Button
+                asChild
+                className="bg-blue-600 hover:bg-blue-700 shadow-sm"
+            >
+                <Link href={`/admin/skills/reading/questions/edit/${id}`}>
+                    <Edit className="mr-2 w-4 h-4" />
+                    Edit Passage
+                </Link>
+            </Button>
         </div>
       </div>
 
-      <Footer />
-    </main>
+       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-200px)]">
+           {/* LEFT: PASSAGE TEXT */}
+           <Card className="shadow-sm border-slate-200 flex flex-col h-full overflow-hidden">
+             <CardHeader className="bg-slate-50 border-b border-slate-100 py-3">
+               <CardTitle className="text-sm font-medium text-slate-800 flex items-center gap-2">
+                 <BookOpen className="w-4 h-4" />
+                 Passage Content
+               </CardTitle>
+             </CardHeader>
+             <CardContent className="flex-1 overflow-y-auto p-6 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
+               {passage.image && (
+                 <div className="mb-6 rounded-lg overflow-hidden border border-slate-100">
+                    <img
+                        src={passage.image.startsWith("http") ? passage.image : `${BACKEND_URL}${passage.image}`}
+                        alt="Illustration"
+                        className="w-full object-cover"
+                    />
+                 </div>
+               )}
+               <div className="prose prose-slate max-w-none">
+                 <p className="whitespace-pre-wrap text-slate-700 leading-relaxed text-base font-serif">
+                   {passage.passage}
+                 </p>
+               </div>
+             </CardContent>
+           </Card>
+
+           {/* RIGHT: QUESTIONS */}
+           <div className="flex flex-col h-full overflow-hidden gap-6">
+                <div className="flex-1 overflow-y-auto space-y-6 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent pr-2">
+                    {passage.subQuestions.map((sq, idx) => (
+                         <Card key={idx} className="shadow-sm border-slate-200">
+                             <CardHeader className="bg-slate-50/50 border-b border-slate-100 py-3">
+                                <CardTitle className="text-sm font-medium text-slate-800 flex justify-between">
+                                    <span>Question {idx + 1}: {sq.type.replace(/_/g, " ").toUpperCase()}</span>
+                                </CardTitle>
+                             </CardHeader>
+                             <CardContent className="pt-4 space-y-4">
+                                <div className="text-slate-800 font-medium whitespace-pre-wrap">
+                                    {sq.question}
+                                </div>
+
+                                {/* Multiple Choice */}
+                                {sq.type === "multiple_choice" && sq.options && (
+                                    <div className="grid grid-cols-1 gap-2">
+                                        {sq.options.map((opt, i) => {
+                                             const letter = String.fromCharCode(65 + i);
+                                             const isCorrect = sq.correctAnswer === letter || sq.correctAnswers?.includes(letter);
+                                             return (
+                                                 <div key={i} className={`p-3 rounded border text-sm flex items-start gap-2 ${
+                                                     showAnswers && isCorrect ? "bg-green-50 border-green-200" : "bg-white border-slate-200"
+                                                 }`}>
+                                                     <span className={`font-bold ${showAnswers && isCorrect ? "text-green-700" : "text-slate-500"}`}>{letter}.</span>
+                                                     <span className={showAnswers && isCorrect ? "text-green-900" : "text-slate-700"}>{opt}</span>
+                                                     {showAnswers && isCorrect && <CheckCircle2 className="w-4 h-4 text-green-600 ml-auto" />}
+                                                 </div>
+                                             )
+                                        })}
+                                    </div>
+                                )}
+
+                                {/* True/False/NG */}
+                                {["true_false_not_given", "yes_no_not_given"].includes(sq.type) && (
+                                     <div className="grid grid-cols-3 gap-2">
+                                        {["True", "False", "Not Given"].map((opt) => {
+                                             const display = sq.type === "yes_no_not_given" ? opt.replace("True", "Yes").replace("False", "No") : opt;
+                                             const isCorrect = sq.correctAnswers?.includes(display);
+                                             return (
+                                                 <div key={opt} className={`p-2 text-center border rounded text-sm font-medium ${
+                                                     showAnswers && isCorrect ? "bg-green-50 border-green-200 text-green-700" : "bg-white border-slate-200 text-slate-600"
+                                                 }`}>
+                                                     {display}
+                                                 </div>
+                                             )
+                                        })}
+                                     </div>
+                                )}
+
+                                {/* Fill in Blanks */}
+                                {showAnswers && sq.correctAnswers && sq.correctAnswers.length > 0 && !["multiple_choice", "true_false_not_given", "yes_no_not_given"].includes(sq.type) && (
+                                     <div className="mt-2 text-sm bg-green-50 text-green-800 p-3 rounded border border-green-100">
+                                         <span className="font-semibold block mb-1">Answer Key:</span>
+                                         <div className="flex flex-wrap gap-2">
+                                            {sq.correctAnswers.map((ans, k) => (
+                                                <Badge key={k} variant="secondary" className="bg-white text-green-700 border-green-200">
+                                                    {ans}
+                                                </Badge>
+                                            ))}
+                                         </div>
+                                     </div>
+                                )}
+                             </CardContent>
+                         </Card>
+                    ))}
+
+                    {passage.explanation && (
+                      <Card className="shadow-sm border-slate-200 bg-blue-50/30">
+                        <CardHeader className="bg-transparent border-b border-blue-100 py-3">
+                          <CardTitle className="text-sm font-medium text-blue-800">Explanation</CardTitle>
+                        </CardHeader>
+                        <CardContent className="pt-4">
+                          <div className="prose prose-sm max-w-none text-slate-700">
+                            {passage.explanation}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+                </div>
+           </div>
+       </div>
+    </div>
   );
 }

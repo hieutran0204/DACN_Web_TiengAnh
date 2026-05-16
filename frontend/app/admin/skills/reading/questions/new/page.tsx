@@ -2,11 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Navbar from "@/components/navbar";
-import Footer from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
@@ -15,16 +14,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import {
   Plus,
   Trash2,
   Image as ImageIcon,
-  Upload,
+  ChevronLeft,
   X,
   Loader2,
+  Save,
 } from "lucide-react";
+import { apiFetch } from "@/lib/api";
 
 type QuestionType =
   | "multiple_choice"
@@ -166,340 +166,338 @@ export default function NewReadingQuestion() {
     formData.append("subQuestions", JSON.stringify(processed));
 
     try {
-      const res = await fetch(
-        "http://localhost:3000/api/admin/questions/reading/reading-questions",
-        {
-          method: "POST",
-          body: formData,
-          credentials: "include",
-        }
-      );
+      await apiFetch("/admin/questions/reading/reading-questions", {
+        method: "POST",
+        body: formData,
+      });
 
-      if (res.ok) {
-        alert("TẠO PASSAGE THÀNH CÔNG – ĐẸP NHƯ IELTS CAMBRIDGE 21!!!");
-        router.push("/admin/skills/reading/questions");
-      } else {
-        const err = await res.text();
-        alert("Lỗi: " + err);
-      }
-    } catch (err) {
-      alert("Lỗi kết nối server");
+      alert("Create Passage Success!");
+      router.push("/admin/skills/reading/questions");
+    } catch (err: any) {
+      alert("Lỗi: " + err.message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-background to-muted/30">
-      <Navbar />
-      <div className="mt-20 px-6 max-w-7xl mx-auto py-12">
-        <div className="text-center mb-12">
-          <h1 className="text-6xl font-black bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-            TẠO PASSAGE READING MỚI – NHIỀU LOẠI CÂU HỎI
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-800 tracking-tight">
+            Create New Reading Passage
           </h1>
+          <p className="text-slate-500 mt-1">Add a new reading text and questions</p>
         </div>
-
-        <form onSubmit={handleSubmit} className="space-y-12">
-          <div className="grid md:grid-cols-3 gap-8">
-            <Card className="shadow-2xl">
-              <CardHeader>
-                <CardTitle className="text-2xl">Passage Number</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Select
-                  value={passageNumber}
-                  onValueChange={(v) => setPassageNumber(v as any)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Passage 1">Passage 1</SelectItem>
-                    <SelectItem value="Passage 2">Passage 2</SelectItem>
-                    <SelectItem value="Passage 3">Passage 3</SelectItem>
-                  </SelectContent>
-                </Select>
-              </CardContent>
-            </Card>
-
-            <Card className="shadow-2xl">
-              <CardHeader>
-                <CardTitle className="text-2xl">Độ khó</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Select
-                  value={difficulty}
-                  onValueChange={(v) => setDifficulty(v as any)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="easy">Dễ</SelectItem>
-                    <SelectItem value="medium">Trung bình</SelectItem>
-                    <SelectItem value="hard">Khó</SelectItem>
-                  </SelectContent>
-                </Select>
-              </CardContent>
-            </Card>
-
-            <Card className="shadow-2xl">
-              <CardHeader>
-                <CardTitle className="text-2xl flex items-center gap-3">
-                  <ImageIcon className="w-8 h-8" /> Hình ảnh
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Input type="file" accept="image/*" onChange={handleImage} />
-                {imagePreview && (
-                  <div className="mt-4 relative inline-block">
-                    <img
-                      src={imagePreview}
-                      alt="Preview"
-                      className="max-h-64 rounded-xl shadow-xl"
-                    />
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="icon"
-                      className="absolute top-2 right-2"
-                      onClick={() => {
-                        setImageFile(null);
-                        setImagePreview(null);
-                      }}>
-                      <X className="w-5 h-5" />
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card className="shadow-2xl border-4 border-primary/20">
-            <CardHeader className="bg-gradient-to-r from-primary/10 to-purple-100">
-              <CardTitle className="text-4xl font-black">PASSAGE</CardTitle>
-            </CardHeader>
-            <CardContent className="pt-8">
-              <Textarea
-                rows={22}
-                value={passage}
-                onChange={(e) => setPassage(e.target.value)}
-                placeholder="Dán đoạn văn Reading ở đây..."
-                className="text-lg font-serif leading-relaxed"
-                required
-              />
-            </CardContent>
-          </Card>
-
-          <Card className="shadow-2xl border-4 border-primary/30">
-            <CardHeader className="bg-gradient-to-r from-primary/10 to-primary/5">
-              <div className="flex justify-between items-center">
-                <CardTitle className="text-3xl">
-                  Câu hỏi con ({subQuestions.length})
-                </CardTitle>
-                <div className="flex gap-3">
-                  <Select
-                    onValueChange={(v) => addSubQuestion(v as QuestionType)}>
-                    <SelectTrigger className="w-64">
-                      + Thêm loại câu hỏi
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="multiple_choice">
-                        Multiple Choice
-                      </SelectItem>
-                      <SelectItem value="true_false_not_given">
-                        True/False/Not Given
-                      </SelectItem>
-                      <SelectItem value="yes_no_not_given">
-                        Yes/No/Not Given
-                      </SelectItem>
-                      <SelectItem value="sentence_completion">
-                        Sentence Completion
-                      </SelectItem>
-                      <SelectItem value="summary_completion">
-                        Summary Completion
-                      </SelectItem>
-                      <SelectItem value="diagram_label_completion">
-                        Diagram Label Completion
-                      </SelectItem>
-                      <SelectItem value="matching_headings">
-                        Matching Headings
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-8 pt-6">
-              {subQuestions.map((sq, i) => (
-                <div
-                  key={i}
-                  className="p-8 border-2 border-primary/20 rounded-xl bg-muted/30 space-y-6">
-                  <div className="flex justify-between items-center">
-                    <Badge variant="secondary" className="text-lg px-4 py-2">
-                      {sq.type.replace(/_/g, " ").toUpperCase()}
-                    </Badge>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeSubQuestion(i)}>
-                      <Trash2 className="w-6 h-6 text-red-600" />
-                    </Button>
-                  </div>
-
-                  <Textarea
-                    placeholder="Câu hỏi / statement..."
-                    value={sq.question}
-                    onChange={(e) =>
-                      updateSubQuestion(i, "question", e.target.value)
-                    }
-                    rows={3}
-                  />
-
-                  {/* Multiple Choice */}
-                  {sq.type === "multiple_choice" && (
-                    <>
-                      <div className="grid grid-cols-2 gap-4">
-                        {["A", "B", "C", "D"].map((l, idx) => (
-                          <Input
-                            key={l}
-                            placeholder={`${l}.`}
-                            value={sq.options?.[idx] || ""}
-                            onChange={(e) =>
-                              updateOption(i, idx, e.target.value)
-                            }
-                          />
-                        ))}
-                      </div>
-                      <Select
-                        value={sq.correctAnswer || "A"}
-                        onValueChange={(v) =>
-                          updateSubQuestion(i, "correctAnswer", v)
-                        }>
-                        <SelectTrigger className="w-48">
-                          Đáp án đúng
-                        </SelectTrigger>
-                        <SelectContent>
-                          {["A", "B", "C", "D"].map((x) => (
-                            <SelectItem key={x} value={x}>
-                              {x}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </>
-                  )}
-
-                  {/* True/False/Not Given */}
-                  {(sq.type === "true_false_not_given" ||
-                    sq.type === "yes_no_not_given") && (
-                    <Select
-                      value={sq.correctAnswers?.[0] || ""}
-                      onValueChange={(v) =>
-                        updateSubQuestion(i, "correctAnswers", [v])
-                      }>
-                      <SelectTrigger>Đáp án</SelectTrigger>
-                      <SelectContent>
-                        {(sq.type === "true_false_not_given"
-                          ? ["True", "False", "Not Given"]
-                          : ["Yes", "No", "Not Given"]
-                        ).map((x) => (
-                          <SelectItem key={x} value={x}>
-                            {x}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-
-                  {/* Completion */}
-                  {[
-                    "sentence_completion",
-                    "summary_completion",
-                    "diagram_label_completion",
-                  ].includes(sq.type) && (
-                    <div className="space-y-3">
-                      {(sq.correctAnswers || []).map((ans, idx) => (
-                        <div key={idx} className="flex gap-3">
-                          <Input
-                            value={ans}
-                            onChange={(e) => {
-                              const updated = [...subQuestions];
-                              updated[i].correctAnswers![idx] = e.target.value;
-                              setSubQuestions(updated);
-                            }}
-                            placeholder="Đáp án"
-                          />
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => {
-                              const updated = [...subQuestions];
-                              updated[i].correctAnswers = updated[
-                                i
-                              ].correctAnswers!.filter((_, j) => j !== idx);
-                              setSubQuestions(updated);
-                            }}>
-                            <Trash2 className="w-5 h-5 text-red-600" />
-                          </Button>
-                        </div>
-                      ))}
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          const updated = [...subQuestions];
-                          updated[i].correctAnswers = [
-                            ...(updated[i].correctAnswers || []),
-                            "",
-                          ];
-                          setSubQuestions(updated);
-                        }}>
-                        <Plus className="w-4 h-4 mr-2" /> Thêm đáp án
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-
-          <Card className="shadow-2xl">
-            <CardHeader>
-              <CardTitle className="text-2xl">Giải thích</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Textarea
-                rows={8}
-                value={explanation}
-                onChange={(e) => setExplanation(e.target.value)}
-                placeholder="Giải thích chi tiết..."
-              />
-            </CardContent>
-          </Card>
-
-          <div className="text-center pt-10">
-            <Button
-              type="submit"
-              size="lg"
-              disabled={loading}
-              className="text-4xl px-48 py-16 font-black bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 shadow-3xl">
-              {loading ? (
-                <>
-                  <Loader2 className="mr-6 w-12 h-12 animate-spin" /> ĐANG
-                  TẠO...
-                </>
-              ) : (
-                <>
-                  <Upload className="mr-6 w-12 h-12" /> TẠO PASSAGE NGAY
-                </>
-              )}
-            </Button>
-          </div>
-        </form>
+        <Button 
+          variant="outline" 
+          onClick={() => router.back()}
+          className="gap-2"
+        >
+          <ChevronLeft className="w-4 h-4" /> Back to List
+        </Button>
       </div>
-      <Footer />
-    </main>
+
+      <form onSubmit={handleSubmit} className="space-y-8 pb-10">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            {/* LEFT COLUMN: Metadata & Passage */}
+            <div className="space-y-6 lg:col-span-1">
+                <Card className="shadow-sm border-slate-200">
+                    <CardHeader className="bg-slate-50 border-b border-slate-100 pb-4">
+                        <CardTitle className="text-lg font-medium text-slate-800">Metadata</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4 pt-4">
+                        <div className="space-y-2">
+                            <Label>Passage Number</Label>
+                            <Select
+                                value={passageNumber}
+                                onValueChange={(v) => setPassageNumber(v as any)}>
+                                <SelectTrigger className="bg-white">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Passage 1">Passage 1</SelectItem>
+                                    <SelectItem value="Passage 2">Passage 2</SelectItem>
+                                    <SelectItem value="Passage 3">Passage 3</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label>Difficulty</Label>
+                            <Select
+                                value={difficulty}
+                                onValueChange={(v) => setDifficulty(v as any)}>
+                                <SelectTrigger className="bg-white">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="easy">Easy</SelectItem>
+                                    <SelectItem value="medium">Medium</SelectItem>
+                                    <SelectItem value="hard">Hard</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card className="shadow-sm border-slate-200">
+                    <CardHeader className="bg-slate-50 border-b border-slate-100 pb-4">
+                        <CardTitle className="text-lg font-medium text-slate-800 flex items-center gap-2">
+                             <ImageIcon className="w-4 h-4" /> Image (Optional)
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-4 space-y-4">
+                        <Input type="file" accept="image/*" onChange={handleImage} className="cursor-pointer" />
+                        {imagePreview && (
+                            <div className="relative rounded-lg overflow-hidden border border-slate-200">
+                                <img
+                                    src={imagePreview}
+                                    alt="Preview"
+                                    className="w-full h-auto object-cover"
+                                />
+                                <Button
+                                    type="button"
+                                    variant="destructive"
+                                    size="icon"
+                                    className="absolute top-2 right-2 h-8 w-8"
+                                    onClick={() => {
+                                        setImageFile(null);
+                                        setImagePreview(null);
+                                    }}>
+                                    <X className="w-4 h-4" />
+                                </Button>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+
+                <Card className="shadow-sm border-slate-200">
+                    <CardHeader className="bg-slate-50 border-b border-slate-100 pb-4">
+                        <CardTitle className="text-lg font-medium text-slate-800">Passage Content</CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-0 p-0">
+                        <Textarea
+                            rows={20}
+                            value={passage}
+                            onChange={(e) => setPassage(e.target.value)}
+                            placeholder="Paste your reading passage here..."
+                            className="text-base font-serif leading-relaxed border-0 focus-visible:ring-0 resize-none p-4 min-h-[500px]"
+                            required
+                        />
+                    </CardContent>
+                </Card>
+            </div>
+
+            {/* RIGHT COLUMN: Questions */}
+            <div className="lg:col-span-2 space-y-6">
+                <Card className="shadow-sm border-slate-200">
+                    <CardHeader className="bg-slate-50 border-b border-slate-100 pb-4 flex flex-row justify-between items-center">
+                        <CardTitle className="text-lg font-medium text-slate-800">
+                            Questions ({subQuestions.length})
+                        </CardTitle>
+                        
+                        <div className="flex gap-2">
+                            <Select onValueChange={(v) => addSubQuestion(v as QuestionType)}>
+                                <SelectTrigger className="w-[200px] h-9 bg-white">
+                                    <Plus className="w-4 h-4 mr-2" /> Add Question Type
+                                </SelectTrigger>
+                                <SelectContent align="end">
+                                    <SelectItem value="multiple_choice">Multiple Choice</SelectItem>
+                                    <SelectItem value="true_false_not_given">True/False/Not Given</SelectItem>
+                                    <SelectItem value="yes_no_not_given">Yes/No/Not Given</SelectItem>
+                                    <SelectItem value="sentence_completion">Sentence Completion</SelectItem>
+                                    <SelectItem value="summary_completion">Summary Completion</SelectItem>
+                                    <SelectItem value="diagram_label_completion">Diagram Label Completion</SelectItem>
+                                    <SelectItem value="matching_headings">Matching Headings</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </CardHeader>
+
+                    <CardContent className="space-y-6 pt-6">
+                        {subQuestions.map((sq, i) => (
+                            <div key={i} className="p-6 border border-slate-200 rounded-xl bg-slate-50/50 relative hover:border-slate-300 transition-colors">
+                                <div className="flex justify-between items-center mb-4">
+                                    <Badge variant="secondary" className="text-xs font-semibold px-2.5 py-0.5 bg-white border-slate-200 text-slate-600">
+                                        {sq.type.replace(/_/g, " ").toUpperCase()}
+                                    </Badge>
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="icon"
+                                        className="text-slate-400 hover:text-red-500 h-8 w-8"
+                                        onClick={() => removeSubQuestion(i)}>
+                                        <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div className="space-y-1.5">
+                                        <Label className="text-xs text-slate-500 font-semibold uppercase">Question / Statement</Label>
+                                        <Textarea
+                                            placeholder="Enter the question text or statement here..."
+                                            value={sq.question}
+                                            onChange={(e) => updateSubQuestion(i, "question", e.target.value)}
+                                            rows={2}
+                                            className="bg-white resize-none"
+                                        />
+                                    </div>
+
+                                    {/* Multiple Choice */}
+                                    {sq.type === "multiple_choice" && (
+                                        <div className="space-y-4 pt-2">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                {["A", "B", "C", "D"].map((l, idx) => (
+                                                    <div key={l} className="space-y-1">
+                                                        <Label className="text-xs text-slate-500">Option {l}</Label>
+                                                        <Input
+                                                            placeholder={`Option ${l}`}
+                                                            value={sq.options?.[idx] || ""}
+                                                            onChange={(e) => updateOption(i, idx, e.target.value)}
+                                                            className="bg-white"
+                                                        />
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <div className="space-y-1">
+                                                <Label className="text-xs text-slate-500">Correct Answer</Label>
+                                                <Select
+                                                    value={sq.correctAnswer || "A"}
+                                                    onValueChange={(v) => updateSubQuestion(i, "correctAnswer", v)}>
+                                                    <SelectTrigger className="w-[180px] bg-white">
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {["A", "B", "C", "D"].map((x) => (
+                                                            <SelectItem key={x} value={x}>{x}</SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* True/False/Not Given & Yes/No/Not Given */}
+                                    {(sq.type === "true_false_not_given" || sq.type === "yes_no_not_given") && (
+                                        <div className="space-y-1 w-[200px]">
+                                            <Label className="text-xs text-slate-500">Correct Answer</Label>
+                                            <Select
+                                                value={sq.correctAnswers?.[0] || ""}
+                                                onValueChange={(v) => updateSubQuestion(i, "correctAnswers", [v])}>
+                                                <SelectTrigger className="bg-white">
+                                                    <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {(sq.type === "true_false_not_given"
+                                                        ? ["True", "False", "Not Given"]
+                                                        : ["Yes", "No", "Not Given"]
+                                                    ).map((x) => (
+                                                        <SelectItem key={x} value={x}>{x}</SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    )}
+
+                                    {/* Completion Types */}
+                                    {[
+                                        "sentence_completion",
+                                        "summary_completion",
+                                        "diagram_label_completion",
+                                    ].includes(sq.type) && (
+                                        <div className="space-y-2">
+                                            <Label className="text-xs text-slate-500">Correct Answers (press + to add alternative answers)</Label>
+                                            {(sq.correctAnswers || []).map((ans, idx) => (
+                                                <div key={idx} className="flex gap-2">
+                                                    <Input
+                                                        value={ans}
+                                                        onChange={(e) => {
+                                                            const updated = [...subQuestions];
+                                                            updated[i].correctAnswers![idx] = e.target.value;
+                                                            setSubQuestions(updated);
+                                                        }}
+                                                        placeholder={`Answer ${idx + 1}`}
+                                                        className="bg-white"
+                                                    />
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="text-slate-400 hover:text-red-500"
+                                                        onClick={() => {
+                                                            const updated = [...subQuestions];
+                                                            updated[i].correctAnswers = updated[i].correctAnswers!.filter((_, j) => j !== idx);
+                                                            setSubQuestions(updated);
+                                                        }}>
+                                                        <X className="w-4 h-4" />
+                                                    </Button>
+                                                </div>
+                                            ))}
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                size="sm"
+                                                className="border-dashed mt-2"
+                                                onClick={() => {
+                                                    const updated = [...subQuestions];
+                                                    updated[i].correctAnswers = [...(updated[i].correctAnswers || []), ""];
+                                                    setSubQuestions(updated);
+                                                }}>
+                                                <Plus className="w-3 h-3 mr-2" /> Add Answer Variant
+                                            </Button>
+                                        </div>
+                                    )}
+
+                                    {/* Matching Headings - Placeholder if needed, simplified for now usually uses dropdowns or similar logic */}
+                                    {sq.type === "matching_headings" && (
+                                         <div className="bg-amber-50 text-amber-800 text-sm p-3 rounded border border-amber-200">
+                                            Note: For matching headings, ensure the question text helps identify the paragraph (e.g., "Paragraph A").
+                                         </div>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                    </CardContent>
+                </Card>
+
+                <Card className="shadow-sm border-slate-200">
+                    <CardHeader className="bg-slate-50 border-b border-slate-100 pb-4">
+                        <CardTitle className="text-lg font-medium text-slate-800">Explanation</CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-0 p-0">
+                        <Textarea
+                            rows={6}
+                            value={explanation}
+                            onChange={(e) => setExplanation(e.target.value)}
+                            placeholder="Provide a detailed explanation for the answers..."
+                            className="border-0 focus-visible:ring-0 resize-none p-4"
+                        />
+                    </CardContent>
+                </Card>
+
+                <div className="flex justify-end pt-4 pb-20">
+                    <Button
+                        type="submit"
+                        size="lg"
+                        disabled={loading}
+                        className="bg-blue-600 hover:bg-blue-700 min-w-[200px]"
+                    >
+                        {loading ? (
+                            <>
+                                <Loader2 className="mr-2 w-5 h-5 animate-spin" /> Saving...
+                            </>
+                        ) : (
+                            <>
+                                <Save className="mr-2 w-5 h-5" /> Save Passage
+                            </>
+                        )}
+                    </Button>
+                </div>
+            </div>
+        </div>
+      </form>
+    </div>
   );
 }

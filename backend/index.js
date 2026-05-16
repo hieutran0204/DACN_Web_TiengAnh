@@ -8,6 +8,7 @@ const fs = require("fs");
 dotenv.config();
 
 const app = express();
+app.use(express.json());
 const PORT = process.env.PORT || 3000;
 
 // ==================== THƯ MỤC UPLOADS ====================
@@ -16,7 +17,9 @@ if (!fs.existsSync(uploadsPath)) {
   fs.mkdirSync(uploadsPath, { recursive: true });
   console.log("Thư mục uploads đã được tạo:", uploadsPath);
 }
-
+app.get("/test-hieu", (req, res) => {
+  res.json({ message: "Kết nối thành công rồi Hiếu ơi!", status: "OK" });
+});
 app.use("/uploads", express.static(uploadsPath));
 
 // ==================== MIDDLEWARES ====================
@@ -25,9 +28,9 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:3000"],
+    origin: ["http://localhost:5173", "http://localhost:3000", "*"],
     credentials: true,
-  })
+  }),
 );
 
 // Debug (bật khi cần)

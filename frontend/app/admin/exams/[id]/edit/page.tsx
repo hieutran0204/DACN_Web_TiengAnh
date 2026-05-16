@@ -18,24 +18,36 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
+import { 
+  Headphones, 
+  BookOpen, 
+  PenTool, 
+  Mic, 
+  AlertCircle,
+  ChevronLeft,
+  Loader2,
+  Save,
+  Search
+} from "lucide-react";
 import { apiFetch } from "@/lib/api";
-import { useToast } from "@/components/ui/use-toast";
-import { notFound } from "next/navigation";
 
-// Dùng kiểu linh hoạt, không lỗi TS
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+
 type Question = Record<string, any>;
-type ExamResponse = { data?: any } | any;
+type Skill = "listening" | "reading" | "writing" | "speaking";
 
 export default function EditExamPage() {
   const params = useParams();
   const id = params.id as string;
   const router = useRouter();
-  const { toast } = useToast();
 
   const [exam, setExam] = useState<any>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [duration, setDuration] = useState("180");
+  const [error, setError] = useState("");
 
   const [selectedQuestions, setSelectedQuestions] = useState<{
     listening: string[];
@@ -67,49 +79,49 @@ export default function EditExamPage() {
   useEffect(() => {
     if (!id) return;
 
-    Promise.all([
-      apiFetch(`/admin/exam/${id}`),
-      apiFetch("/admin/questions/listening/listening-questions?limit=500"),
-      apiFetch("/admin/questions/reading/reading-questions?limit=500"),
-      apiFetch("/admin/questions/writing?limit=500"),
-      apiFetch("/admin/questions/speaking?limit=500"),
-    ])
-      .then(
-        ([examRes, listeningRes, readingRes, writingRes, speakingRes]: [
-          ExamResponse,
-          any,
-          any,
-          any,
-          any,
-        ]) => {
-          const examData = (examRes as any).data || examRes;
-          setExam(examData);
-          setTitle(examData.title || "");
-          setDescription(examData.description || "");
-          setDuration(String(examData.durationMinutes || 180));
+    const fetchData = async () => {
+        try {
+            const [examRes, listeningRes, readingRes, writingRes, speakingRes] = await Promise.all([
+                apiFetch(`/admin/exam/${id}`),
+                apiFetch(`/admin/questions/listening/listening-questions?limit=500`),
+                apiFetch(`/admin/questions/reading/reading-questions?limit=500`),
+                apiFetch(`/admin/questions/writing?limit=500`),
+                apiFetch(`/admin/questions/speaking?limit=500`),
+            ]);
 
-          const skills = examData.skills || {};
-          setSelectedQuestions({
-            listening: (skills.listening || []).map((q: any) => q._id || q),
-            reading: (skills.reading || []).map((q: any) => q._id || q),
-            writing: (skills.writing || []).map((q: any) => q._id || q),
-            speaking: (skills.speaking || []).map((q: any) => q._id || q),
-          });
+            const examData = examRes.data || examRes;
+            setExam(examData);
+            setTitle(examData.title || "");
+            setDescription(examData.description || "");
+            setDuration(String(examData.durationMinutes || 180));
 
-          setAllQuestions({
-            listening: (listeningRes as any).data || [],
-            reading: (readingRes as any).data || [],
-            writing: (writingRes as any).data || [],
-            speaking: (speakingRes as any).data || [],
-          });
+            const skills = examData.skills || {};
+            setSelectedQuestions({
+                listening: (skills.listening || []).map((q: any) => q._id || q),
+                reading: (skills.reading || []).map((q: any) => q._id || q),
+                writing: (skills.writing || []).map((q: any) => q._id || q),
+                speaking: (skills.speaking || []).map((q: any) => q._id || q),
+            });
+
+            setAllQuestions({
+                listening: listeningRes.data || [],
+                reading: readingRes.data || [],
+                writing: writingRes.data || [],
+                speaking: speakingRes.data || [],
+            });
+
+        } catch (err: any) {
+            console.error("Error loading data:", err);
+            setError("Failed to load exam data");
+        } finally {
+            setLoading(false);
         }
-      )
-      .catch(() => notFound())
-      .finally(() => setLoading(false));
+    };
+    fetchData();
   }, [id]);
 
   const toggleQuestion = (
-    skill: keyof typeof selectedQuestions,
+    skill: Skill,
     qid: string
   ) => {
     setSelectedQuestions((prev) => ({
@@ -123,15 +135,12 @@ export default function EditExamPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) {
-      toast({
-        variant: "destructive",
-        title: "Lỗi",
-        description: "Tiêu đề không được để trống",
-      });
-      return;
+        setError("Title is required");
+        return;
     }
-
+    setError("");
     setSaving(true);
+    
     try {
       await apiFetch(`/admin/exam/${id}`, {
         method: "PUT",
@@ -143,179 +152,210 @@ export default function EditExamPage() {
         }),
       });
 
-      toast({ title: "Thành công!", description: "Đã cập nhật đề thi" });
+      alert("Exam updated successfully!");
       router.push("/admin/exams");
     } catch (err: any) {
-      toast({
-        variant: "destructive",
-        title: "Lỗi",
-        description: err.message || "Không thể lưu",
-      });
+      setError(err.message || "Failed to update exam");
     } finally {
       setSaving(false);
     }
   };
 
+  const skillConfig = {
+    listening: { icon: Headphones, color: "text-blue-600", label: "Listening" },
+    reading: { icon: BookOpen, color: "text-green-600", label: "Reading" },
+    writing: { icon: PenTool, color: "text-purple-600", label: "Writing" },
+    speaking: { icon: Mic, color: "text-orange-600", label: "Speaking" },
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-2xl font-bold">Đang tải đề thi...</div>
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="space-y-4 w-full max-w-3xl px-6">
+           <Skeleton className="h-12 w-1/2 mx-auto" />
+           <Skeleton className="h-[400px] w-full" />
+        </div>
       </div>
     );
   }
 
-  if (!exam) return notFound();
+  if (!exam) return <div className="p-10 text-center">Exam not found</div>;
 
-  const renderTable = (skill: keyof typeof allQuestions) => {
+  const renderTable = (skill: Skill) => {
     const questions = allQuestions[skill] || [];
     if (questions.length === 0) {
       return (
-        <p className="text-center py-8 text-muted-foreground">
-          Chưa có câu hỏi nào
-        </p>
+        <div className="text-center py-12">
+            <AlertCircle className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+            <p className="text-slate-500">No questions available for {skill}</p>
+        </div>
       );
     }
 
     return (
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-12"></TableHead>
-            <TableHead>Tiêu đề / Câu hỏi</TableHead>
-            <TableHead>Loại</TableHead>
-            <TableHead>Độ khó</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {questions.map((q: Question) => (
-            <TableRow key={q._id}>
-              <TableCell>
-                <Checkbox
-                  checked={selectedQuestions[skill].includes(q._id)}
-                  onCheckedChange={() => toggleQuestion(skill, q._id)}
-                />
-              </TableCell>
-              <TableCell className="font-medium max-w-md truncate">
-                {(
-                  q.title ||
-                  q.question ||
-                  q.topic ||
-                  q.passageNumber ||
-                  q.passage ||
-                  "Chưa có nội dung"
-                ).toString()}
-              </TableCell>
-              <TableCell>
-                {q.type
-                  ? q.type
-                      .replace(/_/g, " ")
-                      .replace(/\b\w/g, (l: string) => l.toUpperCase())
-                  : "—"}
-              </TableCell>
-              <TableCell>
-                <Badge
-                  variant={
-                    q.difficulty === "easy"
-                      ? "default"
-                      : q.difficulty === "hard"
-                        ? "destructive"
-                        : "secondary"
-                  }>
-                  {(q.difficulty || "medium").toUpperCase()}
-                </Badge>
-              </TableCell>
+      <div className="rounded-md border border-slate-200 mt-4 max-h-[600px] overflow-y-auto">
+        <Table>
+            <TableHeader className="bg-slate-50 sticky top-0 z-10">
+            <TableRow>
+                <TableHead className="w-[50px]"></TableHead>
+                <TableHead>Content / Title</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Difficulty</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+            </TableHeader>
+            <TableBody>
+            {questions.map((q: Question) => (
+                <TableRow key={q._id} className="hover:bg-slate-50">
+                <TableCell>
+                    <Checkbox
+                    checked={selectedQuestions[skill].includes(q._id)}
+                    onCheckedChange={() => toggleQuestion(skill, q._id)}
+                    />
+                </TableCell>
+                <TableCell className="font-medium max-w-md">
+                    <div className="truncate" title={q.title || q.question || q.passageNumber}>
+                         {q.title || q.question || q.topic || q.passageNumber || q.passage || "Untitled"}
+                    </div>
+                </TableCell>
+                <TableCell>
+                     <Badge variant="outline" className="font-normal text-slate-600">
+                         {q.type ? q.type.replace(/_/g, " ") : "—"}
+                    </Badge>
+                </TableCell>
+                <TableCell>
+                     <Badge
+                        className={
+                            q.difficulty === "easy"
+                            ? "bg-green-100 text-green-700 hover:bg-green-200 border-green-200"
+                            : q.difficulty === "medium"
+                            ? "bg-yellow-100 text-yellow-700 hover:bg-yellow-200 border-yellow-200"
+                            : "bg-red-100 text-red-700 hover:bg-red-200 border-red-200"
+                        }
+                    >
+                        {(q.difficulty || "medium").toUpperCase()}
+                    </Badge>
+                </TableCell>
+                </TableRow>
+            ))}
+            </TableBody>
+        </Table>
+      </div>
     );
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="mt-16 py-12 max-w-7xl mx-auto px-4">
-        <h1 className="text-5xl font-bold mb-8">Sửa Đề Thi</h1>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-800 tracking-tight">
+            Edit Exam
+          </h1>
+          <p className="text-slate-500 mt-1">ID: {id}</p>
+        </div>
+        <Button
+          variant="outline"
+          onClick={() => router.back()}
+          className="gap-2"
+        >
+          <ChevronLeft className="w-4 h-4" /> Back to List
+        </Button>
+      </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>Thông tin đề thi</CardTitle>
+       {error && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-6 pb-10">
+          <Card className="shadow-sm border-slate-200">
+            <CardHeader className="bg-slate-50 border-b border-slate-100 pb-4">
+              <CardTitle className="text-lg font-medium text-slate-800">Exam Details</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div>
-                <Label>Tiêu đề *</Label>
-                <Input
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="IELTS Test #01"
-                />
+            <CardContent className="space-y-6 pt-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                   <div className="space-y-2">
+                    <Label>Title <span className="text-red-500">*</span></Label>
+                    <Input
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        placeholder="Exam Title"
+                        className="bg-white"
+                    />
+                  </div>
+                   <div className="space-y-2">
+                    <Label>Duration (minutes)</Label>
+                    <Input
+                        type="number"
+                        value={duration}
+                        onChange={(e) => setDuration(e.target.value)}
+                        min="10"
+                        className="bg-white"
+                    />
+                  </div>
               </div>
-              <div>
-                <Label>Mô tả</Label>
+              <div className="space-y-2">
+                <Label>Description</Label>
                 <Textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={3}
-                  placeholder="Mô tả ngắn về đề thi..."
-                />
-              </div>
-              <div>
-                <Label>Thời gian (phút)</Label>
-                <Input
-                  type="number"
-                  value={duration}
-                  onChange={(e) => setDuration(e.target.value)}
-                  min="60"
-                  max="300"
-                  className="w-32"
+                  placeholder="Exam description..."
+                  className="bg-white resize-none"
                 />
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Chỉnh sửa câu hỏi trong đề</CardTitle>
+          <Card className="shadow-sm border-slate-200">
+            <CardHeader className="bg-slate-50 border-b border-slate-100 pb-4">
+              <CardTitle className="text-lg font-medium text-slate-800">Select Questions</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-4">
               <Tabs defaultValue="listening" className="w-full">
-                <TabsList className="grid w-full grid-cols-4">
-                  <TabsTrigger value="listening">Listening</TabsTrigger>
-                  <TabsTrigger value="reading">Reading</TabsTrigger>
-                  <TabsTrigger value="writing">Writing</TabsTrigger>
-                  <TabsTrigger value="speaking">Speaking</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-4 mb-4">
+                    {Object.entries(skillConfig).map(([key, config]) => (
+                         <TabsTrigger key={key} value={key} className="flex items-center gap-2">
+                            <config.icon className={`w-4 h-4 ${config.color}`} />
+                            {config.label}
+                            <Badge variant="secondary" className="ml-1 h-5 px-1.5 min-w-[1.25rem]">
+                                {selectedQuestions[key as Skill].length}
+                            </Badge>
+                         </TabsTrigger>
+                    ))}
                 </TabsList>
 
-                <TabsContent value="listening">
-                  {renderTable("listening")}
-                </TabsContent>
-                <TabsContent value="reading">
-                  {renderTable("reading")}
-                </TabsContent>
-                <TabsContent value="writing">
-                  {renderTable("writing")}
-                </TabsContent>
-                <TabsContent value="speaking">
-                  {renderTable("speaking")}
-                </TabsContent>
+                <TabsContent value="listening">{renderTable("listening")}</TabsContent>
+                <TabsContent value="reading">{renderTable("reading")}</TabsContent>
+                <TabsContent value="writing">{renderTable("writing")}</TabsContent>
+                <TabsContent value="speaking">{renderTable("speaking")}</TabsContent>
               </Tabs>
             </CardContent>
           </Card>
 
-          <div className="flex gap-4">
-            <Button type="submit" size="lg" disabled={saving}>
-              {saving ? "Đang lưu..." : "Lưu thay đổi"}
-            </Button>
+          <div className="flex justify-end gap-4">
             <Button
-              type="button"
-              variant="outline"
-              size="lg"
-              onClick={() => router.push("/admin/exams")}>
-              Hủy
+                type="button"
+                variant="outline"
+                size="lg"
+                onClick={() => router.back()}
+            >
+                Cancel
+            </Button>
+            <Button type="submit" size="lg" disabled={saving} className="bg-blue-600 hover:bg-blue-700 min-w-[150px]">
+              {saving ? (
+                  <>
+                    <Loader2 className="mr-2 w-4 h-4 animate-spin" /> Saving...
+                  </>
+              ) : (
+                  <>
+                    <Save className="mr-2 w-4 h-4" /> Save Changes
+                  </>
+              )}
             </Button>
           </div>
-        </form>
-      </div>
+      </form>
     </div>
   );
 }

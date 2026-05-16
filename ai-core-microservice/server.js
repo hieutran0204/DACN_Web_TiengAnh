@@ -106,6 +106,7 @@
 // };
 
 require("dotenv").config();
+const path = require("path");
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
@@ -114,6 +115,9 @@ const morgan = require("morgan");
 // Đúng đường dẫn vì file nằm ngoài cùng
 const authMiddleware = require("./middleware/auth");
 const aiRoutes = require("./routes/ai");
+const graphRoutes = require("./routes/graph");
+const graphService = require("./services/graph.service");
+const ruleBasedService = require("./services/nlp/rule-based.service");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -140,6 +144,9 @@ app.use("/api/chat", require("./routes/chat"));
 // Protected Routes
 app.use("/api/ai", authMiddleware.verifyAPIKey, aiRoutes);
 
+// GraphRAG Routes
+app.use("/api/graph", graphRoutes);
+
 // Health check
 app.get("/health", (req, res) =>
   res.json({
@@ -153,9 +160,30 @@ app.get("/", (req, res) => {
   res.json({ message: "AI Core Microservice đang chạy cực mạnh!" });
 });
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, async () => {
   console.log(`AI Core chạy thành công tại http://localhost:${PORT}`);
+  
+  // Initialize Graph service & Sync Vocabulary
+  try {
+    await graphService.init();
+    
+    // Đồng bộ từ vựng từ Graph sang RuleBasedService
+    // Đồng bộ từ vựng từ Neo4j
+    const wordNames = await graphService.getAllWordNames();
+    ruleBasedService.setAcademicWords(wordNames);
+
+    // Đồng bộ kiến thức từ folder /md (Grammar, Topic Vocabulary)
+    const mdPath = path.join(__dirname, 'md');
+    await ruleBasedService.bootstrapFromMarkdown(mdPath);
+
+    console.log("🚀 Tất cả từ vựng và kiến thức KG đã sẵn sàng.");
+  } catch (err) {
+    console.error("❌ Lỗi khi khởi động AI Core:", err);
+  }
 });
+
+// Set timeout to 10 minutes for long AI analysis
+server.timeout = 600000;
 // Endpoint liệt kê model có sẵn (gọi REST API vì SDK JS không hỗ trợ listModels)
 app.get("/list-models", async (req, res) => {
   try {

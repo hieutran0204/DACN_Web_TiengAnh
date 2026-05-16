@@ -2,10 +2,35 @@ const WordCategory = require("../../models/vocabulary/WordCategory.model");
 const axios = require("axios");
 
 // GET ALL CATEGORIES
+// GET ALL CATEGORIES
 exports.getAllCategories = async (req, res) => {
   try {
-    const categories = await WordCategory.find().sort({ createdAt: -1 });
-    res.json({ success: true, data: categories });
+    const { page = 1, limit = 10, search = "" } = req.query;
+    const skip = (page - 1) * limit;
+    const query = {};
+
+    if (search) {
+      query.name = { $regex: search, $options: "i" };
+    }
+
+    const [categories, total] = await Promise.all([
+      WordCategory.find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(Number(limit)),
+      WordCategory.countDocuments(query),
+    ]);
+
+    res.json({
+      success: true,
+      data: categories,
+      pagination: {
+        page: Number(page),
+        limit: Number(limit),
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }

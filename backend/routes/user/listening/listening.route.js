@@ -1,9 +1,9 @@
-const router = require("express").Router();
-const { verifyToken } = require("../../../middlewares/auth");
-const ctrl = require("../../../controllers/listening/listeningQuestion.controller");
+const express = require("express");
+const router = express.Router();
+const listeningCtrl = require("../../../controllers/listening/listeningQuestion.controller");
 
-router.get("/", verifyToken, ctrl.getAllPaginated);
-router.get("/:id", verifyToken, ctrl.getById);
-// router.get("/part/:partId", verifyToken, ctrl.getBySection);
+// Public (or User) routes for Listening/Dictation
+router.get("/", listeningCtrl.getAllPaginated);
+router.get("/:id", listeningCtrl.getById);
 
 module.exports = router;

@@ -14,7 +14,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { Plus, Edit, Trash2, Loader2, Shapes } from "lucide-react";
+import { apiFetch } from "@/lib/api";
 
 interface Category {
   _id: string;
@@ -37,14 +38,8 @@ export default function AdminCategoriesPage() {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch(
-        "http://localhost:3000/api/admin/game/categories"
-      ); // SỬA: Full URL backend
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      setCategories(data.data || data || []);
+      const response = await apiFetch<any>("/admin/game/categories");
+      setCategories(response.data || response || []);
     } catch (error) {
       console.error("Error fetching categories:", error);
     }
@@ -60,22 +55,15 @@ export default function AdminCategoriesPage() {
     setIsLoading(true);
     try {
       const url = editingCategory
-        ? `http://localhost:3000/api/admin/game/categories/${editingCategory._id}`
-        : "http://localhost:3000/api/admin/game/categories"; // SỬA: Full URL
+        ? `/admin/game/categories/${editingCategory._id}`
+        : "/admin/game/categories";
 
       const method = editingCategory ? "PUT" : "POST";
 
-      const response = await fetch(url, {
+      await apiFetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-
-      if (!response.ok) {
-        const result = await response.json();
-        alert(result.message || "Lỗi khi lưu");
-        return;
-      }
 
       setFormData({ name: "", description: "" });
       setEditingCategory(null);
@@ -83,8 +71,8 @@ export default function AdminCategoriesPage() {
       alert(
         editingCategory ? "Cập nhật thành công!" : "Tạo category thành công!"
       );
-    } catch (error) {
-      alert("Lỗi kết nối server");
+    } catch (error: any) {
+      alert("Lỗi: " + error.message);
     } finally {
       setIsLoading(false);
     }
@@ -102,70 +90,66 @@ export default function AdminCategoriesPage() {
     if (!confirm("Bạn có chắc muốn xóa category này?")) return;
 
     try {
-      const response = await fetch(
-        `http://localhost:3000/api/admin/game/categories/${id}`,
-        {
-          // SỬA: Full URL
-          method: "DELETE",
-        }
-      );
-
-      if (!response.ok) {
-        const result = await response.json();
-        alert(result.message || "Lỗi khi xóa");
-        return;
-      }
+      await apiFetch(`/admin/game/categories/${id}`, {
+        method: "DELETE",
+      });
 
       fetchCategories();
       alert("Xóa thành công!");
-    } catch (error) {
-      alert("Lỗi kết nối server");
+    } catch (error: any) {
+      alert("Lỗi: " + error.message);
     }
   };
 
   if (!mounted) return null;
 
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">Quản lý Categories</h1>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-1">
-          <CardHeader>
+    <div className="container mx-auto p-8 max-w-7xl">
+      <div className="flex items-center gap-3 mb-8">
+         <Shapes className="w-8 h-8 text-indigo-600" />
+         <h1 className="text-3xl font-bold text-slate-800">Game Categories</h1>
+      </div>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <Card className="lg:col-span-1 border-slate-200 shadow-sm h-fit sticky top-8">
+          <CardHeader className="bg-slate-50 border-b border-slate-100">
             <CardTitle>
-              {editingCategory ? "Chỉnh sửa Category" : "Tạo Category Mới"}
+              {editingCategory ? "Edit Category" : "New Category"}
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Label htmlFor="name">Tên Category *</Label>
+              <div className="space-y-2">
+                <Label htmlFor="name">Name *</Label>
                 <Input
                   id="name"
                   value={formData.name}
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
-                  placeholder="Ví dụ: Động vật, Công nghệ..."
+                  placeholder="e.g. Animals, Tech..."
                   required
                   disabled={isLoading}
+                  className="bg-white"
                 />
               </div>
-              <div>
-                <Label htmlFor="description">Mô tả</Label>
+              <div className="space-y-2">
+                <Label htmlFor="description">Description</Label>
                 <Textarea
                   id="description"
                   value={formData.description}
                   onChange={(e) =>
                     setFormData({ ...formData, description: e.target.value })
                   }
-                  placeholder="Mô tả ngắn về category..."
+                  placeholder="Short description..."
                   rows={3}
                   disabled={isLoading}
+                  className="bg-white"
                 />
               </div>
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                <Plus className="w-4 h-4 mr-2" />
-                {editingCategory ? "Cập nhật" : "Tạo mới"}
+              <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700" disabled={isLoading}>
+                {isLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
+                {editingCategory ? "Update Category" : "Create Category"}
               </Button>
               {editingCategory && (
                 <Button
@@ -177,58 +161,60 @@ export default function AdminCategoriesPage() {
                     setFormData({ name: "", description: "" });
                   }}
                   disabled={isLoading}>
-                  Hủy
+                  Cancel
                 </Button>
               )}
             </form>
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Danh sách Categories ({categories.length})</CardTitle>
+        <Card className="lg:col-span-2 border-slate-200 shadow-sm">
+          <CardHeader className="bg-slate-50 border-b border-slate-100">
+            <CardTitle>Categories ({categories.length})</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-0">
             {categories.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                {mounted
-                  ? "Chưa có category nào. Hãy thêm category mới!"
-                  : "Đang tải..."}
+               <div className="text-center py-20">
+                <div className="bg-slate-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100">
+                  <Shapes className="w-8 h-8 text-slate-300" />
+                </div>
+                <h3 className="text-slate-900 font-medium">No categories yet</h3>
+                <p className="text-slate-500 text-sm mt-1">Create one to get started.</p>
               </div>
             ) : (
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead>Tên</TableHead>
-                    <TableHead>Mô tả</TableHead>
-                    <TableHead>Ngày tạo</TableHead>
-                    <TableHead>Thao tác</TableHead>
+                  <TableRow className="hover:bg-slate-50/50">
+                    <TableHead className="pl-6">Name</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead className="w-[150px]">Created</TableHead>
+                    <TableHead className="text-right pr-6 w-[120px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {categories.map((category) => (
-                    <TableRow key={category._id}>
-                      <TableCell className="font-medium">
+                    <TableRow key={category._id} className="hover:bg-slate-50">
+                      <TableCell className="pl-6 font-medium text-indigo-700">
                         {category.name}
                       </TableCell>
-                      <TableCell>{category.description || "-"}</TableCell>
-                      <TableCell>
-                        {new Date(category.createdAt).toLocaleDateString(
-                          "vi-VN"
-                        )}
+                      <TableCell className="text-slate-600">{category.description || "-"}</TableCell>
+                      <TableCell className="text-slate-500 text-sm">
+                        {new Date(category.createdAt).toLocaleDateString("vi-VN")}
                       </TableCell>
-                      <TableCell>
-                        <div className="flex space-x-2">
+                      <TableCell className="text-right pr-6">
+                        <div className="flex justify-end gap-2">
                           <Button
-                            variant="outline"
-                            size="sm"
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-slate-500 hover:text-indigo-600"
                             onClick={() => handleEdit(category)}
                             disabled={isLoading}>
                             <Edit className="w-4 h-4" />
                           </Button>
                           <Button
-                            variant="destructive"
-                            size="sm"
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-slate-500 hover:text-red-600"
                             onClick={() => handleDelete(category._id)}
                             disabled={isLoading}>
                             <Trash2 className="w-4 h-4" />

@@ -2,6 +2,7 @@
 const router = require("express").Router();
 const { verifyToken } = require("../../../middlewares/auth");
 const WritingSubmission = require("../../../models/Submission.model");
+const RawEssay = require("../../../models/RawEssay.model");
 
 // Chuẩn hóa grammar_errors_found thành array string
 const normalizeGrammarErrors = (errors) => {
@@ -17,116 +18,101 @@ const normalizeGrammarErrors = (errors) => {
     .filter(Boolean);
 };
 
-// ======================= NỘP BÀI WRITING =======================
+// ======================= NỘP BÀI WRITING (DECOUPLED) =======================
+/**
+ * Route nộp bài Writing mới: Hỗ trợ nộp lẻ từng Task
+ * Body: { examId, questionId, answer, taskType }
+ */
 router.post("/submit", verifyToken, async (req, res) => {
   try {
-    const {
-      examId,
-      task1Question,
-      task1Type,
-      task1Image,
-      task1Answer,
-      task2Question,
-      task2Type,
-      task2Answer,
-    } = req.body;
-
+    const { examId, questionId, answer, taskType } = req.body;
     const userId = req.user._id;
 
-    if (!task1Answer?.trim() || !task2Answer?.trim()) {
+    if (!answer?.trim() || !questionId) {
       return res.status(400).json({
         success: false,
-        message: "Vui lòng hoàn thành cả Task 1 và Task 2",
+        message: "Thiếu nội dung bài làm hoặc ID câu hỏi",
       });
     }
 
-    // Gọi AI Core chấm bài
-    const [task1Res, task2Res] = await Promise.all([
-      fetch("http://localhost:5000/api/ai/score/writing", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": process.env.SERVICE_API_KEY,
-        },
-        body: JSON.stringify({
-          essay: task1Answer,
-          question: task1Question || "",
-          type: task1Type || "ielts-task1",
-        }),
-      }).then((r) => r.json()),
-
-      fetch("http://localhost:5000/api/ai/score/writing", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": process.env.SERVICE_API_KEY,
-        },
-        body: JSON.stringify({
-          essay: task2Answer,
-          question: task2Question || "",
-          type: task2Type || "ielts-task2",
-        }),
-      }).then((r) => r.json()),
-    ]);
-
-    // Kiểm tra lỗi từ AI
-    if (task1Res.error || task2Res.error) {
-      console.error("AI Core error:", task1Res, task2Res);
-      return res.status(500).json({
-        success: false,
-        message: "AI chấm bài lỗi. Thử lại sau.",
-      });
-    }
-
-    // Lấy điểm số và chuẩn hóa grammar errors
-    const data1 = task1Res.data || task1Res;
-    const data2 = task2Res.data || task2Res;
-
-    const band1 = data1.overall_band || 0;
-    const band2 = data2.overall_band || 0;
-    const overallBand = Math.round(((band1 + band2 * 2) / 3) * 10) / 10;
-
-    // Lưu bài nộp vào DB
-    const submission = await WritingSubmission.create({
+    // 1. Task 1.1: Lưu bài viết thô vào RawEssay
+    // Điều này giúp tách biệt Storage (MongoDB) và Graph Memory (Neo4j)
+    const rawEssay = await RawEssay.create({
       user: userId,
-      exam: examId,
-      overallBand,
-      task1: {
-        question: task1Question || "",
-        type: task1Type || "ielts-task1",
-        image: task1Image || null,
-        answer: task1Answer,
-        result: {
-          ...data1,
-          overall_band: band1,
-          grammar_errors_found: normalizeGrammarErrors(
-            data1.grammar_errors_found
-          ),
-        },
-      },
-      task2: {
-        question: task2Question || "",
-        type: task2Type || "ielts-task2",
-        answer: task2Answer,
-        result: {
-          ...data2,
-          overall_band: band2,
-          grammar_errors_found: normalizeGrammarErrors(
-            data2.grammar_errors_found
-          ),
-        },
-      },
+      question: questionId,
+      exam: examId || null,
+      content: answer,
+      taskType: taskType || (taskType === "Task 1" ? "Task 1" : "Task 2"),
+      status: "processing"
     });
 
+
+
+    // 3. Lưu kết quả vào WritingSubmission (Trạng thái ban đầu là processing)
+    const submission = await WritingSubmission.create({
+      user: userId,
+      exam: examId || null,
+      question: questionId,
+      answer: answer,
+      status: "processing", // Trạng thái đang chấm
+      result: {}, // Chưa có điểm
+    });
+
+    // 4. GỌI AI CHẤM NGẦM (BACKGROUND PROCESS)
+    // Không dùng 'await' ở đây để trả kết quả về cho FE ngay lập tức
+    (async () => {
+      try {
+        console.log(`[AI-Async] Đang chấm bài cho Submission: ${submission._id}`);
+        const aiResponse = await fetch("http://localhost:5000/api/ai/score/writing", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": process.env.SERVICE_API_KEY,
+          },
+          body: JSON.stringify({
+            essay: answer,
+            question: "", 
+            type: taskType || "ielts-task2",
+            studentId: userId,
+            essayId: rawEssay._id 
+          }),
+        });
+
+        const aiResult = await aiResponse.json();
+
+        if (aiResult.success) {
+          const data = aiResult.data;
+          // Cập nhật kết quả khi AI chấm xong
+          await WritingSubmission.findByIdAndUpdate(submission._id, {
+            status: "completed",
+            result: {
+              ...data,
+              grammar_errors_found: normalizeGrammarErrors(data.grammar_errors_found),
+            },
+          });
+          
+          rawEssay.status = "completed";
+          await rawEssay.save();
+          console.log(`[AI-Async] Chấm bài thành công cho Submission: ${submission._id}`);
+        } else {
+          throw new Error("AI Core failed to score");
+        }
+      } catch (err) {
+        console.error(`[AI-Async] Lỗi chấm bài ngầm:`, err.message);
+        await WritingSubmission.findByIdAndUpdate(submission._id, { status: "failed" });
+        rawEssay.status = "failed";
+        await rawEssay.save();
+      }
+    })();
+
+    // 5. TRẢ VỀ CHO FRONTEND NGAY LẬP TỨC
     return res.json({
       success: true,
       data: {
         resultId: submission._id,
-        overallBand,
-        task1: submission.task1.result,
-        task2: submission.task2.result,
+        status: "processing",
       },
-      message: "Nộp bài thành công!",
+      message: "Bài làm đã được gửi đi chấm!",
     });
   } catch (err) {
     console.error("Lỗi nộp bài Writing:", err);
@@ -134,12 +120,13 @@ router.post("/submit", verifyToken, async (req, res) => {
   }
 });
 
+
 // ======================= LẤY LỊCH SỬ =======================
 router.get("/my-submissions", verifyToken, async (req, res) => {
   try {
     const submissions = await WritingSubmission.find({ user: req.user._id })
       .populate("exam", "title")
-      .select("exam overallBand submittedAt task1.result task2.result")
+      .populate("question", "task type topic")
       .sort({ submittedAt: -1 });
 
     res.json({ success: true, data: submissions });
@@ -154,7 +141,9 @@ router.get("/submission/:id", verifyToken, async (req, res) => {
     const submission = await WritingSubmission.findOne({
       _id: req.params.id,
       user: req.user._id,
-    }).populate("exam", "title");
+    })
+      .populate("exam", "title")
+      .populate("question");
 
     if (!submission) {
       return res
@@ -166,6 +155,46 @@ router.get("/submission/:id", verifyToken, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: "Lỗi server" });
+  }
+});
+
+// ======================= DASHBOARD NĂNG LỰC (GRAPHRAG) =======================
+/**
+ * GET /api/user/writing-exam/dashboard
+ * Tổng hợp dữ liệu từ Neo4j Graph để FE vẽ chart chân dung học viên
+ */
+router.get("/dashboard", verifyToken, async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    // Gọi sang AI Core Microservice để lấy Graph Profile
+    const aiResponse = await fetch(`http://localhost:5000/api/graph/student-profile/${userId}`, {
+      method: "GET",
+      headers: {
+        "x-api-key": process.env.SERVICE_API_KEY,
+      },
+    });
+
+    const aiResult = await aiResponse.json();
+
+    if (aiResult.success) {
+      return res.json({
+        success: true,
+        data: aiResult.data,
+      });
+    } else {
+      // Nếu chưa có dữ liệu graph (mới làm bài đầu tiên chẳng hạn)
+      return res.json({
+        success: true,
+        data: {
+          stats: { totalEssays: 0, topErrors: [], topStrengths: [], recentEssays: [] },
+          message: "Chưa có đủ dữ liệu để phân tích chuyên sâu."
+        }
+      });
+    }
+  } catch (err) {
+    console.error("Lỗi lấy Dashboard Writing:", err.message);
+    res.status(500).json({ success: false, message: "Không thể kết nối với AI Core" });
   }
 });
 

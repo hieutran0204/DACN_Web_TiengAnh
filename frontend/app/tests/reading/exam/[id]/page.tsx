@@ -59,8 +59,17 @@ interface Exam {
   _id: string;
   title: string;
   description?: string;
+  durationMinutes?: number;
   skills: { reading: ReadingPassage[] };
 }
+
+// Helper to get options
+const getQuestionOptions = (type: string, sq: SubQuestion) => {
+  if (sq.options && sq.options.length > 0) return sq.options;
+  if (type === "true_false_not_given") return ["TRUE", "FALSE", "NOT GIVEN"];
+  if (type === "yes_no_not_given") return ["YES", "NO", "NOT GIVEN"];
+  return [];
+};
 
 export default function ReadingExamPage() {
   const { id } = useParams();
@@ -70,6 +79,7 @@ export default function ReadingExamPage() {
   const [userAnswers, setUserAnswers] = useState<Record<string, string>>({});
   const [showResult, setShowResult] = useState(false);
   const [finalScore, setFinalScore] = useState(0);
+  const [resultDetails, setResultDetails] = useState<any[]>([]); // Added missing state
   const { toast } = useToast();
 
   const totalQuestions =
@@ -106,10 +116,43 @@ export default function ReadingExamPage() {
     ? ((currentPassageIndex + 1) / exam.skills.reading.length) * 100
     : 0;
 
+  const [timeLeft, setTimeLeft] = useState(60 * 60); // Default 60 mins
+
+  // Initialize timer when exam loads
+  useEffect(() => {
+    if (exam?.durationMinutes) {
+      setTimeLeft(exam.durationMinutes * 60);
+    }
+  }, [exam]);
+
+  // Countdown effect
+  useEffect(() => {
+    if (loading || showResult) return;
+
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          handleSubmit(); // Auto submit
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [loading, showResult]);
+
+  // Format time (MM:SS)
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+  };
+
   const handleAnswer = (subQId: string, answer: string) => {
     setUserAnswers((prev) => ({ ...prev, [subQId]: answer }));
   };
-
   const handleSubmit = async () => {
     try {
       setLoading(true);
@@ -121,6 +164,7 @@ export default function ReadingExamPage() {
 
       if (res.success) {
         setFinalScore(res.data.score);
+        setResultDetails(res.data.details); // Store details if needed for review
         setShowResult(true);
         const band = readingBandScore[res.data.score] || 0;
         toast({
@@ -135,6 +179,7 @@ export default function ReadingExamPage() {
         });
       }
     } catch (err) {
+       console.error(err);
        toast({
           variant: "destructive",
           title: "Error",
@@ -165,9 +210,9 @@ export default function ReadingExamPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <Badge variant="secondary" className="hidden sm:flex h-9 items-center gap-2 px-4 text-sm font-medium bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-100 dark:border-blue-900">
+            <Badge variant="secondary" className={`hidden sm:flex h-9 items-center gap-2 px-4 text-sm font-medium border ${timeLeft < 300 ? "bg-red-50 text-red-600 border-red-200 animate-pulse" : "bg-blue-50 text-blue-700 border-blue-100"}`}>
               <Clock className="w-4 h-4" />
-              <span>60:00</span>
+              <span>{formatTime(timeLeft)}</span>
             </Badge>
             <Button size="sm" onClick={handleSubmit} className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-md hover:shadow-lg transition-all">
               Submit Test
@@ -246,6 +291,8 @@ export default function ReadingExamPage() {
               <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 custom-scrollbar bg-slate-50/30 dark:bg-slate-950/30">
                 {currentPassage.subQuestions.map((sq, idx) => {
                    const qType = getQuestionType(currentPassage, sq);
+                   const qOptions = getQuestionOptions(qType, sq);
+
                    return (
                   <Card key={sq._id} className="border shadow-sm bg-white dark:bg-slate-900 hover:shadow-md transition-shadow duration-200 dark:border-slate-800">
                     <CardContent className="p-5">
@@ -262,9 +309,9 @@ export default function ReadingExamPage() {
                       {(qType === "multiple_choice" ||
                         qType === "true_false_not_given" ||
                         qType === "yes_no_not_given") &&
-                        sq.options && (
+                        qOptions.length > 0 && (
                           <div className="grid grid-cols-1 gap-2.5 pl-12">
-                            {sq.options.map((opt) => (
+                            {qOptions.map((opt) => (
                               <Button
                                 key={opt}
                                 variant={
@@ -292,7 +339,11 @@ export default function ReadingExamPage() {
                         qType === "note_completion" ||
                         qType === "table_completion" ||
                         qType === "flow_chart_completion" ||
-                        qType === "diagram_label_completion") && (
+                        qType === "diagram_label_completion" || 
+                        qType === "matching_headings" ||
+                        qType === "matching_information" ||
+                        qType === "matching_features" ||
+                        qType === "matching_sentence_endings") && (
                           <div className="pl-12">
                             <Input
                               type="text"

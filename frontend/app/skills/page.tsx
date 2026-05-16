@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ export default function SkillsPage() {
       color: "text-blue-500",
       bg: "bg-blue-500/10",
       gradient: "from-blue-500/20 to-cyan-500/20",
+      href: "/skills/listening",
     },
     {
       id: 2,
@@ -30,6 +32,7 @@ export default function SkillsPage() {
       color: "text-green-500",
       bg: "bg-green-500/10",
       gradient: "from-green-500/20 to-emerald-500/20",
+      href: "/skills/reading",
     },
     {
       id: 3,
@@ -42,6 +45,7 @@ export default function SkillsPage() {
       color: "text-orange-500",
       bg: "bg-orange-500/10",
       gradient: "from-orange-500/20 to-red-500/20",
+      href: "/skills/speaking",
     },
     {
       id: 4,
@@ -54,6 +58,7 @@ export default function SkillsPage() {
       color: "text-purple-500",
       bg: "bg-purple-500/10",
       gradient: "from-purple-500/20 to-pink-500/20",
+      href: "/skills/writing",
     },
   ];
 
@@ -145,11 +150,13 @@ export default function SkillsPage() {
                           </div>
                         </div>
 
-                        <Button
-                          className="w-full h-12 text-base font-medium rounded-xl group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
-                        >
-                          Continue Learning <ArrowRight className="w-4 h-4 ml-2" />
-                        </Button>
+                        <Link href={skill.href} className="block w-full">
+                          <Button
+                            className="w-full h-12 text-base font-medium rounded-xl group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
+                          >
+                            Continue Learning <ArrowRight className="w-4 h-4 ml-2" />
+                          </Button>
+                        </Link>
                       </div>
                     </div>
                   </div>

@@ -55,7 +55,11 @@ const WritingQuestionSchema = new mongoose.Schema({
   },
 
   image: {
-    type: String, // URL ảnh Task 1
+    type: String, // Deprecated, kept for backward compatibility
+  },
+  images: {
+    type: [String], // URL ảnh cho Task 1 (support multiple)
+    default: [],
   },
 
   difficulty: {

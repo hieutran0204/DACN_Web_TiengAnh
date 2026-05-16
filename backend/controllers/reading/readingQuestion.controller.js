@@ -601,9 +601,11 @@ class ReadingQuestionController {
       const page = Math.max(1, parseInt(req.query.page) || 1);
       const limit = Math.max(1, Math.min(50, parseInt(req.query.limit) || 10));
 
+      const search = req.query.search || "";
       const result = await ReadingQuestionService.getPaginatedQuestions(
         page,
-        limit
+        limit,
+        search
       );
 
       return res.json({

@@ -2,77 +2,103 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Navbar from "@/components/navbar";
-import Footer from "@/components/footer";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Plus, Trash2, PenSquare, AlertCircle, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { apiFetch } from "@/lib/api";
+import { PaginationControl } from "@/components/PaginationControl";
+
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+
+interface PaginationData {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
 
 export default function AdminListeningQuestions() {
   const [questions, setQuestions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  
+  const [pagination, setPagination] = useState<PaginationData>({
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 1,
+  });
+
   const router = useRouter();
 
-  // BẢO VỆ ADMIN
+  // Debounce logic
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      alert("Bạn chưa đăng nhập!");
-      router.push("/login");
-      return;
-    }
-    try {
-      const payload = JSON.parse(atob(token.split(".")[1]));
-      if (payload.role !== "admin") {
-        alert("CẤM VÀO! Chỉ Admin mới được quản lý câu hỏi!");
-        router.push("/profile");
+    const timer = setTimeout(() => {
+      if (searchTerm !== debouncedSearch) {
+        setDebouncedSearch(searchTerm);
+        setPagination((prev) => ({ ...prev, page: 1 }));
       }
-    } catch {
-      localStorage.removeItem("token");
-      router.push("/login");
-    }
-  }, [router]);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchTerm, debouncedSearch]);
 
   useEffect(() => {
-    const fetchQuestions = async () => {
-      try {
-        const res = await fetch(
-          `http://localhost:3000/api/admin/questions/listening/listening-questions?page=${page}&limit=10&populate=section`,
-          { credentials: "include" }
-        );
-        const data = await res.json();
-
-        if (!res.ok) throw new Error(data.message || "Lỗi tải dữ liệu");
-
-        setQuestions(data.data || []);
-        setTotalPages(data.totalPages || 1);
-      } catch (err: any) {
-        console.error("Lỗi fetch:", err);
-        alert("Lỗi tải câu hỏi: " + err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchQuestions();
-  }, [page]);
+  }, [pagination.page, debouncedSearch]);
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("XÓA THẬT HẢ ANH? Không cứu được đâu đấy!")) return;
-
+  const fetchQuestions = async () => {
+    setLoading(true);
     try {
-      const res = await fetch(
-        `http://localhost:3000/api/admin/questions/listening/listening-questions/${id}`,
-        { method: "DELETE", credentials: "include" }
+      const queryParams = new URLSearchParams({
+        page: pagination.page.toString(),
+        limit: pagination.limit.toString(),
+        search: debouncedSearch,
+        populate: "section" // Keep this parameter
+      });
+
+      const data = await apiFetch(
+        `/admin/questions/listening/listening-questions?${queryParams.toString()}`
       );
 
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || "Xóa thất bại");
+      if (data.success) {
+          setQuestions(data.data || []);
+          // Backend Listening now returns: { success: true, data, total, totalPages, page, limit }
+          // Or just object with these props.
+          if (data.totalPages !== undefined) {
+             setPagination(prev => ({
+                 ...prev,
+                 total: data.total || 0,
+                 totalPages: data.totalPages || 1,
+                 page: data.page || prev.page,
+                 limit: data.limit || prev.limit
+             }));
+          }
+      } else {
+        // Fallback for older format if any
+         setQuestions(data.data || []);
       }
+
+    } catch (err: any) {
+      console.error("Lỗi fetch:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("XÓA THẬT HẢ ? Không cứu được đâu đấy!")) return;
+
+    try {
+      await apiFetch(`/admin/questions/listening/listening-questions/${id}`, {
+        method: "DELETE",
+      });
 
       setQuestions((prev) => prev.filter((q) => q._id !== id));
       alert("XÓA THÀNH CÔNG!");
+      fetchQuestions(); // Refresh pagination
     } catch (err: any) {
       alert("Lỗi xóa: " + err.message);
     }
@@ -82,156 +108,140 @@ export default function AdminListeningQuestions() {
     return type.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
   };
 
-  if (loading) {
+  if (loading && questions.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 to-pink-900 flex items-center justify-center">
-        <p className="text-6xl font-extrabold text-white animate-pulse">
-          ĐANG TẢI CÂU HỎI LISTENING...
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <p className="text-xl font-medium text-slate-600 animate-pulse">
+          Loading Listening Questions...
         </p>
       </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
-      <Navbar />
-      <div className="pt-20 container mx-auto px-6 max-w-7xl">
-        <div className="flex justify-between items-center mb-16">
-          <h1 className="text-8xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-600">
-            LISTENING QUESTIONS
-          </h1>
+    <div className="min-h-screen bg-slate-50 p-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Listening Questions</h1>
+            <p className="text-slate-500 mt-1">Manage your listening test database</p>
+          </div>
           <Link href="/admin/skills/listening/questions/new">
-            <button className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-12 py-6 rounded-3xl text-3xl font-extrabold shadow-2xl hover:scale-110 transition">
-              + THÊM CÂU HỎI
-            </button>
+            <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm gap-2">
+              <Plus className="w-4 h-4" />
+              New Question
+            </Button>
           </Link>
         </div>
 
-        {questions.length === 0 ? (
-          <div className="text-center py-32">
-            <p className="text-6xl font-bold text-gray-400 mb-8">
-              Chưa có câu hỏi Listening nào
-            </p>
-            <Link href="/admin/skills/listening/questions/new">
-              <button className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-16 py-8 rounded-3xl text-4xl font-extrabold shadow-2xl hover:scale-110 transition">
-                TẠO CÂU HỎI ĐẦU TIÊN NGAY!
-              </button>
-            </Link>
+        {/* SEARCH BAR */}
+        <div className="flex items-center justify-between mb-6 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <div className="relative w-full max-w-sm">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Input
+              placeholder="Search by title or section..."
+              className="pl-9 bg-slate-50 border-slate-200 focus-visible:ring-blue-500"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <div className="text-sm text-slate-500">
+             Total: <span className="font-bold text-slate-700">{pagination.total}</span>
+          </div>
+        </div>
+
+        {questions.length === 0 && !loading ? (
+          <div className="text-center py-20 bg-white rounded-xl border border-dashed border-slate-200 shadow-sm">
+            <div className="bg-slate-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Plus className="w-8 h-8 text-slate-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-slate-900 mb-1">No questions found</h3>
+            <p className="text-slate-500 mb-6">{searchTerm ? `No results for "${searchTerm}"` : "Create your first listening question to get started."}</p>
+            {!searchTerm && (
+                <Link href="/admin/skills/listening/questions/new">
+                <Button>Create Question</Button>
+                </Link>
+            )}
           </div>
         ) : (
-          <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-3xl overflow-hidden border border-purple-200">
-            <table className="w-full">
-              <thead className="bg-gradient-to-r from-purple-600 to-pink-600 text-white">
-                <tr>
-                  <th className="p-6 text-left text-2xl">Section</th>
-                  <th className="p-6 text-left text-2xl">Type</th>
-                  <th className="p-6 text-left text-2xl">Tiêu đề</th>
-                  <th className="p-6 text-left text-2xl">Số câu</th>
-                  <th className="p-6 text-left text-2xl">Đáp án đúng</th>
-                  <th className="p-6 text-left text-2xl">Audio</th>
-                  <th className="p-6 text-left text-2xl">Hành động</th>
-                </tr>
-              </thead>
-              <tbody>
-                {questions.map((q) => (
-                  <tr
-                    key={q._id}
-                    className="border-t hover:bg-purple-50 transition">
-                    {/* SECTION – BẮT ĐÚNG 100% */}
-                    {/* SECTION – SỬA CHỖ NÀY LÀ XONG MÃI MÃI */}
-                    <td className="p-6 font-bold text-xl text-purple-700">
-                      {q.section || "Chưa chọn Section"}
-                    </td>
-                    {/* TYPE */}
-                    <td className="p-6">
-                      <span className="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full font-bold text-lg shadow-lg">
-                        {formatType(q.type)}
-                      </span>
-                    </td>
-
-                    {/* TIÊU ĐỀ */}
-                    <td className="p-6 font-medium text-gray-800 max-w-xs truncate">
-                      {q.title || "Chưa có tiêu đề"}
-                    </td>
-
-                    {/* SỐ CÂU HỎI CON */}
-                    <td className="p-6 text-center font-bold text-2xl text-blue-600">
-                      {q.subQuestions?.length || 0}
-                    </td>
-
-                    {/* ĐÁP ÁN ĐÚNG – HIỆN THỊ ĐẸP NHƯ MƠ */}
-                    <td className="p-6">
-                      <div className="flex flex-wrap gap-2">
-                        {q.subQuestions?.map((sq: any, idx: number) => (
-                          <span
-                            key={idx}
-                            className="px-4 py-2 bg-green-600 text-white rounded-full font-bold text-sm shadow">
-                            {idx + 1}. {sq.correctAnswer}
-                          </span>
-                        )) || (
-                          <span className="text-gray-400">Chưa có đáp án</span>
-                        )}
-                      </div>
-                    </td>
-
-                    {/* AUDIO */}
-                    <td className="p-6">
-                      {q.audio ? (
-                        <audio controls className="h-12 w-64">
-                          <source
-                            src={`http://localhost:3000${q.audio}`}
-                            type="audio/mpeg"
-                          />
-                          Không hỗ trợ
-                        </audio>
-                      ) : (
-                        <span className="text-red-500 font-bold">
-                          Không có audio
-                        </span>
-                      )}
-                    </td>
-
-                    {/* HÀNH ĐỘNG */}
-                    <td className="p-6 space-x-3">
-                      <Link
-                        href={`/admin/skills/listening/questions/${q._id}/edit`}>
-                        <button className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-8 py-4 rounded-xl font-bold hover:scale-110 transition shadow-lg">
-                          SỬA
-                        </button>
-                      </Link>
-                      <button
-                        onClick={() => handleDelete(q._id)}
-                        className="bg-gradient-to-r from-red-600 to-rose-600 text-white px-8 py-4 rounded-xl font-bold hover:scale-110 transition shadow-lg">
-                        XÓA
-                      </button>
-                    </td>
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm text-left">
+                <thead className="bg-slate-50 text-slate-500 font-medium border-b border-slate-200">
+                  <tr>
+                    <th className="px-6 py-4 w-[100px]">Section</th>
+                    <th className="px-6 py-4 w-[150px]">Type</th>
+                    <th className="px-6 py-4">Title</th>
+                    <th className="px-6 py-4 w-[100px] text-center">Items</th>
+                    <th className="px-6 py-4 w-[250px]">Preview</th>
+                    <th className="px-6 py-4 w-[120px] text-right">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {questions.map((q) => (
+                    <tr key={q._id} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="px-6 py-4 font-medium text-slate-700">
+                        {q.section?.name || q.section || "-"}
+                      </td>
+                      <td className="px-6 py-4">
+                        <Badge variant="secondary" className="font-normal capitalize bg-slate-100 text-slate-600 hover:bg-slate-200">
+                          {formatType(q.type)}
+                        </Badge>
+                      </td>
+                      <td className="px-6 py-4">
+                        <p className="font-medium text-slate-900 line-clamp-1">{q.title}</p>
+                        <p className="text-xs text-slate-400 mt-0.5 line-clamp-1">{q._id}</p>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                         <Badge variant="outline" className="font-mono">
+                            {q.type === 'dictation' ? q.segments?.length || 0 : q.subQuestions?.length || 0}
+                         </Badge>
+                      </td>
+                      <td className="px-6 py-4">
+                         {q.audio ? (
+                            <audio controls className="h-8 w-48 opacity-80 hover:opacity-100 transition-opacity">
+                                <source src={q.audio.startsWith('http') ? q.audio : `${BACKEND_URL}${q.audio}`} type="audio/mpeg" />
+                            </audio>
+                         ) : (
+                            <span className="text-xs text-red-400 flex items-center gap-1">
+                                <AlertCircle className="w-3 h-3" /> No Audio
+                            </span>
+                         )}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex justify-end gap-2">
+                            <Link href={`/admin/skills/listening/questions/edit/${q._id}`}>
+                                <Button size="icon" variant="ghost" className="h-8 w-8 text-slate-500 hover:text-blue-600">
+                                    <PenSquare className="w-4 h-4" />
+                                </Button>
+                            </Link>
+                            <Button 
+                                size="icon" 
+                                variant="ghost" 
+                                className="h-8 w-8 text-slate-500 hover:text-red-600"
+                                onClick={() => handleDelete(q._id)}
+                            >
+                                <Trash2 className="w-4 h-4" />
+                            </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
-            {/* PHÂN TRANG */}
-            <div className="p-8 flex justify-center gap-8 bg-gray-50 border-t">
-              <button
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className="px-12 py-6 bg-purple-600 text-white rounded-xl text-2xl font-bold disabled:opacity-50 hover:scale-110 transition disabled:cursor-not-allowed">
-                TRƯỚC
-              </button>
-              <span className="text-3xl font-bold self-center text-purple-700">
-                Trang {page} / {totalPages}
-              </span>
-              <button
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-                className="px-12 py-6 bg-purple-600 text-white rounded-xl text-2xl font-bold disabled:opacity-50 hover:scale-110 transition disabled:cursor-not-allowed">
-                SAU
-              </button>
+            {/* Pagination */}
+            <div className="p-4 border-t border-slate-200">
+                <PaginationControl
+                    currentPage={pagination.page}
+                    totalPages={pagination.totalPages}
+                    onPageChange={(page) => setPagination((prev) => ({ ...prev, page }))}
+                />
             </div>
           </div>
         )}
       </div>
-      <Footer />
-    </main>
+    </div>
   );
 }

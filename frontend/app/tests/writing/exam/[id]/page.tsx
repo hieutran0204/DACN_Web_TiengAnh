@@ -55,16 +55,10 @@ export default function WritingExamPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [timeLeft, setTimeLeft] = useState(60 * 60); // 60 minutes
-  const [activeTab, setActiveTab] = useState("task1");
-  const [copied, setCopied] = useState<{ task1: boolean; task2: boolean }>({
-    task1: false,
-    task2: false,
-  });
+  const [activeTab, setActiveTab] = useState<string>("");
+  const [copied, setCopied] = useState<Record<string, boolean>>({});
 
-  const [answers, setAnswers] = useState({
-    task1: "",
-    task2: "",
-  });
+  const [answers, setAnswers] = useState<Record<string, string>>({});
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -74,6 +68,10 @@ export default function WritingExamPage() {
       .then((res: any) => {
         if (res?.success && res.data) {
           setExam(res.data);
+          // Set active tab to the first question ID
+          if (res.data.skills?.writing?.length > 0) {
+            setActiveTab(res.data.skills.writing[0]._id);
+          }
         } else {
           toast({
             variant: "destructive",
@@ -121,7 +119,7 @@ export default function WritingExamPage() {
     const saved = localStorage.getItem(`writing-draft-${id}`);
     if (saved) {
       const parsed = JSON.parse(saved);
-      setAnswers(parsed.answers || { task1: "", task2: "" });
+      setAnswers(parsed.answers || {});
       setTimeLeft(parsed.timeLeft || 60 * 60);
     }
   }, [exam, id]);
@@ -140,32 +138,26 @@ export default function WritingExamPage() {
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const handleCopy = (text: string, task: "task1" | "task2") => {
+  const handleCopy = (text: string, questionId: string) => {
     navigator.clipboard.writeText(text);
-    setCopied({ ...copied, [task]: true });
-    setTimeout(() => setCopied({ ...copied, [task]: false }), 2000);
+    setCopied({ ...copied, [questionId]: true });
+    setTimeout(() => setCopied({ ...copied, [questionId]: false }), 2000);
   };
 
   const handleSubmit = async () => {
     if (!exam || submitting) return;
 
-    const task1 = exam.skills.writing?.find((q) => q.task === "Task 1");
-    const task2 = exam.skills.writing?.find((q) => q.task === "Task 2");
+    const writingQuestions = exam.skills.writing || [];
+    if (writingQuestions.length === 0) return;
 
-    if (!task1 && !task2) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Invalid exam data.",
-      });
-      return;
-    }
+    // Kiểm tra xem có bài nào quá ngắn không
+    const tooShort = writingQuestions.some(q => {
+      const ans = answers[q._id] || "";
+      return ans.trim().length > 0 && ans.trim().length < 50;
+    });
 
-    if (
-      (task1 && answers.task1.trim().length < 50) || 
-      (task2 && answers.task2.trim().length < 50)
-    ) {
-      if (!confirm("Your essay seems short. Are you sure you want to submit?")) {
+    if (tooShort) {
+      if (!confirm("Một số bài viết của bạn hơi ngắn. Bạn có chắc chắn muốn nộp không?")) {
         return;
       }
     }
@@ -173,30 +165,43 @@ export default function WritingExamPage() {
     setSubmitting(true);
 
     try {
-        // USE MAIN BACKEND API
-      const res = await apiFetch("/user/writing-exam/submit", {
-        method: "POST",
-        body: JSON.stringify({
-          examId: id,
-          task1Question: task1?.question,
-          task1Type: task1?.type,
-          task1Image: task1?.image,
-          task1Answer: answers.task1,
-          task2Question: task2?.question,
-          task2Type: task2?.type,
-          task2Answer: answers.task2,
-        }),
-      });
+      // Nộp từng Task một vì Backend đã decoupled
+      // Lưu kết quả ID của câu cuối cùng để redirect (hoặc có thể cải tiến sau)
+      let lastResultId = "";
 
-      if (res.success && res.data) {
+      for (const q of writingQuestions) {
+        const answer = answers[q._id];
+        if (!answer?.trim()) continue;
+
+        const res = await apiFetch("/user/writing-exam/submit", {
+          method: "POST",
+          body: JSON.stringify({
+            examId: id,
+            questionId: q._id,
+            answer: answer,
+            taskType: q.task,
+          }),
+        });
+
+        if (res.success) {
+          lastResultId = res.data.resultId;
+        }
+      }
+
+      if (lastResultId) {
         localStorage.removeItem(`writing-draft-${id}`);
-        // Redirect to result page using ID from DB
-        router.push(`/tests/writing/result/${res.data.resultId}`);
+        toast({ 
+          title: "Nộp bài thành công!", 
+          description: "Bài làm của bạn đã được gửi đi chấm. Bạn có thể xem kết quả trong phần Lịch sử sau vài phút.",
+          duration: 5000 
+        });
+        // Quay lại trang danh sách đề thi để làm bài khác
+        router.push("/tests/writing");
       } else {
         toast({
           variant: "destructive",
           title: "Submission Failed",
-          description: res.message || "Unknown error occurred.",
+          description: "Please write something before submitting.",
         });
       }
     } catch (err: any) {
@@ -214,8 +219,7 @@ export default function WritingExamPage() {
   if (loading) return <LoadingScreen />;
   if (!exam) return <NotFoundScreen />;
 
-  const task1 = exam.skills.writing?.find((q) => q.task === "Task 1");
-  const task2 = exam.skills.writing?.find((q) => q.task === "Task 2");
+  const writingQuestions = exam.skills.writing || [];
 
   return (
     <main className="min-h-screen bg-slate-50/50 dark:bg-slate-950 transition-colors duration-300">
@@ -246,11 +250,14 @@ export default function WritingExamPage() {
       </header>
 
       <div className="container py-6 max-w-7xl mx-auto">
-        <Tabs defaultValue={task1 ? "task1" : "task2"} value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <Tabs defaultValue={writingQuestions[0]?._id} value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="flex items-center justify-between mb-6">
-            <TabsList className="grid w-full max-w-[400px] grid-cols-2 bg-slate-200/50 dark:bg-slate-800/50 p-1">
-              <TabsTrigger value="task1" disabled={!task1} className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900 data-[state=active]:text-primary dark:data-[state=active]:text-slate-100 data-[state=active]:shadow-sm font-medium transition-all">Task 1</TabsTrigger>
-              <TabsTrigger value="task2" disabled={!task2} className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900 data-[state=active]:text-primary dark:data-[state=active]:text-slate-100 data-[state=active]:shadow-sm font-medium transition-all">Task 2</TabsTrigger>
+            <TabsList className={`grid w-full max-w-[400px] bg-slate-200/50 dark:bg-slate-800/50 p-1`} style={{ gridTemplateColumns: `repeat(${writingQuestions.length}, 1fr)` }}>
+              {writingQuestions.map((q, idx) => (
+                <TabsTrigger key={q._id} value={q._id} className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900 data-[state=active]:text-primary dark:data-[state=active]:text-slate-100 data-[state=active]:shadow-sm font-medium transition-all">
+                  {q.task || `Task ${idx + 1}`}
+                </TabsTrigger>
+              ))}
             </TabsList>
             <div className="hidden md:flex items-center text-sm text-slate-500 dark:text-slate-400 bg-blue-50 dark:bg-blue-900/20 px-3 py-1 rounded-full border border-blue-100 dark:border-blue-900">
               <AlertCircle className="w-4 h-4 mr-2 text-blue-500 dark:text-blue-400" />
@@ -258,38 +265,37 @@ export default function WritingExamPage() {
             </div>
           </div>
 
-          {/* TASK 1 CONTENT */}
-          <TabsContent value="task1" className="mt-0">
-            {task1 ? (
+          {writingQuestions.map((q) => (
+            <TabsContent key={q._id} value={q._id} className="mt-0">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-12rem)]">
                 {/* LEFT: PROMPT */}
                 <Card className="h-full flex flex-col overflow-hidden border-slate-200 dark:border-slate-800 shadow-md bg-white dark:bg-slate-900">
                   <CardHeader className="bg-slate-50/50 dark:bg-slate-800/50 border-b dark:border-slate-800 py-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800 px-3">Task 1</Badge>
+                        <Badge variant="outline" className={`${q.task === "Task 1" ? "bg-blue-50 text-blue-700" : "bg-purple-50 text-purple-700"} px-3`}>{q.task}</Badge>
                         <span className="text-sm font-bold text-slate-700 dark:text-slate-300">
-                          {task1.type.replace(/_/g, " ").toUpperCase()}
+                          {q.type.replace(/_/g, " ").toUpperCase()}
                         </span>
                       </div>
-                      <Button variant="ghost" size="sm" onClick={() => handleCopy(task1.question, "task1")}>
-                        {copied.task1 ? <Check className="w-3.5 h-3.5 mr-1 text-green-600" /> : <Copy className="w-3.5 h-3.5 mr-1" />}
+                      <Button variant="ghost" size="sm" onClick={() => handleCopy(q.question, q._id)}>
+                        {copied[q._id] ? <Check className="w-3.5 h-3.5 mr-1 text-green-600" /> : <Copy className="w-3.5 h-3.5 mr-1" />}
                         Copy
                       </Button>
                     </div>
                   </CardHeader>
                   <CardContent className="flex-1 overflow-y-auto p-6 custom-scrollbar bg-white dark:bg-slate-900">
-                    {task1.image && (
+                    {q.image && (
                       <div className="mb-6 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm">
                         <img
-                          src={task1.image}
-                          alt="Task 1 Visual"
+                          src={q.image.startsWith("http") ? q.image : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"}${q.image}`}
+                          alt="Writing Visual"
                           className="w-full h-auto object-contain bg-slate-50 dark:bg-slate-950"
                         />
                       </div>
                     )}
                     <h3 className="font-bold text-lg mb-3 text-slate-800 dark:text-slate-100">Question</h3>
-                    <p className="text-base leading-relaxed whitespace-pre-line text-slate-700 dark:text-slate-300">{task1.question}</p>
+                    <p className="text-base leading-relaxed whitespace-pre-line text-slate-700 dark:text-slate-300">{q.question}</p>
                   </CardContent>
                 </Card>
 
@@ -298,66 +304,21 @@ export default function WritingExamPage() {
                   <CardHeader className="bg-slate-50/50 dark:bg-slate-800/50 border-b dark:border-slate-800 py-3">
                     <div className="flex items-center justify-between">
                        <span className="font-semibold text-slate-800 dark:text-slate-100">Your Response</span>
-                       <Badge>{answers.task1.trim().split(/\s+/).filter(w => w).length} words</Badge>
+                       <Badge>{(answers[q._id] || "").trim().split(/\s+/).filter(w => w).length} words</Badge>
                     </div>
                   </CardHeader>
                   <div className="flex-1 relative bg-white dark:bg-slate-950">
                     <Textarea
                       placeholder="Write your response here..."
                       className="absolute inset-0 w-full h-full resize-none p-6 text-base leading-relaxed border-0 focus:ring-0"
-                      value={answers.task1}
-                      onChange={(e) => setAnswers({ ...answers, task1: e.target.value })}
+                      value={answers[q._id] || ""}
+                      onChange={(e) => setAnswers({ ...answers, [q._id]: e.target.value })}
                     />
                   </div>
                 </Card>
               </div>
-            ) : null}
-          </TabsContent>
-
-          {/* TASK 2 CONTENT */}
-          <TabsContent value="task2" className="mt-0">
-            {task2 ? (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-12rem)]">
-                {/* LEFT: PROMPT */}
-                <Card className="h-full flex flex-col overflow-hidden border-slate-200 dark:border-slate-800 shadow-md bg-white dark:bg-slate-900">
-                  <CardHeader className="bg-slate-50/50 dark:bg-slate-800/50 border-b dark:border-slate-800 py-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800 px-3">Task 2</Badge>
-                        <span className="text-sm font-bold text-slate-700 dark:text-slate-300">ESSAY</span>
-                      </div>
-                      <Button variant="ghost" size="sm" onClick={() => handleCopy(task2.question, "task2")}>
-                        {copied.task2 ? <Check className="w-3.5 h-3.5 mr-1 text-green-600" /> : <Copy className="w-3.5 h-3.5 mr-1" />}
-                        Copy
-                      </Button>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="flex-1 overflow-y-auto p-6 custom-scrollbar bg-white dark:bg-slate-900">
-                    <h3 className="font-bold text-lg mb-3 text-slate-800 dark:text-slate-100">Question</h3>
-                    <p className="text-base leading-relaxed whitespace-pre-line text-slate-700 dark:text-slate-300">{task2.question}</p>
-                  </CardContent>
-                </Card>
-
-                {/* RIGHT: EDITOR */}
-                <Card className="h-full flex flex-col overflow-hidden border-slate-200 dark:border-slate-800 shadow-md bg-white dark:bg-slate-900 focus-within:ring-2 focus-within:ring-primary/20">
-                  <CardHeader className="bg-slate-50/50 dark:bg-slate-800/50 border-b dark:border-slate-800 py-3">
-                    <div className="flex items-center justify-between">
-                       <span className="font-semibold text-slate-800 dark:text-slate-100">Your Response</span>
-                       <Badge>{answers.task2.trim().split(/\s+/).filter(w => w).length} words</Badge>
-                    </div>
-                  </CardHeader>
-                  <div className="flex-1 relative bg-white dark:bg-slate-950">
-                    <Textarea
-                      placeholder="Write your response here..."
-                      className="absolute inset-0 w-full h-full resize-none p-6 text-base leading-relaxed border-0 focus:ring-0"
-                      value={answers.task2}
-                      onChange={(e) => setAnswers({ ...answers, task2: e.target.value })}
-                    />
-                  </div>
-                </Card>
-              </div>
-            ) : null}
-          </TabsContent>
+            </TabsContent>
+          ))}
         </Tabs>
       </div>
       <Footer />

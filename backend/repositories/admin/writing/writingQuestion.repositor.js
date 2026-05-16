@@ -45,9 +45,19 @@ exports.update = async (id, data) =>
 exports.remove = async (id) => await WritingQuestion.findByIdAndDelete(id);
 
 // ĐÃ SỬA – BỎ POPULATE ĐI ĐỂ TRÁNH LỖI 500!!!
-exports.getPaginated = async (page = 1, limit = 10) => {
+exports.getPaginated = async (page = 1, limit = 10, search = "") => {
   const skip = (page - 1) * limit;
-  return await WritingQuestion.find()
+  const query = {};
+  
+  if (search) {
+     query.$or = [
+        { topic: { $regex: search, $options: "i" } },
+        { question: { $regex: search, $options: "i" } },
+        { task: { $regex: search, $options: "i" } }
+     ];
+  }
+
+  return await WritingQuestion.find(query)
     // .populate("part", "name")    ← BỎ HẾT 2 DÒNG NÀY
     // .populate("skill", "name")   ← ĐỂ TRÁNH LỖI MONGODB
     .sort({ createdAt: -1 })
@@ -56,7 +66,17 @@ exports.getPaginated = async (page = 1, limit = 10) => {
     .lean();
 };
 
-exports.countTotal = async () => await WritingQuestion.countDocuments();
+exports.countTotal = async (search = "") => {
+    const query = {};
+    if (search) {
+        query.$or = [
+            { topic: { $regex: search, $options: "i" } },
+            { question: { $regex: search, $options: "i" } },
+            { task: { $regex: search, $options: "i" } }
+        ];
+    }
+    return await WritingQuestion.countDocuments(query);
+};
 
 exports.getByPartId = async (partId) =>
   await WritingQuestion.find({ part: partId });

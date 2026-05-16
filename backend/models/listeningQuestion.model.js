@@ -54,11 +54,22 @@ const ListeningQuestionSchema = new mongoose.Schema({
       "matching",
       "note_completion",
       "sentence_completion",
+      "dictation", // New type
     ],
     required: true,
   },
   title: { type: String, required: true },
   audio: { type: String, required: true },
+  
+  // For Dictation & Karaoke Lyrics
+  segments: [
+    {
+      start: Number, // Start time in seconds
+      end: Number,   // End time in seconds
+      text: String,  // Content
+    }
+  ],
+  
   transcript: String,
   explanation: String,
 

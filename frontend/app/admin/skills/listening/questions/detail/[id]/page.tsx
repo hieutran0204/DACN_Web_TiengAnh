@@ -2,19 +2,27 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Navbar from "@/components/navbar";
-import Footer from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Headphones,
-  Edit3,
+  Edit,
   ChevronLeft,
-  Volume2,
   Eye,
   EyeOff,
+  AlertCircle,
+  FileText,
+  CheckCircle2,
+  XCircle,
+  HelpCircle
 } from "lucide-react";
+import Link from "next/link";
+import { apiFetch } from "@/lib/api";
+
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
 export default function ListeningQuestionDetail() {
   const { id } = useParams() as { id: string };
@@ -25,16 +33,10 @@ export default function ListeningQuestionDetail() {
   const [error, setError] = useState("");
   const [showAnswers, setShowAnswers] = useState(false);
 
-  const API_BASE = "http://localhost:3000/api/admin/questions/listening";
-
   useEffect(() => {
     const fetchQuestion = async () => {
       try {
-        const res = await fetch(`${API_BASE}/listening-questions/${id}`, {
-          credentials: "include",
-        });
-        if (!res.ok) throw new Error("Không tải được câu hỏi");
-        const result = await res.json();
+        const result = await apiFetch(`/admin/questions/listening/listening-questions/${id}`);
         setQuestion(result.data);
       } catch (err: any) {
         setError(err.message);
@@ -47,290 +49,268 @@ export default function ListeningQuestionDetail() {
   }, [id]);
 
   if (loading) {
-    return (
-      <main className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <Volume2 className="w-16 h-16 animate-pulse text-primary mx-auto mb-4" />
-          <p className="text-2xl font-bold">Đang tải câu hỏi Listening...</p>
+     return (
+        <div className="min-h-screen flex items-center justify-center bg-slate-50">
+            <div className="text-center space-y-4 w-full max-w-3xl px-6">
+                <Skeleton className="h-12 w-2/3 mx-auto" />
+                <Skeleton className="h-[200px] w-full" />
+                <Skeleton className="h-[400px] w-full" />
+            </div>
         </div>
-      </main>
-    );
+     );
   }
 
   if (error || !question) {
     return (
-      <main className="min-h-screen bg-background">
-        <Navbar />
-        <div className="mt-20 text-center py-20">
-          <Alert variant="destructive" className="max-w-md mx-auto">
-            <AlertDescription className="text-lg">
-              {error || "Không tìm thấy câu hỏi!"}
-            </AlertDescription>
-          </Alert>
-          <Button className="mt-8" onClick={() => router.back()}>
-            <ChevronLeft className="mr-2" /> Quay lại
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 p-6">
+        <div className="text-center space-y-4">
+             <Alert variant="destructive" className="max-w-md mx-auto">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                    {error || "Question not found"}
+                </AlertDescription>
+            </Alert>
+          <Button variant="outline" onClick={() => router.back()}>
+            <ChevronLeft className="mr-2 w-4 h-4" /> Back to List
           </Button>
         </div>
-        <Footer />
-      </main>
+      </div>
     );
   }
 
-  // CHỈ DÙNG q.audio || "" → CHUẨN NHẤT, KHÔNG CỘNG DOMAIN, CHẠY NGON MỌI NƠI
-  const audioUrl = question.audio || null;
+  const audioUrl = question.audio 
+    ? (question.audio.startsWith("http") ? question.audio : `${BACKEND_URL}${question.audio}`)
+    : null;
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-background to-muted/30">
-      <Navbar />
-
-      <div className="mt-16 py-10 px-6 max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="mb-10 flex flex-col md:flex-row justify-between items-start gap-6">
-          <div>
-            <h1 className="text-4xl font-bold text-foreground mb-3">
-              {question.title || "Không có tiêu đề"}
-            </h1>
-            <div className="flex flex-wrap gap-4 text-lg">
-              <span className="font-semibold text-primary">
-                {question.section}
-              </span>
-              <span className="bg-primary/10 px-4 py-2 rounded-full text-primary font-medium">
-                {question.type.replace(/_/g, " ").toUpperCase()}
-              </span>
+    <div className="space-y-6">
+        {/* HEADER */}
+       <div className="flex items-center justify-between">
+        <div className="space-y-1">
+             <div className="flex items-center gap-4">
+                <Button 
+                    variant="outline" 
+                    size="icon"
+                    onClick={() => router.back()}
+                    className="h-9 w-9 border-slate-200"
+                >
+                    <ChevronLeft className="w-5 h-5 text-slate-500" />
+                </Button>
+                <div>
+                     <h1 className="text-2xl font-bold text-slate-800 tracking-tight">
+                        {question.title || "Untitled Question"}
+                     </h1>
+                     <div className="flex items-center gap-2 mt-1">
+                        <Badge variant="secondary" className="bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-200">
+                             {question.section}
+                        </Badge>
+                         <Badge variant="outline" className="text-slate-600">
+                             {question.type.replace(/_/g, " ").toUpperCase()}
+                        </Badge>
+                     </div>
+                </div>
             </div>
-          </div>
-
-          <div className="flex flex-wrap gap-3">
-            <Button
-              size="lg"
-              variant="outline"
-              onClick={() => setShowAnswers(!showAnswers)}
-              className="whitespace-nowrap">
-              {showAnswers ? (
-                <EyeOff className="mr-2" />
-              ) : (
-                <Eye className="mr-2" />
-              )}
-              {showAnswers ? "Ẩn đáp án" : "Hiện đáp án"}
-            </Button>
-            <Button
-              size="lg"
-              onClick={() =>
-                router.push(`/admin/skills/listening/questions/${id}`)
-              }>
-              <Edit3 className="mr-2" /> Chỉnh sửa
-            </Button>
-          </div>
         </div>
+        <div className="flex items-center gap-2">
+            <Button
+                variant="outline"
+                onClick={() => setShowAnswers(!showAnswers)}
+                className="gap-2"
+            >
+                {showAnswers ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showAnswers ? "Hide Answers" : "Show Answers"}
+            </Button>
 
-        {/* Audio Player - SIÊU ĐẸP */}
-        {audioUrl && (
-          <Card className="mb-12 border-2 border-primary/20 shadow-lg">
-            <CardHeader className="bg-primary/5 pb-4">
-              <CardTitle className="flex items-center gap-3 text-2xl">
-                <Headphones className="w-9 h-9 text-primary" />
-                File Audio
+            <Button
+                asChild
+                className="bg-blue-600 hover:bg-blue-700 shadow-sm"
+            >
+                <Link href={`/admin/skills/listening/questions/edit/${id}`}>
+                    <Edit className="mr-2 w-4 h-4" />
+                    Edit Question
+                </Link>
+            </Button>
+        </div>
+      </div>
+
+       {/* AUDIO PLAYER */}
+       {audioUrl && (
+          <Card className="shadow-sm border-slate-200">
+            <CardHeader className="bg-slate-50 border-b border-slate-100 pb-4">
+              <CardTitle className="text-lg font-medium text-slate-800 flex items-center gap-2">
+                <Headphones className="w-4 h-4" />
+                Audio Track
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
               <audio
                 controls
                 controlsList="nodownload"
-                className="w-full h-16 rounded-lg shadow-md"
-                src={audioUrl}>
-                Trình duyệt không hỗ trợ audio.
+                className="w-full h-12"
+                src={audioUrl}
+              >
+                Your browser does not support the audio element.
               </audio>
             </CardContent>
           </Card>
         )}
 
-        {/* Câu hỏi theo loại */}
-        <div className="space-y-10">
-          {/* MULTIPLE CHOICE */}
-          {question.type === "multiple_choice" &&
-            question.subQuestions?.map((sq: any, i: number) => (
-              <Card key={i} className="border-l-4 border-l-primary shadow-md">
-                <CardHeader>
-                  <CardTitle className="text-xl font-semibold">
-                    Câu {i + 1}: {sq.question || "(Không có nội dung câu hỏi)"}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-5">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    {["A", "B", "C", "D"].map((letter, idx) => {
-                      const option = sq.options?.[idx] || "(Trống)";
-                      const isCorrect =
-                        sq.correctAnswer === letter ||
-                        sq.correctAnswers?.includes(letter);
-
-                      return (
-                        <div
-                          key={letter}
-                          className={`p-5 rounded-xl border-2 transition-all ${
-                            showAnswers && isCorrect
-                              ? "border-green-500 bg-green-50 shadow-md"
-                              : "border-muted bg-card"
-                          }`}>
-                          <div className="flex items-start gap-3">
-                            <span className="font-bold text-xl text-primary">
-                              {letter}.
-                            </span>
-                            <span className="text-lg">{option}</span>
-                          </div>
-                          {showAnswers && isCorrect && (
-                            <div className="mt-3 text-green-600 font-bold flex items-center gap-2">
-                              <span className="text-2xl">Correct</span>
+        {/* QUESTIONS */}
+        <div className="grid gap-6">
+             {/* MULTIPLE CHOICE */}
+             {question.type === "multiple_choice" &&
+                 question.subQuestions?.map((sq: any, i: number) => (
+                    <Card key={i} className="shadow-sm border-slate-200">
+                        <CardHeader className="bg-slate-50/50 border-b border-slate-100 pb-3">
+                            <CardTitle className="text-base font-medium text-slate-800">
+                                Question {i + 1}: {sq.question || "(No question text)"}
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="pt-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {["A", "B", "C", "D"].map((letter, idx) => {
+                                    const option = sq.options?.[idx] || "";
+                                    const isCorrect = sq.correctAnswer === letter || sq.correctAnswers?.includes(letter);
+                                    
+                                    return (
+                                        <div 
+                                            key={letter}
+                                            className={`p-4 rounded-lg border flex items-start gap-3 transition-colors ${
+                                                showAnswers && isCorrect
+                                                 ? "bg-green-50 border-green-200"
+                                                 : "bg-white border-slate-200"
+                                            }`}
+                                        >
+                                            <span className={`font-bold flex-shrink-0 ${
+                                                showAnswers && isCorrect ? "text-green-700" : "text-slate-500"
+                                            }`}>
+                                                {letter}.
+                                            </span>
+                                            <span className={`${showAnswers && isCorrect ? "text-green-900 font-medium" : "text-slate-700"}`}>
+                                                 {option}
+                                            </span>
+                                            {showAnswers && isCorrect && (
+                                                <CheckCircle2 className="w-5 h-5 text-green-600 ml-auto flex-shrink-0" />
+                                            )}
+                                        </div>
+                                    )
+                                })}
                             </div>
-                          )}
+                        </CardContent>
+                    </Card>
+                 ))
+             }
+
+             {/* FILL / NOTE / SENTENCE COMPLETION */}
+             {["fill_in_the_blank", "note_completion", "sentence_completion", "dictation"].includes(question.type) && (
+                 <Card className="shadow-sm border-slate-200">
+                    <CardHeader className="bg-slate-50 border-b border-slate-100 pb-4">
+                        <CardTitle className="text-lg font-medium text-slate-800 flex items-center gap-2">
+                             <FileText className="w-4 h-4" /> Content
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-6 space-y-6">
+                        <div className="bg-slate-50 p-6 rounded-lg border border-slate-100 font-medium text-slate-800 leading-relaxed whitespace-pre-wrap">
+                            {question.subQuestions?.[0]?.question || "(No content)"}
                         </div>
-                      );
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
 
-          {/* FILL / NOTE / SENTENCE */}
-          {[
-            "fill_in_the_blank",
-            "note_completion",
-            "sentence_completion",
-          ].includes(question.type) && (
-            <Card className="shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-2xl">Nội dung bài</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="bg-muted/50 p-10 rounded-2xl font-mono text-lg leading-relaxed text-foreground/90">
-                  {question.subQuestions?.[0]?.question ||
-                    "(Không có nội dung)"}
-                </div>
+                         {showAnswers && (
+                             <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+                                 <h3 className="text-green-800 font-semibold mb-3 flex items-center gap-2">
+                                     <CheckCircle2 className="w-4 h-4" /> Correct Answers
+                                 </h3>
+                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                      {question.subQuestions?.[0]?.correctAnswers?.map((ans: string, i: number) => (
+                                          <div key={i} className="bg-white px-3 py-2 rounded border border-green-100 text-green-900 font-medium shadow-sm">
+                                              <span className="text-green-500 mr-2">{i+1}.</span>
+                                              {ans}
+                                          </div>
+                                      ))}
+                                 </div>
+                             </div>
+                         )}
+                    </CardContent>
+                 </Card>
+             )}
 
-                {showAnswers &&
-                  question.subQuestions?.[0]?.correctAnswers?.length > 0 && (
-                    <div className="mt-10 p-8 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-400 rounded-2xl">
-                      <p className="font-bold text-green-800 text-2xl mb-6 text-center">
-                        Đáp án đúng
-                      </p>
-                      <ol className="space-y-4 max-w-2xl mx-auto">
-                        {question.subQuestions[0].correctAnswers.map(
-                          (ans: string, i: number) => (
-                            <li
-                              key={i}
-                              className="text-xl font-bold text-green-900 bg-white/80 px-6 py-4 rounded-lg shadow">
-                              {i + 1}. {ans}
-                            </li>
-                          )
-                        )}
-                      </ol>
-                    </div>
-                  )}
-              </CardContent>
-            </Card>
-          )}
+             {/* MATCHING */}
+             {question.type === "matching" && (
+                 <div className="grid md:grid-cols-2 gap-6">
+                      <Card className="shadow-sm border-slate-200">
+                         <CardHeader className="bg-slate-50 border-b border-slate-100">
+                             <CardTitle className="text-base font-medium">Questions</CardTitle>
+                         </CardHeader>
+                         <CardContent className="pt-4 space-y-4">
+                             {question.subQuestions?.map((sq: any, i: number) => (
+                                 <div key={i} className="flex gap-3 items-start p-3 bg-white border border-slate-100 rounded-md">
+                                     <span className="font-bold text-slate-400 w-6 flex-shrink-0">{i+1}.</span>
+                                     <span className="text-slate-800">{sq.question}</span>
+                                 </div>
+                             ))}
+                         </CardContent>
+                      </Card>
 
-          {/* MATCHING */}
-          {question.type === "matching" && (
-            <div className="grid md:grid-cols-2 gap-10">
-              <Card className="shadow-lg">
-                <CardHeader>
-                  <CardTitle className="text-2xl">Câu hỏi</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {question.subQuestions?.map((sq: any, i: number) => (
-                    <div
-                      key={i}
-                      className="flex gap-5 items-center mb-8 text-lg font-medium">
-                      <span className="font-bold text-xl w-10 text-primary">
-                        {i + 1}.
-                      </span>
-                      <span>{sq.question || "(Trống)"}</span>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
+                       <Card className="shadow-sm border-slate-200">
+                         <CardHeader className="bg-slate-50 border-b border-slate-100">
+                             <CardTitle className="text-base font-medium">Options</CardTitle>
+                         </CardHeader>
+                         <CardContent className="pt-4 space-y-4">
+                             {question.matchingOptions?.map((opt: string, i: number) => (
+                                 <div key={i} className="flex gap-3 items-start p-3 bg-white border border-slate-100 rounded-md">
+                                     <span className="font-bold text-blue-600 bg-blue-50 w-6 h-6 flex items-center justify-center rounded flex-shrink-0">
+                                         {String.fromCharCode(65 + i)}
+                                     </span>
+                                     <span className="text-slate-800">{opt}</span>
+                                 </div>
+                             ))}
 
-              <Card className="shadow-lg">
-                <CardHeader>
-                  <CardTitle className="text-2xl">Lựa chọn</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {question.matchingOptions?.map((opt: string, i: number) => (
-                    <div
-                      key={i}
-                      className="flex gap-5 items-center mb-8 text-lg font-medium">
-                      <div className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center text-xl font-bold shadow-lg">
-                        {String.fromCharCode(65 + i)}
-                      </div>
-                      <span>{opt || "(Trống)"}</span>
-                    </div>
-                  ))}
-
-                  {showAnswers && (
-                    <div className="mt-10 p-8 bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-400 rounded-2xl">
-                      <p className="font-bold text-blue-800 text-2xl mb-6 text-center">
-                        Ghép đúng
-                      </p>
-                      <div className="space-y-4 max-w-xs mx-auto">
-                        {question.subQuestions?.map((sq: any, i: number) => (
-                          <div
-                            key={i}
-                            className="text-xl font-bold text-indigo-900 bg-white/80 px-6 py-4 rounded-lg shadow text-center">
-                            {i + 1} → {sq.correctAnswers?.[0] || "?"}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-          )}
+                             {showAnswers && (
+                                 <div className="mt-6 pt-6 border-t border-slate-100">
+                                     <h4 className="font-semibold text-green-700 mb-3">Correct Matches</h4>
+                                      <div className="grid grid-cols-3 gap-2">
+                                          {question.subQuestions?.map((sq: any, i: number) => (
+                                              <div key={i} className="bg-green-50 text-green-800 px-3 py-2 rounded text-center border border-green-100 font-bold">
+                                                  {i+1} → {sq.correctAnswers?.[0]}
+                                              </div>
+                                          ))}
+                                      </div>
+                                 </div>
+                             )}
+                         </CardContent>
+                      </Card>
+                 </div>
+             )}
         </div>
 
-        {/* Transcript & Explanation */}
+        {/* TRANSCRIPT & EXPLANATION */}
         {(question.transcript || question.explanation) && (
-          <div className="mt-16 grid md:grid-cols-2 gap-10">
-            {question.transcript && (
-              <Card className="shadow-lg">
-                <CardHeader>
-                  <CardTitle className="text-2xl">Transcript</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <pre className="whitespace-pre-wrap font-sans text-base leading-relaxed text-foreground/90">
-                    {question.transcript}
-                  </pre>
-                </CardContent>
-              </Card>
-            )}
-
-            {question.explanation && (
-              <Card className="shadow-lg">
-                <CardHeader>
-                  <CardTitle className="text-2xl">Giải thích</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="prose prose-lg max-w-none text-foreground/90">
-                    {question.explanation}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
+            <div className="grid md:grid-cols-2 gap-6 pt-4">
+                 {question.transcript && (
+                      <Card className="shadow-sm border-slate-200">
+                        <CardHeader className="bg-slate-50 border-b border-slate-100">
+                             <CardTitle className="text-base font-medium">Transcript</CardTitle>
+                        </CardHeader>
+                        <CardContent className="pt-4 max-h-[300px] overflow-y-auto">
+                            <p className="whitespace-pre-wrap text-slate-600 leading-relaxed text-sm">
+                                {question.transcript}
+                            </p>
+                        </CardContent>
+                      </Card>
+                 )}
+                 {question.explanation && (
+                      <Card className="shadow-sm border-slate-200">
+                        <CardHeader className="bg-slate-50 border-b border-slate-100">
+                             <CardTitle className="text-base font-medium">Explanation</CardTitle>
+                        </CardHeader>
+                        <CardContent className="pt-4 max-h-[300px] overflow-y-auto">
+                             <div className="prose prose-sm max-w-none text-slate-600">
+                                {question.explanation}
+                             </div>
+                        </CardContent>
+                      </Card>
+                 )}
+            </div>
         )}
-
-        <div className="text-center mt-20">
-          <Button
-            size="lg"
-            variant="outline"
-            onClick={() => router.push("/admin/skills/listening/questions")}
-            className="text-xl px-12 py-6">
-            <ChevronLeft className="mr-2" /> Quay lại danh sách câu hỏi
-          </Button>
-        </div>
-      </div>
-
-      <Footer />
-    </main>
+    </div>
   );
 }

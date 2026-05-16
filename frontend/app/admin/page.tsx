@@ -137,7 +137,11 @@ export default function AdminDashboard() {
                         <BookOpen className="w-8 h-8 mb-2" />
                         <span className="text-sm font-semibold">Questions</span>
                      </Link>
-                     <Link href="/admin/gamess" className="flex flex-col items-center justify-center p-4 bg-white/10 rounded-xl hover:bg-white/20 transition-colors backdrop-blur-sm cursor-pointer">
+                     <Link href="/admin/vocabulary" className="flex flex-col items-center justify-center p-4 bg-white/10 rounded-xl hover:bg-white/20 transition-colors backdrop-blur-sm cursor-pointer">
+                        <BookOpen className="w-8 h-8 mb-2" />
+                        <span className="text-sm font-semibold">Vocabulary</span>
+                     </Link>
+                     <Link href="/admin/games" className="flex flex-col items-center justify-center p-4 bg-white/10 rounded-xl hover:bg-white/20 transition-colors backdrop-blur-sm cursor-pointer">
                         <Gamepad2 className="w-8 h-8 mb-2" />
                         <span className="text-sm font-semibold">Games</span>
                      </Link>

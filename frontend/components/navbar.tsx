@@ -29,7 +29,7 @@ export default function Navbar() {
 
   // Scroll & Visibility State
   const [isVisible, setIsVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
+  const lastScrollY = useRef(0); // Using ref to avoid effect dependency re-trigger
   const [showScrollTop, setShowScrollTop] = useState(false);
   const { theme, setTheme } = useTheme();
 
@@ -41,7 +41,6 @@ export default function Navbar() {
   const links = [
     { href: "/", label: "Home" },
     { href: "/tests", label: "Tests" },
-    { href: "/skills", label: "Skills" },
     { href: "/vocabulary", label: "Vocabulary" },
     { href: "/articles", label: "Articles" },
     { href: "/games", label: "Games" },
@@ -53,7 +52,7 @@ export default function Navbar() {
 
       // Navbar visibility logic
       if (currentScrollY > 100) {
-        if (currentScrollY > lastScrollY) {
+        if (currentScrollY > lastScrollY.current) {
           setIsVisible(false); // Scrolling down
         } else {
           setIsVisible(true); // Scrolling up
@@ -63,18 +62,14 @@ export default function Navbar() {
       }
 
       // Scroll to top button visibility
-      if (currentScrollY > 300) {
-        setShowScrollTop(true);
-      } else {
-        setShowScrollTop(false);
-      }
+      setShowScrollTop(currentScrollY > 300);
 
-      setLastScrollY(currentScrollY);
+      lastScrollY.current = currentScrollY;
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [lastScrollY]);
+  }, []); // Empty dependency array = listener added once
 
   useEffect(() => {
     // Find active link based on pathname
@@ -141,7 +136,7 @@ export default function Navbar() {
             <Link href="/" className="flex items-center gap-2">
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                 <span className="text-primary-foreground font-bold text-lg">
-                  E
+                  T
                 </span>
               </div>
               <h1 className="text-xl font-bold text-foreground">TestKiller</h1>

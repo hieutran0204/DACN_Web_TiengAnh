@@ -32,6 +32,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { OverviewPanel } from "@/components/profile/OverviewPanel";
+import { HistoryPanel } from "@/components/profile/HistoryPanel";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -187,89 +189,26 @@ export default function ProfilePage() {
           {/* Right Content - Tabs */}
           <div className="lg:col-span-8">
             <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-8">
+              <TabsList className="grid w-full grid-cols-3 mb-8">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
+                <TabsTrigger value="history">History</TabsTrigger>
                 <TabsTrigger value="settings">Settings</TabsTrigger>
               </TabsList>
 
-              <TabsContent value="overview" className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">
-                        Tests Completed
-                      </CardTitle>
-                      <BookOpen className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">12</div>
-                      <p className="text-xs text-muted-foreground">
-                        +2 from last week
-                      </p>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">
-                        Average Score
-                      </CardTitle>
-                      <Trophy className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">7.5</div>
-                      <p className="text-xs text-muted-foreground">
-                        Top 15% of students
-                      </p>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">
-                        Study Time
-                      </CardTitle>
-                      <Activity className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">24h</div>
-                      <p className="text-xs text-muted-foreground">
-                        Total hours learned
-                      </p>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Recent Activity</CardTitle>
-                    <CardDescription>
-                      Your latest learning progress and achievements.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-8">
-                      {[1, 2, 3].map((i) => (
-                        <div key={i} className="flex items-center">
-                          <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center mr-4">
-                            <BookOpen className="w-4 h-4 text-primary" />
-                          </div>
-                          <div className="ml-4 space-y-1">
-                            <p className="text-sm font-medium leading-none">
-                              Completed IELTS Reading Test #{i}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              Score: {6.5 + i * 0.5} • {i} days ago
-                            </p>
-                          </div>
-                          <div className="ml-auto font-medium">
-                            +{10 * i} XP
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
+              {/* OVERVIEW CONTENT */}
+              <TabsContent value="overview" className="mt-0">
+                <OverviewPanel />
               </TabsContent>
 
+              {/* HISTORY CONTENT (NEW) */}
+              <TabsContent value="history" className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-bold">Lịch Sử Làm Bài</h2>
+                </div>
+                <HistoryPanel />
+              </TabsContent>
+
+              {/* SETTINGS CONTENT */}
               <TabsContent value="settings">
                 <Card>
                   <CardHeader>

@@ -168,8 +168,8 @@ class ReadingQuestionService {
     return deleted;
   }
 
-  async getPaginatedQuestions(page = 1, limit = 10) {
-    return await repo.getPaginated(page, limit);
+  async getPaginatedQuestions(page = 1, limit = 10, search = "") {
+    return await repo.getPaginated(page, limit, search);
   }
 
   async getByPassageNumber(passageNumber) {

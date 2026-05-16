@@ -168,16 +168,11 @@ export default function TestsPage() {
                 <span>Premium IELTS Preparation</span>
               </div>
               <h1 className="text-5xl md:text-7xl font-extrabold text-foreground mb-6 tracking-tight">
-                Full IELTS{" "}
+                Full IELTS Skills{" "}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-600">
-                  Mock Tests
+                 Tests
                 </span>
               </h1>
-              <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-                Experience realistic exam conditions with our comprehensive mock
-                tests. Get instant AI scoring, detailed feedback, and accurate
-                band score predictions.
-              </p>
             </motion.div>
           </div>
 

@@ -13,6 +13,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import {
   Sparkles,
   RotateCcw,
   CheckCircle2,
@@ -30,6 +38,7 @@ import {
   ArrowLeft,
   GraduationCap,
   ChevronLeft,
+  Search,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -59,6 +68,11 @@ export default function WordScrambleGame() {
   const [isCorrect, setIsCorrect] = useState(false);
   const [score, setScore] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Pagination and Search State
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
 
   useEffect(() => {
     fetchCategories();
@@ -136,6 +150,20 @@ export default function WordScrambleGame() {
     setScore(0);
   };
 
+  // Filter and Pagination Logic
+  const filteredCategories = categories.filter((category) =>
+    category.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const totalPages = Math.ceil(filteredCategories.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentCategories = filteredCategories.slice(indexOfFirstItem, indexOfLastItem);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
   // --- Render Components ---
 
   if (!selectedCategory || !currentWord) {
@@ -170,51 +198,122 @@ export default function WordScrambleGame() {
             </CardDescription>
           </CardHeader>
           <CardContent className="p-6 md:p-10">
-            {isLoading ? (
+            {isLoading && categories.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 gap-4">
                 <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
                 <p className="text-slate-500 font-medium">Đang tải dữ liệu...</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {categories.map((category, index) => (
-                  <motion.button
-                    key={category._id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    whileHover={{ scale: 1.03, y: -5 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => startGame(category._id)}
-                    className="group relative overflow-hidden rounded-3xl bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 p-8 text-left shadow-lg hover:shadow-2xl hover:border-indigo-500/30 dark:hover:border-indigo-400/30 transition-all duration-500"
-                  >
-                    {/* Decorative Gradients */}
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 rounded-bl-full -mr-8 -mt-8 transition-all group-hover:scale-150 group-hover:from-indigo-500/20 group-hover:to-purple-500/20" />
-                    <div className="absolute bottom-0 left-0 w-24 h-24 bg-blue-500/5 rounded-tr-full -ml-6 -mb-6 transition-all group-hover:scale-125" />
-
-                    <div className="absolute top-6 right-6 p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl text-indigo-600 dark:text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300 shadow-sm">
-                      <Gamepad2 className="w-6 h-6" />
+              <>
+                 {/* Search Bar */}
+                 <div className="max-w-md mx-auto mb-8 relative">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                      <Input 
+                        placeholder="Tìm kiếm chủ đề..." 
+                        className="pl-10 h-12 rounded-full border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus-visible:ring-indigo-500"
+                        value={searchTerm}
+                        onChange={(e) => {
+                          setSearchTerm(e.target.value);
+                          setCurrentPage(1);
+                        }}
+                      />
                     </div>
+                 </div>
 
-                    <div className="relative z-10 pt-4">
-                      <h3 className="font-bold text-2xl text-slate-800 dark:text-slate-100 group-hover:text-indigo-700 dark:group-hover:text-indigo-400 transition-colors mb-3">
-                        {category.name}
-                      </h3>
-                      <p className="text-base text-slate-500 dark:text-slate-400 font-medium line-clamp-2 leading-relaxed mb-6">
-                        {category.description || "Thử thách từ vựng với chủ đề này"}
-                      </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                  {currentCategories.length > 0 ? (
+                    currentCategories.map((category, index) => (
+                      <motion.button
+                        key={category._id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                        whileHover={{ scale: 1.03, y: -5 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => startGame(category._id)}
+                        className="group relative overflow-hidden rounded-3xl bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 p-8 text-left shadow-lg hover:shadow-2xl hover:border-indigo-500/30 dark:hover:border-indigo-400/30 transition-all duration-500"
+                      >
+                        {/* Decorative Gradients */}
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 rounded-bl-full -mr-8 -mt-8 transition-all group-hover:scale-150 group-hover:from-indigo-500/20 group-hover:to-purple-500/20" />
+                        <div className="absolute bottom-0 left-0 w-24 h-24 bg-blue-500/5 rounded-tr-full -ml-6 -mb-6 transition-all group-hover:scale-125" />
 
-                      <div className="flex items-center text-sm font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider group-hover:translate-x-2 transition-transform duration-300">
-                        Bắt đầu ngay <ArrowRight className="w-4 h-4 ml-2" />
-                      </div>
+                        <div className="absolute top-6 right-6 p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl text-indigo-600 dark:text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300 shadow-sm">
+                          <Gamepad2 className="w-6 h-6" />
+                        </div>
+
+                        <div className="relative z-10 pt-4">
+                          <h3 className="font-bold text-2xl text-slate-800 dark:text-slate-100 group-hover:text-indigo-700 dark:group-hover:text-indigo-400 transition-colors mb-3">
+                            {category.name}
+                          </h3>
+                          <p className="text-base text-slate-500 dark:text-slate-400 font-medium line-clamp-2 leading-relaxed mb-6">
+                            {category.description || "Thử thách từ vựng với chủ đề này"}
+                          </p>
+
+                          <div className="flex items-center text-sm font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider group-hover:translate-x-2 transition-transform duration-300">
+                            Bắt đầu ngay <ArrowRight className="w-4 h-4 ml-2" />
+                          </div>
+                        </div>
+                      </motion.button>
+                    ))
+                  ) : (
+                    <div className="col-span-full text-center py-12 text-slate-500">
+                        Không tìm thấy chủ đề nào phù hợp.
                     </div>
-                  </motion.button>
-                ))}
-              </div>
+                  )}
+                </div>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                    <Pagination>
+                    <PaginationContent>
+                        <PaginationItem>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                            disabled={currentPage === 1}
+                            className="gap-1 pl-2.5"
+                        >
+                            <span className="sr-only">Previous</span>
+                            <ChevronLeft className="h-4 w-4" />
+                        </Button>
+                        </PaginationItem>
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                        (page) => (
+                            <PaginationItem key={page}>
+                            <PaginationLink
+                                isActive={currentPage === page}
+                                onClick={() => handlePageChange(page)}
+                                className="cursor-pointer"
+                            >
+                                {page}
+                            </PaginationLink>
+                            </PaginationItem>
+                        )
+                        )}
+                        <PaginationItem>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() =>
+                            handlePageChange(Math.min(totalPages, currentPage + 1))
+                            }
+                            disabled={currentPage === totalPages}
+                            className="gap-1 pr-2.5"
+                        >
+                            <span className="sr-only">Next</span>
+                            <ArrowRight className="h-4 w-4" />
+                        </Button>
+                        </PaginationItem>
+                    </PaginationContent>
+                    </Pagination>
+                )}
+              </>
             )}
           </CardContent>
-        </Card >
-      </div >
+        </Card>
+      </div>
     );
   }
 
@@ -388,6 +487,6 @@ export default function WordScrambleGame() {
           </motion.div>
         )}
       </AnimatePresence>
-    </div >
+    </div>
   );
 }

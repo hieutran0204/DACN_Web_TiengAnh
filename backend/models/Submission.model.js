@@ -1,10 +1,14 @@
-// models/WritingSubmission.model.js
 const mongoose = require("mongoose");
 
-// Schema cho toàn bộ kết quả AI trả về
+/**
+ * Decoupled Writing Submission Model
+ * Represents a single submission for a single Writing Task.
+ */
+
+// Schema for detailed AI analysis results
 const WritingResultSchema = new mongoose.Schema(
   {
-    overall_band: { type: Number, required: true },
+    overall_band: { type: Number },
 
     band_breakdown: {
       task_response: Number,
@@ -13,50 +17,73 @@ const WritingResultSchema = new mongoose.Schema(
       grammatical_range_accuracy: Number,
     },
 
-    advanced_vocabulary: [Object],
-    idioms_phrasalverbs: [String],
-    collocations: [String],
-    academic_words: [String],
-    repeated_words: [String],
-    filler_words_in_writing: [String],
+    feedback_vn: String,
+    evidence_based_justification_vn: Object,
+    
+    // Detailed Sentence-level Feedback
+    annotated_text: [Object],
+    detailed_errors: [Object],
 
-    grammar_errors_found: [Object],
+    // Vocabulary & Insights
+    advanced_vocabulary: [Object],
     strengths: [String],
     weaknesses: [String],
     recommendations_vn: String,
     corrected_essay: String,
 
-    word_count: Number,
-    sentence_count: Number,
-    paragraph_count: Number,
-    type_token_ratio: Number,
-    lexical_density: Number,
+    // Statistics (Feature Map)
+    feature_map: Object,
+    hard_caps_applied: Object,
 
-    generated_at: Date,
-    model_source: { type: String, default: "gemini-2.0-flash" },
+    // Debugging (RAG)
+    rag_debug_info: Object,
+    math_debug: Object,
+
+    generated_at: { type: Date, default: Date.now },
+    model_source: { type: String, default: "gemini-1.5-flash" },
   },
   { _id: false }
 );
 
-// Schema cho mỗi task
-const TaskSchema = new mongoose.Schema({
-  question: { type: String, required: true },
-  type: String,
-  image: String,
-  answer: { type: String, required: true },
-  result: { type: WritingResultSchema, required: true },
-});
-
-// Schema chính
 const WritingSubmissionSchema = new mongoose.Schema({
-  user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  exam: { type: mongoose.Schema.Types.ObjectId, ref: "Exam", required: true },
+  user: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: "User", 
+    required: true 
+  },
+  exam: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: "Exam" 
+  },
+  question: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: "WritingQuestion", 
+    required: true 
+  },
 
-  task1: TaskSchema,
-  task2: TaskSchema,
+  answer: { 
+    type: String, 
+    required: true 
+  },
+  
+  // result can be null if AI is still processing (using status)
+  result: { 
+    type: WritingResultSchema 
+  },
 
-  overallBand: { type: Number, required: true }, // (T1 + 2*T2) / 3
-  submittedAt: { type: Date, default: Date.now },
+  status: {
+    type: String,
+    enum: ["pending", "processing", "completed", "failed"],
+    default: "completed"
+  },
+
+  submittedAt: { 
+    type: Date, 
+    default: Date.now 
+  },
 });
+
+// Indexing for faster history lookup
+WritingSubmissionSchema.index({ user: 1, submittedAt: -1 });
 
 module.exports = mongoose.model("WritingSubmission", WritingSubmissionSchema);

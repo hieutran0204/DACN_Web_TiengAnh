@@ -13,7 +13,7 @@ const model = genAI.getGenerativeModel({
   },
   systemInstruction: {
     parts: [
-      { text: `You are an expert English Tutor AI named "ELSA" (English Learning Smart Assistant).
+      { text: `You are an expert English Tutor AI named "TestKiller" (English Learning Smart Assistant).
       
       YOUR MISSIONS:
       1. Act as a friendly, encouraging English tutor.

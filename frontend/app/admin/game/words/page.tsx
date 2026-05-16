@@ -14,8 +14,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, Edit, Trash2, Search } from "lucide-react";
-import { MultiSelect } from "@/components/ui/multi-select"; // ĐÃ TẠO
+import { Plus, Edit, Trash2, Search, Type, Loader2 } from "lucide-react";
+import { MultiSelect } from "@/components/ui/multi-select"; 
+import { apiFetch } from "@/lib/api";
+import { Badge } from "@/components/ui/badge";
 
 interface Category {
   _id: string;
@@ -58,36 +60,20 @@ export default function AdminWordsPage() {
 
   const fetchWords = async () => {
     try {
-      const response = await fetch(
-        "http://localhost:3000/api/admin/game/words"
-      );
-      if (!response.ok) {
-        const errorData = await response.json();
-        alert(errorData.message || "Lỗi khi tải từ vựng");
-        return;
-      }
-      const data = await response.json();
+      const data = await apiFetch<any>("/admin/game/words");
       setWords(data.data || data || []);
-    } catch (error) {
-      alert("Lỗi kết nối server");
+    } catch (error: any) {
+      alert("Lỗi tải từ vựng: " + error.message);
       setWords([]);
     }
   };
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch(
-        "http://localhost:3000/api/admin/game/categories"
-      );
-      if (!response.ok) {
-        const errorData = await response.json();
-        alert(errorData.message || "Lỗi khi tải categories");
-        return;
-      }
-      const data = await response.json();
+      const data = await apiFetch<any>("/admin/game/categories");
       setCategories(data.data || []);
-    } catch (error) {
-      alert("Lỗi khi tải categories");
+    } catch (error: any) {
+       console.error("Failed to load categories", error);
     }
   };
 
@@ -106,36 +92,29 @@ export default function AdminWordsPage() {
     setIsLoading(true);
     try {
       const url = editingWord
-        ? `http://localhost:3000/api/admin/game/words/${editingWord._id}`
-        : "http://localhost:3000/api/admin/game/words";
+        ? `/admin/game/words/${editingWord._id}`
+        : "/admin/game/words";
 
       const method = editingWord ? "PUT" : "POST";
 
-      const response = await fetch(url, {
+      await apiFetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
 
-      const result = await response.json();
-
-      if (response.ok) {
-        setFormData({
-          word: "",
-          category: [],
-          hint: "",
-          meaning: "",
-          usage: "",
-          example: "",
-        });
-        setEditingWord(null);
-        fetchWords();
-        alert(editingWord ? "Cập nhật thành công!" : "Tạo từ thành công!");
-      } else {
-        alert(result.message || "Lỗi khi lưu");
-      }
-    } catch (error) {
-      alert("Lỗi kết nối server. Vui lòng thử lại.");
+      setFormData({
+        word: "",
+        category: [],
+        hint: "",
+        meaning: "",
+        usage: "",
+        example: "",
+      });
+      setEditingWord(null);
+      fetchWords();
+      alert(editingWord ? "Cập nhật thành công!" : "Tạo từ thành công!");
+    } catch (error: any) {
+      alert("Lỗi: " + error.message);
     } finally {
       setIsLoading(false);
     }
@@ -156,25 +135,17 @@ export default function AdminWordsPage() {
   const handleDelete = async (id: string) => {
     if (!confirm("Bạn có chắc muốn xóa từ này?")) return;
     try {
-      const response = await fetch(
-        `http://localhost:3000/api/admin/game/words/${id}`,
-        {
-          method: "DELETE",
-        }
-      );
-      if (!response.ok) {
-        const result = await response.json();
-        alert(result.message || "Lỗi khi xóa");
-        return;
-      }
+      await apiFetch(`/admin/game/words/${id}`, {
+        method: "DELETE",
+      });
       fetchWords();
       alert("Xóa thành công!");
-    } catch (error) {
-      alert("Lỗi kết nối server");
+    } catch (error: any) {
+      alert("Lỗi: " + error.message);
     }
   };
 
-  // Lọc từ theo tìm kiếm và category
+  // Filter logic
   const filteredWords = words.filter((word) => {
     const matchesSearch = word.word
       .toLowerCase()
@@ -185,7 +156,6 @@ export default function AdminWordsPage() {
     return matchesSearch && matchesCategory;
   });
 
-  // Tạo options cho MultiSelect
   const categoryOptions = categories.map((c) => ({
     label: c.name,
     value: c._id,
@@ -194,148 +164,163 @@ export default function AdminWordsPage() {
   if (!mounted) return null;
 
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">Quản lý Từ vựng</h1>
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* FORM TẠO / SỬA */}
-        <Card className="lg:col-span-1">
-          <CardHeader>
-            <CardTitle>{editingWord ? "Chỉnh sửa Từ" : "Tạo Từ Mới"}</CardTitle>
+    <div className="container mx-auto p-8 max-w-7xl">
+      <div className="flex items-center gap-3 mb-8">
+         <Type className="w-8 h-8 text-pink-600" />
+         <h1 className="text-3xl font-bold text-slate-800">Word Management</h1>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        {/* FORM */}
+        <Card className="lg:col-span-1 border-slate-200 shadow-sm h-fit sticky top-8">
+          <CardHeader className="bg-slate-50 border-b border-slate-100 pb-4">
+             <CardTitle className="text-lg">
+                {editingWord ? "Edit Word" : "New Word"}
+             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6 space-y-4">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="word">Từ vựng *</Label>
+                <Label htmlFor="word">Word *</Label>
                 <Input
                   id="word"
                   value={formData.word}
                   onChange={(e) =>
                     setFormData({ ...formData, word: e.target.value })
                   }
-                  placeholder="Ví dụ: rain, computer..."
+                  placeholder="e.g. rain, computer"
                   required
                   disabled={isLoading}
+                   className="bg-white"
                 />
               </div>
 
               <div>
-                <Label htmlFor="category">Category *</Label>
+                <Label htmlFor="category">Categories *</Label>
                 <MultiSelect
                   options={categoryOptions}
                   selected={formData.category}
                   onChange={(selected) =>
                     setFormData({ ...formData, category: selected })
                   }
-                  placeholder="Chọn 1 hoặc nhiều..."
+                  placeholder="Select categories..."
                   disabled={isLoading}
                 />
               </div>
 
               <div>
-                <Label htmlFor="hint">Gợi ý *</Label>
+                <Label htmlFor="hint">Hint *</Label>
                 <Input
                   id="hint"
                   value={formData.hint}
                   onChange={(e) =>
                     setFormData({ ...formData, hint: e.target.value })
                   }
-                  placeholder="Ví dụ: Nước rơi từ trời..."
+                  placeholder="e.g. Falls from sky..."
                   required
                   disabled={isLoading}
+                   className="bg-white"
                 />
               </div>
 
               <div>
-                <Label htmlFor="meaning">Nghĩa *</Label>
-                <Textarea
+                <Label htmlFor="meaning">Meaning (VN) *</Label>
+                <Input
                   id="meaning"
                   value={formData.meaning}
                   onChange={(e) =>
                     setFormData({ ...formData, meaning: e.target.value })
                   }
-                  placeholder="Nghĩa tiếng Việt..."
+                  placeholder="e.g. cơn mưa"
                   required
                   disabled={isLoading}
+                   className="bg-white"
                 />
               </div>
 
               <div>
-                <Label htmlFor="usage">Cách dùng *</Label>
+                <Label htmlFor="usage">Usage / Context *</Label>
                 <Textarea
                   id="usage"
                   value={formData.usage}
                   onChange={(e) =>
                     setFormData({ ...formData, usage: e.target.value })
                   }
-                  placeholder="Cách sử dụng trong câu..."
+                  placeholder="e.g. Noun, weather related"
                   required
                   disabled={isLoading}
+                   className="bg-white resize-none"
+                   rows={2}
                 />
               </div>
 
               <div>
-                <Label htmlFor="example">Ví dụ *</Label>
+                <Label htmlFor="example">Example Sentence *</Label>
                 <Textarea
                   id="example"
                   value={formData.example}
                   onChange={(e) =>
                     setFormData({ ...formData, example: e.target.value })
                   }
-                  placeholder="Ví dụ câu hoàn chỉnh..."
+                  placeholder="e.g. The rain is heavy today."
                   required
                   disabled={isLoading}
+                   className="bg-white resize-none"
+                   rows={2}
                 />
               </div>
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                <Plus className="w-4 h-4 mr-2" />
-                {editingWord ? "Cập nhật" : "Tạo mới"}
-              </Button>
-
-              {editingWord && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => {
-                    setEditingWord(null);
-                    setFormData({
-                      word: "",
-                      category: [],
-                      hint: "",
-                      meaning: "",
-                      usage: "",
-                      example: "",
-                    });
-                  }}
-                  disabled={isLoading}>
-                  Hủy
-                </Button>
-              )}
+              <div className="pt-2">
+                  <Button type="submit" className="w-full bg-pink-600 hover:bg-pink-700" disabled={isLoading}>
+                    {isLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
+                    {editingWord ? "Update Word" : "Add Word"}
+                  </Button>
+    
+                  {editingWord && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full mt-2"
+                      onClick={() => {
+                        setEditingWord(null);
+                        setFormData({
+                          word: "",
+                          category: [],
+                          hint: "",
+                          meaning: "",
+                          usage: "",
+                          example: "",
+                        });
+                      }}
+                      disabled={isLoading}>
+                      Cancel
+                    </Button>
+                  )}
+              </div>
             </form>
           </CardContent>
         </Card>
 
-        {/* DANH SÁCH TỪ VỰNG */}
-        <Card className="lg:col-span-3">
-          <CardHeader>
-            <CardTitle className="flex justify-between items-center">
-              <span>Danh sách Từ vựng ({filteredWords.length})</span>
-              <div className="flex space-x-4">
-                <div className="flex items-center space-x-2">
-                  <Search className="w-4 h-4 text-muted-foreground" />
+        {/* LIST */}
+        <Card className="lg:col-span-3 border-slate-200 shadow-sm">
+          <CardHeader className="bg-slate-50 border-b border-slate-100 pb-4">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <CardTitle>Word List ({filteredWords.length})</CardTitle>
+              <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                <div className="relative">
+                  <Search className="w-4 h-4 text-slate-400 absolute left-2.5 top-2.5" />
                   <Input
-                    placeholder="Tìm kiếm từ..."
+                    placeholder="Search word..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-48"
+                    className="pl-9 w-full md:w-48 bg-white"
                   />
                 </div>
                 <select
                   value={filteredCategory}
                   onChange={(e) => setFilteredCategory(e.target.value)}
-                  className="border rounded p-2 text-sm">
-                  <option value="">Tất cả categories</option>
+                  className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-slate-950">
+                  <option value="">All Categories</option>
                   {categories.map((category) => (
                     <option key={category._id} value={category._id}>
                       {category.name}
@@ -343,43 +328,60 @@ export default function AdminWordsPage() {
                   ))}
                 </select>
               </div>
-            </CardTitle>
+            </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-0">
             {filteredWords.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                Không có từ nào phù hợp.
+               <div className="text-center py-20">
+                <div className="bg-slate-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100">
+                  <Type className="w-8 h-8 text-slate-300" />
+                </div>
+                <h3 className="text-slate-900 font-medium">No words found</h3>
+                <p className="text-slate-500 text-sm mt-1">Try changing filters or add a new word.</p>
               </div>
             ) : (
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead>Từ</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead>Gợi ý</TableHead>
-                    <TableHead>Thao tác</TableHead>
+                  <TableRow className="hover:bg-slate-50/50">
+                    <TableHead className="pl-6">Word</TableHead>
+                    <TableHead>Categories</TableHead>
+                    <TableHead>Meaning</TableHead>
+                    <TableHead className="w-[150px] text-right pr-6">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredWords.map((word) => (
-                    <TableRow key={word._id}>
-                      <TableCell className="font-medium">{word.word}</TableCell>
-                      <TableCell>
-                        {word.category.map((c) => c.name).join(", ")}
+                    <TableRow key={word._id} className="hover:bg-slate-50">
+                      <TableCell className="pl-6">
+                        <div>
+                            <span className="font-bold text-slate-800">{word.word}</span>
+                            <p className="text-xs text-slate-400 mt-0.5 max-w-[200px] truncate">{word.hint}</p>
+                        </div>
                       </TableCell>
-                      <TableCell>{word.hint}</TableCell>
                       <TableCell>
-                        <div className="flex space-x-2">
+                        <div className="flex flex-wrap gap-1">
+                            {word.category.map((c) => (
+                                <Badge key={c._id} variant="secondary" className="font-normal bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-100">
+                                    {c.name}
+                                </Badge>
+                            ))}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-slate-600">{word.meaning}</TableCell>
+                      <TableCell className="text-right pr-6">
+                        <div className="flex justify-end gap-2">
                           <Button
-                            variant="outline"
-                            size="sm"
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-slate-500 hover:text-pink-600"
                             onClick={() => handleEdit(word)}
                             disabled={isLoading}>
                             <Edit className="w-4 h-4" />
                           </Button>
                           <Button
-                            variant="destructive"
-                            size="sm"
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-slate-500 hover:text-red-600"
                             onClick={() => handleDelete(word._id)}
                             disabled={isLoading}>
                             <Trash2 className="w-4 h-4" />

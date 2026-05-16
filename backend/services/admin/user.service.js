@@ -44,8 +44,8 @@ const roleRepo = require("../../repositories/common/role.repository");
 const bcrypt = require("bcryptjs");
 
 class AdminUserService {
-  async getAllUsers() {
-    return await userRepo.getAllWithRole(); // ĐÃ OK
+  async getAllUsers(params) {
+    return await userRepo.findAll(params);
   }
 
   async getUserById(id) {

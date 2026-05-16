@@ -1,141 +1,217 @@
+/**
+ * services/writing.service.js
+ *
+ * ✅ GraphRAG Writing Pipeline (Hybrid Micro-Macro Architecture)
+ *
+ * Flow:
+ *   1. 🧱 Pre-processing: Split essay into sentences & paragraphs.
+ *   2. 🔍 Phase 1A: Micro-Evaluator detects specific errors per sentence.
+ *   3. 🧩 Phase 1B: Rule-Based classifies structure, linking words, academic words, fragments.
+ *   4. 📊 Phase 1.5: Feature Builder aggregates into normalized metrics & annotations.
+ *   5. 🛑 Phase 2.5: Band Constraint Engine calculates Hard Caps.
+ *   6. 🔵 Vector & Graph retrieval.
+ *   7. 💉 Prompt injection  — inject Feature Map, Annotations, and Hard Caps.
+ *   8. 🤖 LLM call          — Gemini/DeepSeek scores the essay (Justify with evidence).
+ *   9. 🧮 IELTS Math Fix    — Overrides Overall Score with strict rounding rules.
+ *   10. 🔺 Triplet extract  — parse new errors for graph update.
+ */
+
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+const { ChatOllama } = require("@langchain/ollama");
+const llmConfig = require("../config/llm.config");
+const memoryService = require("./graph/memory.service");
+const vectorService = require("./rag/vector.service");
+const { buildContext, extractTripletsFromResult } = require("./rag/context-builder");
+const { buildWritingPrompt } = require("./ai/prompt.service");
 
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY);
 
-const model = genAI.getGenerativeModel({
-  model: "gemini-2.5-flash",
-  generationConfig: {
-    responseMimeType: "application/json",
-    temperature: 0.2,
-    topP: 0.95,
-    topK: 40,
-  }
-});
+const microEvaluator = require("./ai/micro-evaluator.service");
+const ruleBased = require("./nlp/rule-based.service");
+const featureBuilder = require("./rag/feature-builder");
+const constraintEngine = require("./ai/band-constraint.engine");
 
+// ─── LLM Client Factory ──────────────────────────────────────────────────────
+let model;
+
+if (llmConfig.provider === "ollama") {
+  console.log(`🤖 Sử dụng Ollama Model: ${llmConfig.model}`);
+  model = new ChatOllama({
+    model: llmConfig.model,
+    baseUrl: process.env.OLLAMA_BASE_URL || "http://localhost:11434",
+    temperature: llmConfig.temperature,
+    format: "json",
+  });
+} else {
+  console.log(`🤖 Sử dụng Gemini Model: ${llmConfig.model}`);
+  const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY);
+  model = genAI.getGenerativeModel({
+    model: llmConfig.model,
+    generationConfig: {
+      responseMimeType: llmConfig.responseMimeType,
+      temperature: llmConfig.temperature,
+      topP: llmConfig.topP,
+      topK: llmConfig.topK,
+    },
+  });
+}
+
+// ─── JSON Parser ─────────────────────────────────────────────────────────────
 const extractJSON = (text) => {
   try {
     const cleaned = text.replace(/```json|```/g, "").trim();
     const start = cleaned.indexOf("{");
-    const end = cleaned.lastIndexOf("}") + 1;
-    if (start === -1 || end === 0) throw new Error("No JSON");
-    const jsonStr = cleaned.substring(start, end);
-    return JSON.parse(jsonStr);
+    const end   = cleaned.lastIndexOf("}") + 1;
+    if (start === -1 || end === 0) throw new Error("No JSON found");
+    return JSON.parse(cleaned.substring(start, end));
   } catch (e) {
-    console.error("Parse JSON lỗi:", text.substring(0, 800));
-    return { error: "AI không trả JSON hợp lệ", raw: text.substring(0, 1000) };
+    console.error("❌ JSON parse error:", text.substring(0, 800));
+    return { error: "AI returned invalid JSON", raw: text.substring(0, 1000) };
   }
 };
 
-const analyzeWriting = async (essay, question = "", type = "ielts-task2") => {
-  // Determine prompts based on task type and specific question category
-  let systemPrompt = "";
-  let jsonStructure = "";
+/**
+ * Standard IELTS Rounding Rule
+ * Ex: 5.25 -> 5.5, 5.75 -> 6.0, 5.125 -> 5.0
+ */
+const calculateIELTSOverall = (tr, cc, lr, gra) => {
+  const average = (tr + cc + lr + gra) / 4;
+  const intPart = Math.floor(average);
+  const fraction = average - intPart;
+
+  if (fraction >= 0.75) return intPart + 1.0;
+  if (fraction >= 0.25) return intPart + 0.5;
+  return intPart + 0.0;
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Main GraphRAG essay analysis pipeline
+ */
+const analyzeWriting = async (
+  essay,
+  question  = "",
+  type      = "ielts-task2",
+  studentId = null,
+  essayId   = null
+) => {
+
+  // ── 1. 🧱 Pre-processing ──────────────────────────────────────────────────
+  const sentences = ruleBased.splitSentences(essay);
+  console.log(`🧱 Split essay into ${sentences.length} sentences.`);
+
+  // ── 2. 🔍 Phase 1A & 1B: Micro & Rule-Based Analysis ──────────────────────
+  console.log("🔍 Running Micro-Evaluator and Rule-Based extraction...");
+  // NGẮT TỪNG CÂU ĐỂ ĐÁNH GIÁ (Phục hồi theo ý bạn)
+  const microResults = await microEvaluator.processSentences(sentences);
+  const ruleResults = sentences.map((sent, idx) => ruleBased.analyzeSentence(sent, idx));
+
+  // ── 3. 📊 Phase 1.5: Feature Builder ──────────────────────────────────────
+  const { feature_map, annotations } = featureBuilder.buildFeatures(microResults, ruleResults, essay, ruleBased);
+  console.log("📊 Feature Map generated:", JSON.stringify(feature_map.grammar.dominant_error_types));
+
+  // ── 4. 🛑 Phase 2.5: Constraint Engine ────────────────────────────────────
+  const hardCaps = constraintEngine.calculateCaps(feature_map);
+  console.log("🛑 Hard Caps:", JSON.stringify(hardCaps));
+
+  // ── 5. 🔵 Vector & Graph Retrieval ────────────────────────────────────────
+  let vectorContext = [];
+  try {
+    const dominantErrors = feature_map.grammar.dominant_error_types.join(" ");
+    const searchQuery = `${type} IELTS Writing Band Descriptors. How to fix: ${dominantErrors}`;
+    vectorContext = await vectorService.search(searchQuery);
+    console.log(`🔵 Vector: ${vectorContext.length} chunks retrieved based on dominant errors.`);
+  } catch (err) {
+    console.warn("⚠️ Vector retrieval failed (non-fatal):", err.message);
+  }
+
+  let graphContext = { errors: [], strengths: [], hasHistory: false };
+  if (studentId) {
+    try {
+      graphContext = await memoryService.getStudentMemory(studentId);
+      console.log(`🟣 Graph: retrieved for student ${studentId}`);
+    } catch (err) {
+      console.warn("⚠️ Graph retrieval failed (non-fatal):", err.message);
+    }
+  }
+
+  // ── 6. 🧩 Context & Prompt Injection ──────────────────────────────────────
+  const ragContext = buildContext(graphContext, vectorContext);
+  const prompt = buildWritingPrompt(essay, question, type, ragContext, feature_map, annotations, hardCaps);
   
-  const specializedPrompts = {
-    // TASK 1
-    "bar_chart": "Focus on comparing data, trends, and key features. Look for superlatives and comparative structures.",
-    "line_graph": "Focus on trends over time (increase, decrease, fluctuate). Look for time expressions.",
-    "pie_chart": "Focus on proportions and percentages. Look for language of fractions and composition.",
-    "table": "Focus on significant numbers and comparisons. Group information logically.",
-    "process": "Focus on sequencing (first, then, subsequently) and passive voice. Describe stages clearly.",
-    "map": "Focus on spatial language (north, south, adjacent) and changes (demolished, constructed, replaced).",
-    "mixed_chart": "Focus on synthesizing data from multiple sources. Ensure connections between charts are made if relevant.",
+  console.log("--- DEBUG: PROMPT SENT TO AI (Macro) ---");
+  console.log(prompt.substring(0, 1000) + "...");
+  console.log("-------------------------------");
+
+  // ── 7. 🤖 LLM Call (Final Judge) ──────────────────────────────────────────
+  let result;
+  try {
+    console.log(`🤖 Gọi ${llmConfig.provider} (${llmConfig.model}) để chấm điểm...`);
+    let rawText;
+    if (llmConfig.provider === "ollama") {
+      const response = await model.invoke(prompt);
+      rawText = response.content;
+    } else {
+      const llmResult = await model.generateContent(prompt);
+      rawText = await llmResult.response.text();
+    }
     
-    // TASK 2
-    "opinion": "Focus on clear opinion/position throughout. 'To what extent do you agree...'",
-    "discussion": "Focus on discussing BOTH views and then giving own opinion. Balance is key.",
-    "problem_solution": "Focus on identifying problems clearly and proposing practical solutions.",
-    "cause_effect": "Focus on causal links (because, consequently, lead to). Analyze impacts.",
-    "advantage_disadvantage": "Focus on weighing pros and cons. Use contrasting language.",
-    "two_part_question": "Ensure BOTH questions are answered fully. Logical paragraphing for each part."
+    console.log("✅ AI (Macro) đã phản hồi!");
+    result = extractJSON(rawText);
+  } catch (err) {
+    console.error("❌ LLM Error:", err.message);
+    throw err; 
+  }
+
+  if (result.error) return result;
+
+  // ── 8. 🩹 Post-Processing: Integrate with UI Format ──────────────────────
+  result.annotated_text = annotations;
+  result.feature_map    = feature_map;
+  result.hard_caps_applied = hardCaps;
+
+
+  // ── 8. 🧮 IELTS Math Fix (Overriding LLM's Math) ────────────────────────
+  if (result.band_breakdown) {
+    const tr = result.band_breakdown.task_response || 0;
+    const cc = result.band_breakdown.coherence_cohesion || 0;
+    const lr = result.band_breakdown.lexical_resource || 0;
+    const gra = result.band_breakdown.grammatical_range_accuracy || 0;
+    
+    // Auto calculate EXACT overall band using strict IELTS rules
+    result.overall_band = calculateIELTSOverall(tr, cc, lr, gra);
+    result.math_debug = { raw_average: (tr + cc + lr + gra) / 4, rounded_band: result.overall_band };
+  }
+
+  // Annotate result
+  result.generated_at   = new Date().toISOString();
+  result.type           = type;
+  result.graphrag_used  = !!studentId;   
+  
+  result.feature_map    = feature_map;
+  // result.annotated_text is already set in step 8
+  result.hard_caps_applied = hardCaps;
+
+  result.rag_debug_info = {
+    knowledge_base_chunks: vectorContext.map(v => ({ text: v.text, score: v.score })),
+    student_memory: graphContext.hasHistory ? {
+        past_errors: graphContext.errors.map(e => e.error),
+        past_strengths: graphContext.strengths.map(s => s.strength)
+    } : null
   };
 
-  const specificGuidance = specializedPrompts[type] || "";
+  // ── 9. 🔺 Triplet Extraction & Graph Update ──────────────────────────────
+  if (studentId && essayId) {
+    const triplets = extractTripletsFromResult(result);
+    triplets.originalText = essay; // Đính kèm nội dung để lưu vào Neo4j
+    console.log(`🔺 Extracted ${triplets.length} triplets from LLM result`);
 
-  if (["bar_chart", "line_graph", "pie_chart", "table", "process", "map", "mixed_chart", "Task 1"].includes(type) || type.toLowerCase().includes("task 1")) {
-     // TASK 1 SPECIFIC
-     systemPrompt = `Bạn là chuyên gia IELTS band 9.0. Hãy chấm bài Writing Task 1 (${type}) cực chuẩn.\n${specificGuidance}`;
-     jsonStructure = `
-{
-  "overall_band": 7.0,
-  "band_breakdown": {
-    "task_response": 7.0,
-    "coherence_cohesion": 7.5,
-    "lexical_resource": 7.0,
-    "grammatical_range_accuracy": 6.5
-  },
-  "feedback_vn": "Bài viết mô tả rõ xu hướng chính, nhưng cần so sánh số liệu chi tiết hơn.",
-  
-  "advanced_vocabulary": [
-    {"word": "illustrate", "level": "B2", "meaning_vn": "minh họa"},
-    {"word": "substantial", "level": "C1", "meaning_vn": "đáng kể"}
-  ],
-  "corrected_essay": "The chart illustrates the changes...",
-  "strengths": ["Clear overview", "Accurate data"],
-  "weaknesses": ["Lack of comparison", "Minor grammar errors"],
-   "recommendations_vn": "Nên dùng cấu trúc so sánh như 'User higher than...' thay vì chỉ liệt kê."
-}`;
-  } else {
-     // TASK 2 SPECIFIC
-     systemPrompt = `Bạn là chuyên gia IELTS band 9.0. Hãy chấm bài Writing Task 2 (${type}) cực chuẩn.\n${specificGuidance}`;
-     jsonStructure = `
-{
-  "overall_band": 7.0,
-  "band_breakdown": {
-    "task_response": 7.0,
-    "coherence_cohesion": 7.5,
-    "lexical_resource": 7.0,
-    "grammatical_range_accuracy": 6.5
-  },
-  "feedback_vn": "Bài viết có lập luận rõ ràng, từ vựng tốt nhưng còn lặp từ.",
-  
-  "advanced_vocabulary": [
-    {"word": "outweigh", "level": "C1", "meaning_vn": "vượt trội hơn"},
-    {"word": "crucial", "level": "B2", "meaning_vn": "quan trọng"}
-  ],
-  "corrected_essay": "In recent years...",
-  "strengths": ["Clear position", "Logical structure"],
-  "weaknesses": ["Word repetition", "Limited complex structures"],
-  "recommendations_vn": "Hãy phát triển ý sâu hơn ở đoạn thân bài 2."
-}`;
+    memoryService.updateStudentMemory(studentId, essayId, triplets).catch(err =>
+      console.error("❌ Async graph update failed:", err.message)
+    );
   }
 
-  const prompt = `
-${systemPrompt}
-
-Phân tích bài viết sau và TRẢ VỀ CHỈ JSON ĐÚNG CẤU TRÚC DƯỚI ĐÂY:
-
-Topic: ${question}
-Type: ${type}
-Essay:
-"""${essay}"""
-
-Mẫu JSON trả về (BẮT BUỘC):
-${jsonStructure}
-
-Thêm các trường phân tích chi tiết:
-- collocations (list string)
-- academic_words (list string)
-- repeated_words (list string)
-- grammar_errors_found (list object {error, type})
-- word_count (number)
-`.trim();
-
-  try {
-    const result = await model.generateContent(prompt);
-    const text = await result.response.text();
-    console.log("--- AI RAW OUTPUT START ---");
-    console.log(text);
-    console.log("--- AI RAW OUTPUT END ---");
-    const data = extractJSON(text);
-    if (data && !data.error) {
-      data.generated_at = new Date().toISOString();
-      data.type = type;
-    }
-    return data;
-  } catch (err) {
-    return { error: "Gemini error", details: err.message };
-  }
+  return result;
 };
 
 module.exports = { analyzeWriting };
