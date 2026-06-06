@@ -61,14 +61,12 @@ mongoose
   .connect(process.env.MONGODB_URI)
   .then(() => {
     console.log("Connected to MongoDB Atlas");
-    app.listen(PORT, () => {
+    const server = app.listen(PORT, () => {
       console.log(`\nSERVER ĐÃ SẴN SÀNG!`);
-      // console.log(`Local: http://localhost:${PORT}`);
-      // console.log(`API:   http://localhost:${PORT}/api`);
-      // console.log(`Auth:  http://localhost:${PORT}/api/auth/login`);
-      // console.log(`Admin: http://localhost:${PORT}/api/admin/users`);
-      // console.log(`User:  http://localhost:${PORT}/api/user/me\n`);
     });
+    
+    // Tăng timeout của Express server lên 100 phút (6000000ms) để chờ AI chấm bài
+    server.timeout = 6000000;
   })
   .catch((err) => {
     console.error("MongoDB connection error:", err.message);

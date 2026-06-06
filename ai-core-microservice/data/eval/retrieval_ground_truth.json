@@ -1,0 +1,178 @@
+[
+  {
+    "eval_id": "eval_001",
+    "query_context": "student weak at articles and SVA, band 4.5, needs basic grammar",
+    "relevant_nodes": [
+      { "type": "KnowledgeChunk", "topic": "article usage with countable and uncountable nouns", "importance": 1.0 },
+      { "type": "KnowledgeChunk", "topic": "subject verb agreement rules and common mistakes", "importance": 1.0 },
+      { "type": "KnowledgeChunk", "topic": "basic sentence construction patterns", "importance": 0.7 }
+    ],
+    "hard_negatives": [
+      { "type": "KnowledgeChunk", "topic": "advanced academic nominalization techniques" },
+      { "type": "KnowledgeChunk", "topic": "inversion structures for emphasis in formal writing" },
+      { "type": "Skeleton", "topic": "band 9 rebuttal synthesis argumentation pattern" }
+    ]
+  },
+  {
+    "eval_id": "eval_002",
+    "query_context": "student with verb tense inconsistency problems, band 5.0",
+    "relevant_nodes": [
+      { "type": "KnowledgeChunk", "topic": "verb tense consistency across paragraphs", "importance": 1.0 },
+      { "type": "KnowledgeChunk", "topic": "past simple versus present perfect usage", "importance": 0.8 },
+      { "type": "KnowledgeChunk", "topic": "common tense shifting errors in IELTS writing", "importance": 0.9 }
+    ],
+    "hard_negatives": [
+      { "type": "KnowledgeChunk", "topic": "advanced conditional structures mixed conditionals" },
+      { "type": "KnowledgeChunk", "topic": "academic hedging and tentative language" }
+    ]
+  },
+  {
+    "eval_id": "eval_003",
+    "query_context": "essay with severe logic jump between paragraphs, off-topic body paragraph",
+    "relevant_nodes": [
+      { "type": "KnowledgeChunk", "topic": "paragraph unity and coherence in essay writing", "importance": 1.0 },
+      { "type": "KnowledgeChunk", "topic": "maintaining topic relevance across body paragraphs", "importance": 1.0 },
+      { "type": "KnowledgeChunk", "topic": "logical progression and sequencing of ideas", "importance": 0.9 },
+      { "type": "KnowledgeChunk", "topic": "coherence and cohesion band descriptors", "importance": 0.7 }
+    ],
+    "hard_negatives": [
+      { "type": "Skeleton", "topic": "band 9 argument with advanced rebuttal chain" },
+      { "type": "KnowledgeChunk", "topic": "advanced cleft sentence structures" }
+    ]
+  },
+  {
+    "eval_id": "eval_004",
+    "query_context": "student overuses linking words mechanically, firstly secondly thirdly pattern",
+    "relevant_nodes": [
+      { "type": "KnowledgeChunk", "topic": "natural cohesion without mechanical linking words", "importance": 1.0 },
+      { "type": "KnowledgeChunk", "topic": "implicit cohesive devices and reference chains", "importance": 0.9 },
+      { "type": "KnowledgeChunk", "topic": "coherence cohesion band 7 requirements natural flow", "importance": 0.8 }
+    ],
+    "hard_negatives": [
+      { "type": "KnowledgeChunk", "topic": "basic list of linking words and their meanings" },
+      { "type": "KnowledgeChunk", "topic": "basic subject verb agreement drills" }
+    ]
+  },
+  {
+    "eval_id": "eval_005",
+    "query_context": "solid band 6 student looking to break into band 7, needs advanced techniques",
+    "relevant_nodes": [
+      { "type": "KnowledgeChunk", "topic": "band 7 writing criteria and what distinguishes it from band 6", "importance": 1.0 },
+      { "type": "KnowledgeChunk", "topic": "less common vocabulary and collocational awareness", "importance": 0.9 },
+      { "type": "KnowledgeChunk", "topic": "complex grammatical structures for higher bands", "importance": 0.8 },
+      { "type": "Skeleton", "topic": "band 7 discussion essay balanced structure with nuance", "importance": 0.7 }
+    ],
+    "hard_negatives": [
+      { "type": "KnowledgeChunk", "topic": "basic paragraph structure introduction body conclusion" },
+      { "type": "KnowledgeChunk", "topic": "basic grammar correction exercises" }
+    ]
+  },
+  {
+    "eval_id": "eval_006",
+    "query_context": "extreme low band essay with multiple basic errors, very short essay",
+    "relevant_nodes": [
+      { "type": "KnowledgeChunk", "topic": "basic sentence construction subject verb object", "importance": 1.0 },
+      { "type": "KnowledgeChunk", "topic": "common spelling mistakes and correction strategies", "importance": 0.9 },
+      { "type": "KnowledgeChunk", "topic": "definite and indefinite article usage basics", "importance": 0.8 }
+    ],
+    "hard_negatives": [
+      { "type": "KnowledgeChunk", "topic": "advanced nominalization turning verbs to nouns" },
+      { "type": "KnowledgeChunk", "topic": "inversion structures never seldom rarely" },
+      { "type": "KnowledgeChunk", "topic": "band 8 and 9 criteria requirements" },
+      { "type": "Skeleton", "topic": "advanced rebuttal synthesis essay pattern" }
+    ]
+  },
+  {
+    "eval_id": "eval_007",
+    "query_context": "student with systematic article omission errors, missing the and a",
+    "relevant_nodes": [
+      { "type": "KnowledgeChunk", "topic": "English article system definite indefinite zero article", "importance": 1.0 },
+      { "type": "KnowledgeChunk", "topic": "countable vs uncountable nouns and article selection", "importance": 0.9 },
+      { "type": "KnowledgeChunk", "topic": "common article error patterns for non-native speakers", "importance": 0.8 }
+    ],
+    "hard_negatives": [
+      { "type": "KnowledgeChunk", "topic": "advanced academic register and formality" },
+      { "type": "KnowledgeChunk", "topic": "complex sentence transformation techniques" }
+    ]
+  },
+  {
+    "eval_id": "eval_010",
+    "query_context": "high band essay with sophisticated vocabulary and grammar, band 7+",
+    "relevant_nodes": [
+      { "type": "KnowledgeChunk", "topic": "band 8 writing criteria and distinguishing features", "importance": 1.0 },
+      { "type": "KnowledgeChunk", "topic": "advanced stylistic techniques for academic writing", "importance": 0.8 }
+    ],
+    "hard_negatives": [
+      { "type": "KnowledgeChunk", "topic": "basic essay structure introduction body conclusion" },
+      { "type": "KnowledgeChunk", "topic": "simple grammar rules and common corrections" },
+      { "type": "KnowledgeChunk", "topic": "basic linking words list" },
+      { "type": "KnowledgeChunk", "topic": "basic article usage rules" }
+    ]
+  },
+  {
+    "eval_id": "eval_012",
+    "query_context": "student with repetitive vocabulary, uses same words throughout essay",
+    "relevant_nodes": [
+      { "type": "KnowledgeChunk", "topic": "vocabulary variety and synonym usage strategies", "importance": 1.0 },
+      { "type": "KnowledgeChunk", "topic": "paraphrasing techniques for lexical resource", "importance": 0.9 },
+      { "type": "KnowledgeChunk", "topic": "lexical resource band descriptors scoring criteria", "importance": 0.7 }
+    ],
+    "hard_negatives": [
+      { "type": "KnowledgeChunk", "topic": "advanced inversion and cleft sentence structures" },
+      { "type": "KnowledgeChunk", "topic": "complex conditional sentences mixed conditionals" }
+    ]
+  },
+  {
+    "eval_id": "eval_015",
+    "query_context": "student with heavy sentence fragments, incomplete sentences throughout",
+    "relevant_nodes": [
+      { "type": "KnowledgeChunk", "topic": "complete sentence structure with subject and predicate", "importance": 1.0 },
+      { "type": "KnowledgeChunk", "topic": "clause joining techniques using conjunctions and relative pronouns", "importance": 0.9 },
+      { "type": "KnowledgeChunk", "topic": "identifying and correcting sentence fragments", "importance": 0.8 }
+    ],
+    "hard_negatives": [
+      { "type": "KnowledgeChunk", "topic": "advanced essay argumentation and rebuttal patterns" },
+      { "type": "KnowledgeChunk", "topic": "band 8 criteria and advanced writing techniques" },
+      { "type": "KnowledgeChunk", "topic": "academic hedging and tentative language" }
+    ]
+  },
+  {
+    "eval_id": "eval_016",
+    "query_context": "student writes excellent grammar but completely off-topic from prompt",
+    "relevant_nodes": [
+      { "type": "KnowledgeChunk", "topic": "task response criteria and addressing the prompt", "importance": 1.0 },
+      { "type": "KnowledgeChunk", "topic": "identifying key words and staying on topic", "importance": 0.9 },
+      { "type": "KnowledgeChunk", "topic": "penalty for off topic essays in IELTS", "importance": 0.8 }
+    ],
+    "hard_negatives": [
+      { "type": "KnowledgeChunk", "topic": "advanced grammar correction exercises" },
+      { "type": "KnowledgeChunk", "topic": "complex sentence formation techniques" }
+    ]
+  },
+  {
+    "eval_id": "eval_017",
+    "query_context": "student uses a completely memorized template with no real substance",
+    "relevant_nodes": [
+      { "type": "KnowledgeChunk", "topic": "memorized essay penalty and formulaic writing", "importance": 1.0 },
+      { "type": "KnowledgeChunk", "topic": "developing specific ideas and authentic examples", "importance": 0.9 },
+      { "type": "KnowledgeChunk", "topic": "avoiding cliches and empty arguments", "importance": 0.8 }
+    ],
+    "hard_negatives": [
+      { "type": "KnowledgeChunk", "topic": "advanced cohesive devices and transition words" },
+      { "type": "KnowledgeChunk", "topic": "basic spelling and grammar correction" }
+    ]
+  },
+  {
+    "eval_id": "eval_018",
+    "query_context": "student writes gibberish and repeats same words constantly",
+    "relevant_nodes": [
+      { "type": "KnowledgeChunk", "topic": "basic sentence formation subject verb object", "importance": 1.0 },
+      { "type": "KnowledgeChunk", "topic": "vocabulary expansion basics and avoiding extreme repetition", "importance": 0.9 }
+    ],
+    "hard_negatives": [
+      { "type": "KnowledgeChunk", "topic": "band 7 criteria and academic argumentation" },
+      { "type": "Skeleton", "topic": "advanced essay structure synthesis rebuttal" },
+      { "type": "KnowledgeChunk", "topic": "nominalization and inversion" }
+    ]
+  }
+]

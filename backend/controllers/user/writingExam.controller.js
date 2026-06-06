@@ -37,7 +37,8 @@ class WritingExamController {
       let aiResult = {};
       try {
         const aiResponse = await axios.post(`${AI_SERVICE_URL}/score/writing/exam`, aiPayload, {
-            headers: { 'x-api-key': SERVICE_API_KEY }
+            headers: { 'x-api-key': SERVICE_API_KEY },
+            timeout: 6000000 // 100 phút thoải mái cho máy local chạy cả 2 task tuần tự
         });
         aiResult = aiResponse.data.data; // { task1: {...}, task2: {...} }
         console.log("[Backend] AI Result Received:", JSON.stringify(aiResult, null, 2));

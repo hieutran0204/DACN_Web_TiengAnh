@@ -28,7 +28,7 @@ const WritingResultSchema = new mongoose.Schema(
     advanced_vocabulary: [Object],
     strengths: [String],
     weaknesses: [String],
-    recommendations_vn: String,
+    recommendations_vn: mongoose.Schema.Types.Mixed,
     corrected_essay: String,
 
     // Statistics (Feature Map)

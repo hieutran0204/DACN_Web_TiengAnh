@@ -40,6 +40,7 @@ export async function POST(req: Request) {
         "x-api-key": API_KEY,
       },
       body: JSON.stringify(batchPayload),
+      signal: AbortSignal.timeout(6000000), // 100 minutes timeout for local inference
     });
 
     const contentType = res.headers.get("content-type");

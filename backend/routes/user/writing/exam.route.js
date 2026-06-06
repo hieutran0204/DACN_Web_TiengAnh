@@ -2,9 +2,10 @@
 const router = require("express").Router();
 const { verifyToken } = require("../../../middlewares/auth");
 const WritingSubmission = require("../../../models/Submission.model");
-const RawEssay = require("../../../models/RawEssay.model");
+const RawEssay         = require("../../../models/RawEssay.model");
+const WritingQuestion  = require("../../../models/writingQuestion.model");
 
-// Chuẩn hóa grammar_errors_found thành array string
+// Normalize grammar_errors_found to string array
 const normalizeGrammarErrors = (errors) => {
   if (!Array.isArray(errors)) return [];
   return errors
@@ -20,7 +21,8 @@ const normalizeGrammarErrors = (errors) => {
 
 // ======================= NỘP BÀI WRITING (DECOUPLED) =======================
 /**
- * Route nộp bài Writing mới: Hỗ trợ nộp lẻ từng Task
+ * POST /submit
+ * Submit a single writing task for async AI grading.
  * Body: { examId, questionId, answer, taskType }
  */
 router.post("/submit", verifyToken, async (req, res) => {
@@ -35,54 +37,73 @@ router.post("/submit", verifyToken, async (req, res) => {
       });
     }
 
-    // 1. Task 1.1: Lưu bài viết thô vào RawEssay
-    // Điều này giúp tách biệt Storage (MongoDB) và Graph Memory (Neo4j)
+    // ── 1. Fetch question text from DB (required for TR detection) ──────────
+    // Without the actual question, TopicRelevanceService receives "" and returns
+    // verdict=NO_QUESTION, making the entire TR Hard Cap system a no-op.
+    let questionText = "";
+    let resolvedType = taskType || "ielts-task2";
+    try {
+      const questionDoc = await WritingQuestion.findById(questionId).select("question type task").lean();
+      if (questionDoc) {
+        questionText  = questionDoc.question || "";
+        // Use question's own type if caller didn't send one (more reliable)
+        resolvedType  = taskType || questionDoc.type || questionDoc.task || "ielts-task2";
+      } else {
+        console.warn(`[AI-Async] WritingQuestion not found for id: ${questionId}. TR detection will be skipped.`);
+      }
+    } catch (fetchErr) {
+      // Non-fatal: log and proceed without question text
+      console.warn(`[AI-Async] Could not fetch question text: ${fetchErr.message}. TR detection will be skipped.`);
+    }
+
+    // ── 2. Persist raw essay ────────────────────────────────────────────────
     const rawEssay = await RawEssay.create({
-      user: userId,
+      user:     userId,
       question: questionId,
-      exam: examId || null,
-      content: answer,
-      taskType: taskType || (taskType === "Task 1" ? "Task 1" : "Task 2"),
-      status: "processing"
+      exam:     examId || null,
+      content:  answer,
+      taskType: resolvedType,
+      status:   "processing",
     });
 
-
-
-    // 3. Lưu kết quả vào WritingSubmission (Trạng thái ban đầu là processing)
+    // ── 3. Create submission record (status: processing) ───────────────────
     const submission = await WritingSubmission.create({
-      user: userId,
-      exam: examId || null,
+      user:     userId,
+      exam:     examId || null,
       question: questionId,
-      answer: answer,
-      status: "processing", // Trạng thái đang chấm
-      result: {}, // Chưa có điểm
+      answer:   answer,
+      status:   "processing",
+      result:   {},
     });
 
-    // 4. GỌI AI CHẤM NGẦM (BACKGROUND PROCESS)
-    // Không dùng 'await' ở đây để trả kết quả về cho FE ngay lập tức
+    // ── 4. Fire-and-forget AI grading (background) ─────────────────────────
+    // Returns immediately to client; AI result is written back via DB update.
     (async () => {
       try {
-        console.log(`[AI-Async] Đang chấm bài cho Submission: ${submission._id}`);
-        const aiResponse = await fetch("http://localhost:5000/api/ai/score/writing", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-api-key": process.env.SERVICE_API_KEY,
-          },
-          body: JSON.stringify({
-            essay: answer,
-            question: "", 
-            type: taskType || "ielts-task2",
+        console.log(`[AI-Async] Grading submission ${submission._id} | question="${questionText.slice(0, 60)}..."`);
+        const axios = require("axios");
+        const aiResponse = await axios.post(
+          "http://localhost:5000/api/ai/score/writing",
+          {
+            essay:     answer,
+            question:  questionText,   // ✅ actual question text — enables TR detection
+            type:      resolvedType,
             studentId: userId,
-            essayId: rawEssay._id 
-          }),
-        });
+            essayId:   rawEssay._id,
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+              "x-api-key":    process.env.SERVICE_API_KEY,
+            },
+            timeout: 6000000, // 100 min — local GPU constraint
+          }
+        );
 
-        const aiResult = await aiResponse.json();
+        const aiResult = aiResponse.data;
 
         if (aiResult.success) {
           const data = aiResult.data;
-          // Cập nhật kết quả khi AI chấm xong
           await WritingSubmission.findByIdAndUpdate(submission._id, {
             status: "completed",
             result: {
@@ -90,27 +111,26 @@ router.post("/submit", verifyToken, async (req, res) => {
               grammar_errors_found: normalizeGrammarErrors(data.grammar_errors_found),
             },
           });
-          
           rawEssay.status = "completed";
           await rawEssay.save();
-          console.log(`[AI-Async] Chấm bài thành công cho Submission: ${submission._id}`);
+          console.log(`[AI-Async] ✅ Grading complete for submission ${submission._id}`);
         } else {
-          throw new Error("AI Core failed to score");
+          throw new Error("AI Core returned success=false");
         }
       } catch (err) {
-        console.error(`[AI-Async] Lỗi chấm bài ngầm:`, err.message);
+        console.error(`[AI-Async] ❌ Background grading failed:`, err.message);
         await WritingSubmission.findByIdAndUpdate(submission._id, { status: "failed" });
         rawEssay.status = "failed";
         await rawEssay.save();
       }
     })();
 
-    // 5. TRẢ VỀ CHO FRONTEND NGAY LẬP TỨC
+    // ── 5. Return immediately to frontend ──────────────────────────────────
     return res.json({
       success: true,
       data: {
         resultId: submission._id,
-        status: "processing",
+        status:   "processing",
       },
       message: "Bài làm đã được gửi đi chấm!",
     });
@@ -119,6 +139,7 @@ router.post("/submit", verifyToken, async (req, res) => {
     return res.status(500).json({ success: false, message: "Lỗi server!" });
   }
 });
+
 
 
 // ======================= LẤY LỊCH SỬ =======================

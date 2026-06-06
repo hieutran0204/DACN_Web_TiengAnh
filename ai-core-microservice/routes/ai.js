@@ -37,42 +37,46 @@ router.post("/score/writing/exam", async (req, res) => {
   try {
     const { task1, task2, studentId, examId } = req.body;
 
-    const promises = [];
+    const combinedData = {};
 
+    // Xử lý tuần tự Task 1 trước, sau đó tới Task 2 để tránh làm quá tải Ollama local (giảm tải VRAM/CPU)
     if (task1?.essay?.trim().length > 10) {
-      promises.push(
-        analyzeWriting(
+      console.log("⏳ [AI-Core] Starting sequential analysis for Task 1...");
+      try {
+        const data = await analyzeWriting(
           task1.essay,
           task1.question,
           task1.type || "Task 1",
           studentId,
           examId ? `${examId}_t1` : null
-        )
-          .then(data => ({ task1: data }))
-          .catch(err  => ({ task1: { error: err.message } }))
-      );
+        );
+        combinedData.task1 = data;
+      } catch (err) {
+        console.error("❌ Task 1 analysis failed:", err.message);
+        combinedData.task1 = { error: err.message };
+      }
     } else {
-      promises.push(Promise.resolve({ task1: null }));
+      combinedData.task1 = null;
     }
 
     if (task2?.essay?.trim().length > 10) {
-      promises.push(
-        analyzeWriting(
+      console.log("⏳ [AI-Core] Starting sequential analysis for Task 2...");
+      try {
+        const data = await analyzeWriting(
           task2.essay,
           task2.question,
           task2.type || "Task 2",
           studentId,
           examId ? `${examId}_t2` : null
-        )
-          .then(data => ({ task2: data }))
-          .catch(err  => ({ task2: { error: err.message } }))
-      );
+        );
+        combinedData.task2 = data;
+      } catch (err) {
+        console.error("❌ Task 2 analysis failed:", err.message);
+        combinedData.task2 = { error: err.message };
+      }
     } else {
-      promises.push(Promise.resolve({ task2: null }));
+      combinedData.task2 = null;
     }
-
-    const results     = await Promise.all(promises);
-    const combinedData = results.reduce((acc, curr) => ({ ...acc, ...curr }), {});
 
     res.json({ success: true, data: combinedData });
   } catch (err) {

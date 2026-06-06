@@ -1,0 +1,452 @@
+{
+  "evaluated_at": "2026-06-03T08:34:25.995Z",
+  "n_total": 20,
+  "n_valid": 20,
+  "metrics": {
+    "qwk": 0.7345,
+    "mae": 0.7,
+    "aar_pct": 60,
+    "emr_pct": 15,
+    "bias": 0.25,
+    "pearson": {
+      "overall": 0.7736,
+      "tr": 0.6658,
+      "cc": 0.252,
+      "lr": 0.7401,
+      "gra": 0.6846
+    },
+    "per_criterion_mae": {
+      "tr": 0.95,
+      "cc": 1.075,
+      "lr": 1.075,
+      "gra": 1.05
+    }
+  },
+  "latency": {
+    "p50_s": 47.75,
+    "p95_s": 68.94
+  },
+  "per_case": [
+    {
+      "id": "GT_001",
+      "source": "Cambridge IELTS — Band 5.0 Sample",
+      "human": {
+        "overall": 5.5,
+        "tr": 6,
+        "cc": 5.5,
+        "lr": 5.5,
+        "gra": 5
+      },
+      "predicted": {
+        "overall": 5,
+        "tr": 4,
+        "cc": 5,
+        "lr": 5,
+        "gra": 5
+      },
+      "delta_overall": -0.5,
+      "within_half_band": true,
+      "latency_s": 39.27
+    },
+    {
+      "id": "GT_002",
+      "source": "Cambridge IELTS — Band 6.5 Sample",
+      "human": {
+        "overall": 6.5,
+        "tr": 7,
+        "cc": 6.5,
+        "lr": 6,
+        "gra": 6.5
+      },
+      "predicted": {
+        "overall": 7,
+        "tr": 5,
+        "cc": 7,
+        "lr": 7.5,
+        "gra": 8
+      },
+      "delta_overall": 0.5,
+      "within_half_band": true,
+      "latency_s": 41.22
+    },
+    {
+      "id": "GT_003",
+      "source": "Cambridge IELTS — Band 7.5 Sample",
+      "human": {
+        "overall": 7.5,
+        "tr": 7.5,
+        "cc": 7.5,
+        "lr": 7.5,
+        "gra": 7.5
+      },
+      "predicted": {
+        "overall": 7,
+        "tr": 5,
+        "cc": 7,
+        "lr": 7.5,
+        "gra": 8
+      },
+      "delta_overall": -0.5,
+      "within_half_band": true,
+      "latency_s": 49.46
+    },
+    {
+      "id": "GT_004",
+      "source": "Self-labeled — expected Band 4.5 (very short, off-topic)",
+      "human": {
+        "overall": 4.5,
+        "tr": 4,
+        "cc": 4.5,
+        "lr": 4.5,
+        "gra": 5
+      },
+      "predicted": {
+        "overall": 4.5,
+        "tr": 4,
+        "cc": 5,
+        "lr": 4.5,
+        "gra": 5
+      },
+      "delta_overall": 0,
+      "within_half_band": true,
+      "latency_s": 60.06
+    },
+    {
+      "id": "GT_005",
+      "source": "Self-labeled — expected Band 8.0 (academic, well-structured)",
+      "human": {
+        "overall": 8,
+        "tr": 8,
+        "cc": 8,
+        "lr": 8,
+        "gra": 7.5
+      },
+      "predicted": {
+        "overall": 7,
+        "tr": 7,
+        "cc": 5.5,
+        "lr": 8.5,
+        "gra": 7
+      },
+      "delta_overall": -1,
+      "within_half_band": false,
+      "latency_s": 42.82
+    },
+    {
+      "id": "GT_006",
+      "source": "Representative sample — Cambridge Band 4.0 characteristics",
+      "human": {
+        "overall": 4,
+        "tr": 4,
+        "cc": 4,
+        "lr": 4,
+        "gra": 4
+      },
+      "predicted": {
+        "overall": 4.5,
+        "tr": 4,
+        "cc": 5,
+        "lr": 4.5,
+        "gra": 5
+      },
+      "delta_overall": 0.5,
+      "within_half_band": true,
+      "latency_s": 50
+    },
+    {
+      "id": "GT_007",
+      "source": "Representative sample — Cambridge Band 4.5 characteristics",
+      "human": {
+        "overall": 4.5,
+        "tr": 5,
+        "cc": 4.5,
+        "lr": 4.5,
+        "gra": 4
+      },
+      "predicted": {
+        "overall": 5,
+        "tr": 5,
+        "cc": 6,
+        "lr": 5.5,
+        "gra": 4
+      },
+      "delta_overall": 0.5,
+      "within_half_band": true,
+      "latency_s": 68.94
+    },
+    {
+      "id": "GT_008",
+      "source": "Representative sample — Cambridge Band 5.0 characteristics",
+      "human": {
+        "overall": 5,
+        "tr": 5,
+        "cc": 5,
+        "lr": 5,
+        "gra": 5
+      },
+      "predicted": {
+        "overall": 6,
+        "tr": 5,
+        "cc": 7,
+        "lr": 5.5,
+        "gra": 6.5
+      },
+      "delta_overall": 1,
+      "within_half_band": false,
+      "latency_s": 47.86
+    },
+    {
+      "id": "GT_009",
+      "source": "Representative sample — Cambridge Band 5.0 characteristics",
+      "human": {
+        "overall": 5,
+        "tr": 5.5,
+        "cc": 5,
+        "lr": 5,
+        "gra": 5
+      },
+      "predicted": {
+        "overall": 5.5,
+        "tr": 5,
+        "cc": 6,
+        "lr": 5.5,
+        "gra": 6
+      },
+      "delta_overall": 0.5,
+      "within_half_band": true,
+      "latency_s": 55.1
+    },
+    {
+      "id": "GT_010",
+      "source": "Representative sample — Cambridge Band 5.5 characteristics",
+      "human": {
+        "overall": 5.5,
+        "tr": 6,
+        "cc": 5.5,
+        "lr": 5.5,
+        "gra": 5.5
+      },
+      "predicted": {
+        "overall": 7,
+        "tr": 5,
+        "cc": 7,
+        "lr": 7.5,
+        "gra": 8.5
+      },
+      "delta_overall": 1.5,
+      "within_half_band": false,
+      "latency_s": 48.63
+    },
+    {
+      "id": "GT_011",
+      "source": "Representative sample — Cambridge Band 5.5 characteristics",
+      "human": {
+        "overall": 5.5,
+        "tr": 5.5,
+        "cc": 5.5,
+        "lr": 5.5,
+        "gra": 6
+      },
+      "predicted": {
+        "overall": 7,
+        "tr": 5,
+        "cc": 5.5,
+        "lr": 8.5,
+        "gra": 8
+      },
+      "delta_overall": 1.5,
+      "within_half_band": false,
+      "latency_s": 47.53
+    },
+    {
+      "id": "GT_012",
+      "source": "Representative sample — Cambridge Band 6.0 characteristics",
+      "human": {
+        "overall": 6,
+        "tr": 6.5,
+        "cc": 6,
+        "lr": 6,
+        "gra": 6
+      },
+      "predicted": {
+        "overall": 7,
+        "tr": 5,
+        "cc": 6.5,
+        "lr": 8.5,
+        "gra": 7
+      },
+      "delta_overall": 1,
+      "within_half_band": false,
+      "latency_s": 46.99
+    },
+    {
+      "id": "GT_013",
+      "source": "Representative sample — Cambridge Band 6.0 characteristics",
+      "human": {
+        "overall": 6,
+        "tr": 6,
+        "cc": 6.5,
+        "lr": 6,
+        "gra": 6
+      },
+      "predicted": {
+        "overall": 6.5,
+        "tr": 5,
+        "cc": 6,
+        "lr": 8.5,
+        "gra": 7
+      },
+      "delta_overall": 0.5,
+      "within_half_band": true,
+      "latency_s": 47.75
+    },
+    {
+      "id": "GT_014",
+      "source": "Representative sample — Cambridge Band 6.5 characteristics",
+      "human": {
+        "overall": 6.5,
+        "tr": 6.5,
+        "cc": 7,
+        "lr": 6.5,
+        "gra": 6.5
+      },
+      "predicted": {
+        "overall": 7.5,
+        "tr": 7.5,
+        "cc": 6,
+        "lr": 8.5,
+        "gra": 8
+      },
+      "delta_overall": 1,
+      "within_half_band": false,
+      "latency_s": 43
+    },
+    {
+      "id": "GT_015",
+      "source": "Representative sample — Cambridge Band 6.5 characteristics",
+      "human": {
+        "overall": 6.5,
+        "tr": 7,
+        "cc": 6.5,
+        "lr": 6.5,
+        "gra": 6.5
+      },
+      "predicted": {
+        "overall": 6.5,
+        "tr": 5,
+        "cc": 6.5,
+        "lr": 7.5,
+        "gra": 7.5
+      },
+      "delta_overall": 0,
+      "within_half_band": true,
+      "latency_s": 45.3
+    },
+    {
+      "id": "GT_016",
+      "source": "Representative sample — Cambridge Band 7.0 characteristics",
+      "human": {
+        "overall": 7,
+        "tr": 7,
+        "cc": 7,
+        "lr": 7,
+        "gra": 7
+      },
+      "predicted": {
+        "overall": 7.5,
+        "tr": 7,
+        "cc": 6.5,
+        "lr": 7.5,
+        "gra": 8
+      },
+      "delta_overall": 0.5,
+      "within_half_band": true,
+      "latency_s": 45.57
+    },
+    {
+      "id": "GT_017",
+      "source": "Representative sample — Cambridge Band 7.0 characteristics",
+      "human": {
+        "overall": 7,
+        "tr": 7.5,
+        "cc": 7,
+        "lr": 7,
+        "gra": 7
+      },
+      "predicted": {
+        "overall": 7.5,
+        "tr": 7.5,
+        "cc": 6,
+        "lr": 8.5,
+        "gra": 8
+      },
+      "delta_overall": 0.5,
+      "within_half_band": true,
+      "latency_s": 46.91
+    },
+    {
+      "id": "GT_018",
+      "source": "Representative sample — Cambridge Band 7.5 characteristics",
+      "human": {
+        "overall": 7.5,
+        "tr": 7.5,
+        "cc": 8,
+        "lr": 7.5,
+        "gra": 7.5
+      },
+      "predicted": {
+        "overall": 7.5,
+        "tr": 7,
+        "cc": 5.5,
+        "lr": 8.5,
+        "gra": 8.5
+      },
+      "delta_overall": 0,
+      "within_half_band": true,
+      "latency_s": 47.18
+    },
+    {
+      "id": "GT_019",
+      "source": "Representative sample — Cambridge Band 8.0 characteristics",
+      "human": {
+        "overall": 8,
+        "tr": 8,
+        "cc": 8,
+        "lr": 8,
+        "gra": 8
+      },
+      "predicted": {
+        "overall": 7,
+        "tr": 7.5,
+        "cc": 6,
+        "lr": 7.5,
+        "gra": 7
+      },
+      "delta_overall": -1,
+      "within_half_band": false,
+      "latency_s": 48.13
+    },
+    {
+      "id": "GT_020",
+      "source": "Representative sample — Cambridge Band 8.5 characteristics",
+      "human": {
+        "overall": 8.5,
+        "tr": 8.5,
+        "cc": 8.5,
+        "lr": 8.5,
+        "gra": 8.5
+      },
+      "predicted": {
+        "overall": 7,
+        "tr": 5.5,
+        "cc": 6.5,
+        "lr": 8.5,
+        "gra": 7
+      },
+      "delta_overall": -1.5,
+      "within_half_band": false,
+      "latency_s": 47.75
+    }
+  ],
+  "failed_cases": []
+}

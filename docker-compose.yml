@@ -47,6 +47,8 @@ services:
       # Nếu chỉ dùng APOC thì không cần map thư mục plugins ra ngoài, 
       # để container tự dùng thư mục ảo của nó sẽ tránh được lỗi Permission Denied.
       # - ./infra/neo4j/plugins:/plugins
+    tmpfs:
+      - /var/lib/neo4j/run
     healthcheck:
       test: ["CMD", "wget", "-O", "-", "http://localhost:7474"]
       interval: 30s
