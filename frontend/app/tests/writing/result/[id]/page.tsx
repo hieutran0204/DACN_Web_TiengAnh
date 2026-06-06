@@ -38,6 +38,15 @@ export default function WritingResultPage() {
   const { id } = useParams();
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [checkedRecoms, setCheckedRecoms] = useState<number[]>([]);
+
+  const toggleRecom = (idx: number) => {
+    if (checkedRecoms.includes(idx)) {
+      setCheckedRecoms(checkedRecoms.filter((i) => i !== idx));
+    } else {
+      setCheckedRecoms([...checkedRecoms, idx]);
+    }
+  };
 
   const fetchResult = async () => {
     try {
@@ -473,12 +482,65 @@ export default function WritingResultPage() {
                     <p className="text-amber-800/70 dark:text-amber-500/70">Những hành động cụ thể bạn cần thực hiện cho bài viết tiếp theo</p>
                   </div>
 
-                  <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-sm border border-amber-100 dark:border-amber-900/30">
-                    <div className="prose prose-slate dark:prose-invert max-w-none">
-                       <p className="text-lg leading-loose text-slate-700 dark:text-slate-300 whitespace-pre-line">
-                         {feedbackData?.recommendations_vn}
-                       </p>
-                    </div>
+                  <div className="space-y-4">
+                    {Array.isArray(feedbackData?.recommendations_vn) ? (
+                      feedbackData.recommendations_vn.map((rec: any, idx: number) => {
+                        const isChecked = checkedRecoms.includes(idx);
+                        return (
+                          <div
+                            key={idx}
+                            onClick={() => toggleRecom(idx)}
+                            className={`p-6 rounded-2xl border transition-all cursor-pointer ${
+                              isChecked
+                                ? "bg-amber-50/50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800 shadow-inner"
+                                : "bg-white dark:bg-slate-900 border-amber-100 dark:border-amber-900/30 shadow-sm hover:shadow-md hover:-translate-y-0.5"
+                            }`}
+                          >
+                            <div className="flex gap-4">
+                              <div className="mt-1 shrink-0">
+                                <div
+                                  className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
+                                    isChecked
+                                      ? "bg-amber-500 border-amber-500 text-white"
+                                      : "border-slate-300 dark:border-slate-600"
+                                  }`}
+                                >
+                                  {isChecked && <CheckCircle className="w-4 h-4" />}
+                                </div>
+                              </div>
+                              <div className={`space-y-3 flex-1 transition-opacity ${isChecked ? "opacity-60" : "opacity-100"}`}>
+                                <div>
+                                  <Badge className="mb-2 bg-amber-100 text-amber-800 hover:bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400">
+                                    {rec.focus || rec.focus_area || `Mục tiêu ${idx + 1}`}
+                                  </Badge>
+                                  <h3 className="font-bold text-lg text-slate-800 dark:text-slate-200">
+                                    {rec.action || rec.actionable_step || rec}
+                                  </h3>
+                                </div>
+                                {(rec.current_issue || rec.student_current_issue) && (
+                                  <div className="bg-red-50 dark:bg-red-900/10 p-3 rounded-lg border border-red-100 dark:border-red-900/20 text-sm">
+                                    <span className="font-semibold text-red-800 dark:text-red-400 block mb-1">Thói quen hiện tại:</span>
+                                    <span className="text-red-600 dark:text-red-300 italic">"{rec.current_issue || rec.student_current_issue}"</span>
+                                  </div>
+                                )}
+                                {rec.expected_outcome && (
+                                  <div className="flex items-start gap-2 text-sm text-green-700 dark:text-green-400 mt-2">
+                                    <Sparkles className="w-4 h-4 mt-0.5 shrink-0" />
+                                    <p><span className="font-semibold">Kết quả mong đợi:</span> {rec.expected_outcome}</p>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-sm border border-amber-100 dark:border-amber-900/30">
+                        <p className="text-lg leading-loose text-slate-700 dark:text-slate-300 whitespace-pre-line">
+                          {feedbackData?.recommendations_vn || "Chưa có lời khuyên cụ thể."}
+                        </p>
+                      </div>
+                    )}
                   </div>
                </div>
             </Card>

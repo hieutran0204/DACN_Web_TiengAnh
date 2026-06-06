@@ -1,0 +1,47 @@
+[
+  {
+    "essayId": "aae_essay_1",
+    "triplets": [
+      {
+        "subject": {"name": "Technology improves access to education", "label": "Claim"},
+        "relationship": "SUPPORTS",
+        "object": {"name": "Students can access online libraries from anywhere", "label": "Evidence"}
+      },
+      {
+        "subject": {"name": "Students can access online libraries from anywhere", "label": "Evidence"},
+        "relationship": "SUPPORTS",
+        "object": {"name": "This levels the playing field for students in remote areas", "label": "Evidence"}
+      }
+    ]
+  },
+  {
+    "essayId": "aae_essay_2",
+    "triplets": [
+      {
+        "subject": {"name": "Remote work increases employee productivity", "label": "Claim"},
+        "relationship": "SUPPORTS",
+        "object": {"name": "Employees save 2 hours of commuting time daily", "label": "Evidence"}
+      },
+      {
+        "subject": {"name": "Employees save 2 hours of commuting time daily", "label": "Evidence"},
+        "relationship": "SUPPORTS",
+        "object": {"name": "They use this saved time to rest and focus better on tasks", "label": "Evidence"}
+      }
+    ]
+  },
+  {
+    "essayId": "aae_essay_3",
+    "triplets": [
+      {
+        "subject": {"name": "Urbanization leads to environmental degradation", "label": "Claim"},
+        "relationship": "SUPPORTS",
+        "object": {"name": "More vehicles on the road increase carbon emissions", "label": "Evidence"}
+      },
+      {
+        "subject": {"name": "More vehicles on the road increase carbon emissions", "label": "Evidence"},
+        "relationship": "SUPPORTS",
+        "object": {"name": "This directly contributes to global warming and smog in cities", "label": "Evidence"}
+      }
+    ]
+  }
+]

@@ -1,0 +1,308 @@
+[
+  {
+    "id": "eval_001",
+    "student_id": "eval_student_01",
+    "scenario": "BASIC_GRAMMAR_DISASTER",
+    "question": "Some people think that AI will replace human teachers in the future. To what extent do you agree or disagree?",
+    "essay": "In my opinion, AI is very important for education. AI can teach student many thing. For example, student use computer to learn english. The technology help student to study easy. Many people think AI is good. AI make education better. Therefore, I agree AI will replace teacher in future. AI is very helpful tool. Student can learn from AI anytime. AI never get tired and always patient.",
+    "expected": {
+      "band_range": { "overall": [4.0, 5.0] },
+      "must_detect_errors": ["article_errors", "SVA"],
+      "must_detect_strengths": ["task_relevance"],
+      "must_recommend": ["article_usage_basics", "subject_verb_agreement_practice"],
+      "must_avoid": ["advanced_nominalization", "complex_rebuttal_techniques", "band8_essay_structures"],
+      "must_detect_discourse_flaws": ["underdeveloped_ideas", "no_specific_examples"],
+      "expected_retrieval_topics": ["article_usage", "basic_grammar_rules", "sentence_variety_basics"],
+      "hard_negatives": ["advanced_academic_register", "inversion_structures", "cleft_sentences"]
+    }
+  },
+  {
+    "id": "eval_002",
+    "student_id": "eval_student_02",
+    "scenario": "TENSE_INCONSISTENCY",
+    "question": "Nowadays, many people prefer to work from home. Discuss the advantages and disadvantages.",
+    "essay": "Working from home has become increasingly popular in recent years. Many employees preferred this arrangement because it offer flexibility. Last year, millions of workers switch to remote work and they found it convenient. However, working from home has some disadvantages. People often feel isolated and they miss the social interaction with colleagues. Furthermore, it is difficult to separate work and personal life when you worked from home. Some people also struggle with distractions at home such as children or household chores. In conclusion, while remote work have many benefits, people should carefully consider its drawbacks before making a decision.",
+    "expected": {
+      "band_range": { "overall": [4.5, 5.5] },
+      "must_detect_errors": ["tense_errors", "SVA"],
+      "must_detect_strengths": ["idea_development", "adequate_structure"],
+      "must_recommend": ["verb_tense_consistency_exercises", "proofreading_strategies"],
+      "must_avoid": ["advanced_essay_structures", "academic_nominalization"],
+      "must_detect_discourse_flaws": [],
+      "expected_retrieval_topics": ["verb_tense_rules", "proofreading_techniques"],
+      "hard_negatives": ["complex_sentence_transformation", "advanced_cohesive_devices"]
+    }
+  },
+  {
+    "id": "eval_003",
+    "student_id": "eval_student_03",
+    "scenario": "COHERENCE_GAP_LOGIC_JUMP",
+    "question": "Some people believe that online learning is more effective than traditional classrooms. Discuss both views and give your opinion.",
+    "essay": "In today's digital age, online learning has emerged as a significant alternative to traditional classroom education. Proponents of online learning argue that it provides unmatched flexibility, allowing students to access materials at their own pace and convenience. This is particularly beneficial for working professionals who need to balance their careers with further education.\n\nHowever, governments should invest more money in building new sports facilities for young people. Physical health is extremely important for children and teenagers. Schools should provide more physical education classes. Playing sports teaches teamwork and discipline.\n\nIn conclusion, both online and traditional learning have their merits. I believe that a hybrid approach combining the strengths of both methods would be the most effective solution for modern education.",
+    "expected": {
+      "band_range": { "overall": [4.5, 5.5] },
+      "must_detect_errors": ["coherence"],
+      "must_detect_strengths": ["vocabulary_range", "introduction_quality"],
+      "must_recommend": ["paragraph_unity_exercises", "topic_sentence_practice", "logical_flow_techniques"],
+      "must_avoid": ["advanced_rebuttal_techniques"],
+      "must_detect_discourse_flaws": ["logic_jump", "off_topic_paragraph"],
+      "expected_retrieval_topics": ["coherence_and_cohesion", "paragraph_structure", "logical_progression"],
+      "hard_negatives": ["band9_argumentation_patterns"]
+    }
+  },
+  {
+    "id": "eval_004",
+    "student_id": "eval_student_04",
+    "scenario": "MECHANICAL_LINKING_OVERUSE",
+    "question": "In many countries, the gap between the rich and the poor is increasing. What problems does this cause? What solutions can you suggest?",
+    "essay": "Nowadays, the wealth gap between the rich and the poor is becoming wider in many countries. This essay will discuss the problems caused by this issue and suggest some possible solutions.\n\nFirstly, income inequality leads to social instability. Furthermore, poor people cannot afford healthcare and education. Moreover, this creates a cycle of poverty that is difficult to break. In addition, crime rates tend to be higher in areas with extreme poverty. Additionally, social tension can lead to protests and unrest.\n\nSecondly, governments should implement progressive tax policies. Furthermore, investing in public education would help reduce inequality. Moreover, creating more job opportunities in rural areas is essential. In addition, social welfare programs should be expanded to support vulnerable populations.\n\nIn conclusion, income inequality causes many serious problems. Therefore, it is crucial for governments and society to work together to address this pressing issue.",
+    "expected": {
+      "band_range": { "overall": [5.5, 6.5] },
+      "must_detect_errors": ["overuse_linking_words"],
+      "must_detect_strengths": ["clear_structure", "task_response", "relevant_ideas"],
+      "must_recommend": ["natural_cohesion_techniques", "implicit_linking_strategies"],
+      "must_avoid": ["basic_grammar_drills"],
+      "must_detect_discourse_flaws": ["mechanical_cohesion"],
+      "expected_retrieval_topics": ["cohesive_devices", "natural_linking", "band_descriptors_CC"],
+      "hard_negatives": ["basic_article_usage", "basic_SVA_rules"]
+    }
+  },
+  {
+    "id": "eval_005",
+    "student_id": "eval_student_05",
+    "scenario": "SOLID_BAND_6_CEILING",
+    "question": "Some people think that the government should spend money on public services rather than on the arts. To what extent do you agree or disagree?",
+    "essay": "It is often argued that government funding should prioritize essential public services such as healthcare and education over the arts. While I acknowledge the importance of maintaining robust public infrastructure, I believe that arts funding is equally vital for a well-functioning society.\n\nOn the one hand, public services directly impact citizens' quality of life. Healthcare systems ensure that people receive medical attention when needed, while education provides the foundation for economic growth. Without adequate funding for these sectors, a country's development would inevitably stagnate. For instance, countries that invest heavily in healthcare tend to have higher life expectancy rates.\n\nOn the other hand, the arts contribute significantly to cultural identity and social cohesion. Museums, theaters, and public art installations create spaces for community engagement and dialogue. Furthermore, the creative industries generate substantial economic value, employing millions of people worldwide. A society without art would be lacking in the cultural richness that makes life meaningful.\n\nIn conclusion, while public services must remain a priority, governments should allocate balanced funding that includes support for the arts. Both sectors are indispensable for a prosperous and culturally vibrant society.",
+    "expected": {
+      "band_range": { "overall": [6.0, 7.0] },
+      "must_detect_errors": [],
+      "must_detect_strengths": ["clear_position", "good_coherence", "adequate_vocabulary", "relevant_examples"],
+      "must_recommend": ["advanced_grammar_structures", "less_common_vocabulary_strategies", "nuanced_argumentation"],
+      "must_avoid": ["basic_grammar_exercises", "basic_linking_word_lists"],
+      "must_detect_discourse_flaws": [],
+      "expected_retrieval_topics": ["band7_requirements", "advanced_vocabulary_strategies", "complex_sentence_patterns"],
+      "hard_negatives": ["basic_paragraph_structure", "simple_sentence_correction"]
+    }
+  },
+  {
+    "id": "eval_006",
+    "student_id": "eval_student_06",
+    "scenario": "EXTREME_LOW_BAND_SHORT",
+    "question": "Discuss the impact of technology on modern education.",
+    "essay": "Technology very importent today. Many student use phone for study. I think technology good for education because help student learn more fast. But some people dont agree. Technology bad for eye. Student play game not study.",
+    "expected": {
+      "band_range": { "overall": [3.0, 4.5] },
+      "must_detect_errors": ["spelling", "SVA", "article_errors", "sentence_fragments"],
+      "must_detect_strengths": ["attempts_task_address"],
+      "must_recommend": ["basic_sentence_construction", "spelling_practice", "article_usage_beginners"],
+      "must_avoid": ["advanced_essay_structures", "academic_vocabulary_C1", "complex_rebuttal", "band8_techniques"],
+      "must_detect_discourse_flaws": ["insufficient_development", "too_short"],
+      "expected_retrieval_topics": ["basic_grammar", "sentence_structure_basics"],
+      "hard_negatives": ["inversion_structures", "nominalization", "band9_criteria", "advanced_cohesive_devices"]
+    }
+  },
+  {
+    "id": "eval_007",
+    "student_id": "eval_student_07",
+    "scenario": "ARTICLE_ERROR_PATTERN",
+    "question": "In some countries, young people are encouraged to work or travel for a year between finishing high school and starting university. Discuss the advantages and disadvantages.",
+    "essay": "Taking gap year between high school and university is becoming more common in many countries. There are both advantage and disadvantage to this approach.\n\nOn one hand, taking year off can provide valuable life experience. Young people can gain practical skills by working in real job. Travel can also broaden their perspective and help them understand different culture. For instance, volunteering abroad teaches independence and responsibility, which are quality that university cannot always provide.\n\nOn other hand, there are some drawback to gap year. Student may lose academic momentum and find it difficult to return to studying. Additionally, not all families can afford to support child during year without income. There is also risk that some young people may develop lazy habit and never return to education.\n\nIn conclusion, while gap year offer many benefit, it is important for young people to plan carefully and set clear goal before taking time off.",
+    "expected": {
+      "band_range": { "overall": [4.5, 5.5] },
+      "must_detect_errors": ["article_errors"],
+      "must_detect_strengths": ["clear_structure", "task_response", "idea_development"],
+      "must_recommend": ["article_usage_rules", "countable_uncountable_nouns"],
+      "must_avoid": ["advanced_academic_register_training"],
+      "must_detect_discourse_flaws": [],
+      "expected_retrieval_topics": ["article_rules", "noun_countability", "basic_grammar"],
+      "hard_negatives": ["nominalization_techniques", "advanced_cohesion"]
+    }
+  },
+  {
+    "id": "eval_008",
+    "student_id": "eval_student_08",
+    "scenario": "GOOD_START_WEAK_ENDING",
+    "question": "Some people believe that unpaid community service should be a compulsory part of high school programs. To what extent do you agree or disagree?",
+    "essay": "The notion that high school students should be required to participate in unpaid community service has gained considerable traction in recent years. I strongly agree with this proposal, as I believe it fosters empathy, develops practical skills, and strengthens social bonds.\n\nFirst and foremost, engaging in community service cultivates a sense of empathy and social responsibility among young people. When students volunteer at local shelters or assist elderly neighbors, they gain firsthand exposure to the challenges faced by less fortunate members of society. This experience can profoundly shape their worldview and encourage a lifelong commitment to civic engagement.\n\nFurthermore, community service provide students with practical skills that complement academic learning. Working in teams, managing time effectively, and solving real-world problems are abilities that no textbook can adequately teach.\n\nSo yeah in conclusion I think community service is good and students should do it. It help them a lot.",
+    "expected": {
+      "band_range": { "overall": [5.5, 6.5] },
+      "must_detect_errors": ["register_inconsistency", "SVA"],
+      "must_detect_strengths": ["strong_introduction", "good_vocabulary", "idea_extension"],
+      "must_recommend": ["conclusion_writing_techniques", "maintaining_academic_register"],
+      "must_avoid": ["basic_grammar_drills"],
+      "must_detect_discourse_flaws": ["weak_conclusion", "register_drop"],
+      "expected_retrieval_topics": ["conclusion_strategies", "formal_register", "maintaining_tone"],
+      "hard_negatives": ["basic_sentence_structure", "spelling_practice"]
+    }
+  },
+  {
+    "id": "eval_009",
+    "student_id": "eval_student_09",
+    "scenario": "ADEQUATE_BUT_FORMULAIC",
+    "question": "In many cities, the use of private cars has increased significantly. What are the causes of this trend? What solutions can be implemented?",
+    "essay": "In recent years, the number of private cars on the roads has increased dramatically in many cities around the world. This essay will examine the reasons for this trend and propose some solutions to address the issue.\n\nThere are several reasons why more people are using private cars. Firstly, public transportation systems in many cities are inadequate and unreliable. Secondly, owning a car is seen as a status symbol in many cultures. Thirdly, the expansion of suburbs has made car ownership a necessity for commuting.\n\nTo solve this problem, governments can take several measures. Firstly, they should invest in improving public transportation networks to make them more efficient and affordable. Secondly, congestion charges could be introduced in city centers to discourage car use. Thirdly, promoting cycling infrastructure and car-sharing programs would provide viable alternatives.\n\nIn conclusion, the increase in private car usage is caused by inadequate public transport, cultural factors, and urban sprawl. By implementing comprehensive transportation policies, governments can effectively reduce car dependency and create more sustainable cities.",
+    "expected": {
+      "band_range": { "overall": [5.5, 6.5] },
+      "must_detect_errors": ["mechanical_linking", "formulaic_structure"],
+      "must_detect_strengths": ["clear_organization", "task_response", "relevant_solutions"],
+      "must_recommend": ["varied_discourse_patterns", "implicit_cohesion", "topic_sentence_variety"],
+      "must_avoid": ["basic_linking_word_lists", "basic_essay_structure_templates"],
+      "must_detect_discourse_flaws": ["formulaic_progression"],
+      "expected_retrieval_topics": ["natural_cohesion", "varied_paragraph_structures", "band7_CC_requirements"],
+      "hard_negatives": ["basic_grammar_correction", "basic_vocabulary_lists"]
+    }
+  },
+  {
+    "id": "eval_010",
+    "student_id": "eval_student_10",
+    "scenario": "HIGH_BAND_EXCELLENCE",
+    "question": "Some people believe that technological advancements have made our lives more complicated rather than simpler. Discuss both views and give your opinion.",
+    "essay": "The relentless pace of technological innovation has fundamentally transformed nearly every facet of modern life. While detractors contend that this transformation has introduced unprecedented complexity, I would argue that technology, on balance, has streamlined human existence in profoundly meaningful ways.\n\nAdmittedly, the proliferation of digital devices and platforms has created new challenges. The constant barrage of notifications, the pressure to maintain an online presence, and the erosion of privacy in the digital age have collectively contributed to what sociologists term 'technostress.' Furthermore, the rapid obsolescence of devices generates environmental concerns and forces consumers into perpetual upgrade cycles, adding both financial and cognitive burden.\n\nNevertheless, the benefits of technological progress far outweigh these drawbacks. Medical breakthroughs enabled by artificial intelligence and genomics have extended life expectancy and improved diagnostic accuracy. Similarly, innovations in renewable energy technology offer viable pathways to mitigating climate change, arguably the most pressing existential threat facing humanity. On a more quotidian level, digital banking, e-commerce, and communication tools have eliminated countless inefficiencies that once consumed significant portions of people's daily routines.\n\nIn conclusion, while technological advancement undeniably introduces novel complexities, its capacity to solve problems of far greater magnitude renders it an overwhelmingly positive force. The key lies not in resisting progress but in developing the digital literacy necessary to harness its benefits responsibly.",
+    "expected": {
+      "band_range": { "overall": [7.0, 8.0] },
+      "must_detect_errors": [],
+      "must_detect_strengths": ["sophisticated_vocabulary", "complex_grammar", "nuanced_argumentation", "strong_coherence", "effective_examples"],
+      "must_recommend": ["maintain_current_level", "minor_stylistic_refinements"],
+      "must_avoid": ["basic_grammar_exercises", "basic_vocabulary_building", "basic_coherence_techniques"],
+      "must_detect_discourse_flaws": [],
+      "expected_retrieval_topics": ["band8_criteria", "advanced_stylistic_techniques"],
+      "hard_negatives": ["basic_essay_structure", "simple_grammar_rules", "basic_linking_words"]
+    }
+  },
+  {
+    "id": "eval_011",
+    "student_id": "eval_student_11",
+    "scenario": "MULTI_ERROR_CONFUSED",
+    "question": "Some people think that children should begin their formal education at a very early age. Others think children should not start school until they are older. Discuss both views.",
+    "essay": "Nowdays, many parent want their children start school very early age. But another people think children should play and enjoy childhood before go to school. I will discuss both view in this essay.\n\nFirst, early education help children develop brain. Children who go to school at age 3 or 4 can learn alphabet and number. They also learn how to share and play with other children. For example, my cousin start school at 3 years old and now she is very smart student.\n\nSecond, some expert say children need more time to play. Playing is important for children development. If children start school too early, they may feel stress and dont want to learn. Children should have freedom to explore world through play.\n\nIn my opinion, I think children should start school at around 5 or 6 years old. This is because they are ready to learn at this age. Starting too early might cause more harm than good.",
+    "expected": {
+      "band_range": { "overall": [4.0, 5.0] },
+      "must_detect_errors": ["tense_errors", "article_errors", "spelling", "SVA"],
+      "must_detect_strengths": ["attempts_both_views", "personal_example"],
+      "must_recommend": ["basic_grammar_foundation", "tense_practice", "article_usage_basics"],
+      "must_avoid": ["advanced_argumentation", "academic_vocabulary_C1", "complex_sentence_patterns"],
+      "must_detect_discourse_flaws": ["underdeveloped_arguments"],
+      "expected_retrieval_topics": ["basic_tenses", "article_rules", "spelling_common_errors"],
+      "hard_negatives": ["nominalization", "advanced_rebuttal", "band8_essay_structure"]
+    }
+  },
+  {
+    "id": "eval_012",
+    "student_id": "eval_student_13",
+    "scenario": "REPETITIVE_VOCABULARY",
+    "question": "Many people believe that social networking sites have had a huge negative impact on both individuals and society. To what extent do you agree or disagree?",
+    "essay": "Social networking sites are very popular today. Many people use social networking sites every day. Some people think social networking sites are bad for people and society. I partly agree with this opinion.\n\nFirstly, social networking sites can be bad for mental health. People spend too much time on social networking sites and they become addicted. When people use social networking sites too much, they feel lonely and depressed. For example, young people who use social networking sites often compare themselves with others.\n\nHowever, social networking sites also have good effects. Social networking sites help people stay connected with friends and family. People can also use social networking sites to learn new things and share information.\n\nIn conclusion, social networking sites have both good and bad effects. People should use social networking sites moderately to avoid the bad effects.",
+    "expected": {
+      "band_range": { "overall": [5.0, 5.5] },
+      "must_detect_errors": ["repetitive_vocabulary", "limited_lexical_range"],
+      "must_detect_strengths": ["basic_structure", "task_address", "coherent_flow"],
+      "must_recommend": ["synonym_practice", "paraphrasing_techniques", "vocabulary_expansion"],
+      "must_avoid": ["advanced_grammar_structures", "complex_argumentation_techniques"],
+      "must_detect_discourse_flaws": ["lexical_repetition"],
+      "expected_retrieval_topics": ["vocabulary_variety", "paraphrasing_skills", "synonyms_for_common_words"],
+      "hard_negatives": ["advanced_cohesive_devices", "inversion_practice"]
+    }
+  },
+  {
+    "id": "eval_013",
+    "student_id": "eval_student_14",
+    "scenario": "GOOD_BUT_INFORMAL",
+    "question": "Some people think that the best way to reduce crime is to give longer prison sentences. Others believe there are better alternative ways of reducing crime. Discuss both views and give your opinion.",
+    "essay": "Crime is a big deal in pretty much every country around the globe. Some folks reckon that locking criminals up for longer will sort the problem out, but I think there are way better approaches to cutting crime rates.\n\nLook, giving people longer prison sentences sounds good on paper. When criminals know they'll be behind bars for ages, they might think twice before doing something dodgy. Plus, while they're locked up, they literally can't commit crimes on the streets, which is a win for everyone.\n\nBut here's the thing - longer sentences don't actually get to the root of the problem. Most criminals turn to crime because of poverty, lack of education, or drug addiction. If we actually invested in education programs, job training, and rehabilitation services, we'd be tackling the real causes. Countries like Norway have super low reoffending rates because they focus on rehabilitating prisoners rather than just punishing them.\n\nAll things considered, I'm convinced that prevention and rehabilitation are far more effective than simply extending prison sentences. We need to be smart about this rather than just being tough.",
+    "expected": {
+      "band_range": { "overall": [5.5, 6.5] },
+      "must_detect_errors": ["informal_register"],
+      "must_detect_strengths": ["strong_ideas", "logical_flow", "good_examples", "clear_position"],
+      "must_recommend": ["academic_register_practice", "formal_vocabulary_alternatives"],
+      "must_avoid": ["basic_grammar_exercises", "basic_sentence_construction"],
+      "must_detect_discourse_flaws": ["inappropriate_register"],
+      "expected_retrieval_topics": ["academic_register", "formal_vs_informal_language", "IELTS_writing_conventions"],
+      "hard_negatives": ["basic_grammar_rules", "spelling_practice"]
+    }
+  },
+  {
+    "id": "eval_014",
+    "student_id": "eval_student_15",
+    "scenario": "NEAR_BAND_7_POLISH",
+    "question": "Some people think that the increasing use of computers and mobile phones has a negative effect on young people's reading and writing skills. To what extent do you agree or disagree?",
+    "essay": "The digital revolution has transformed the way young people interact with text, leading many to express concern about declining literacy standards. While I acknowledge that excessive screen time can potentially erode certain traditional literacy skills, I believe that digital technology has, paradoxically, created more opportunities for reading and writing than ever before.\n\nIt is undeniable that the brevity inherent in digital communication platforms such as social media and instant messaging has popularized abbreviated language forms. Young people frequently employ acronyms, emojis, and truncated spellings that deviate significantly from standard written conventions. Research conducted by the National Literacy Trust suggests that prolonged exposure to such informal registers may indeed weaken students' grasp of formal grammar and punctuation in academic contexts.\n\nConversely, the digital landscape has democratized access to written content on an unprecedented scale. Young people today consume vastly more text through online articles, blogs, and e-books than previous generations ever could through physical libraries alone. Moreover, platforms like Wattpad and Medium have cultivated thriving communities of young writers who produce and share original content regularly, honing their compositional skills through practice and peer feedback.\n\nIn conclusion, while digital communication may challenge traditional literacy conventions, the net effect of technology on young people's reading and writing capabilities remains broadly positive, provided that educators adapt their pedagogical approaches to harness digital tools effectively.",
+    "expected": {
+      "band_range": { "overall": [6.5, 7.5] },
+      "must_detect_errors": [],
+      "must_detect_strengths": ["sophisticated_vocabulary", "complex_grammar", "well_developed_arguments", "effective_coherence"],
+      "must_recommend": ["minor_stylistic_refinements", "advanced_hedging_language"],
+      "must_avoid": ["basic_grammar_exercises", "basic_vocabulary_lists", "basic_coherence_techniques", "basic_essay_structure"],
+      "must_detect_discourse_flaws": [],
+      "expected_retrieval_topics": ["band7_band8_criteria", "advanced_writing_techniques"],
+      "hard_negatives": ["basic_sentence_patterns", "basic_linking_words", "basic_article_usage"]
+    }
+  },
+  {
+    "id": "eval_015",
+    "student_id": "eval_student_12",
+    "scenario": "FRAGMENT_HEAVY",
+    "question": "In many countries, the proportion of older people is increasing. What problems might this cause? What can be done to address these issues?",
+    "essay": "The aging population. A very serious problem in many countries. Governments need to find solutions.\n\nBecause people live longer. Medical costs increase very much. The government has to spend more money on hospitals and medicines. Also the pension system. Very expensive to maintain when many old people. Young workers have to pay more taxes. This is unfair.\n\nAnother problem is labor shortage. When old people retire. Not enough workers to replace them. Companies struggle to find employees. The economy suffers because of this situation.\n\nSome solutions include. Raising the retirement age so people work longer. Encouraging immigration to increase the workforce. Also investing in automation and robots. To replace human workers in some jobs.\n\nIn conclusion, aging population creates problems for healthcare and economy. But solutions exist if governments act quickly.",
+    "expected": {
+      "band_range": { "overall": [4.0, 5.0] },
+      "must_detect_errors": ["sentence_fragments"],
+      "must_detect_strengths": ["relevant_ideas", "attempts_structure"],
+      "must_recommend": ["complete_sentence_construction", "clause_joining_techniques"],
+      "must_avoid": ["advanced_nominalization", "academic_hedging", "complex_argumentation"],
+      "must_detect_discourse_flaws": ["fragmented_writing"],
+      "expected_retrieval_topics": ["sentence_structure", "complete_sentences", "clause_types"],
+      "hard_negatives": ["advanced_essay_structures", "inversion_techniques", "band8_criteria"]
+    }
+  },
+  {
+    "id": "eval_016",
+    "student_id": "eval_student_10",
+    "scenario": "OFF_TOPIC_EXCELLENT_GRAMMAR",
+    "question": "Some people think that the government should spend money on exploring space. To what extent do you agree or disagree?",
+    "essay": "It is widely acknowledged that the global economy has experienced unprecedented fluctuations over the past decade. The proliferation of international trade agreements has undeniably fostered economic interdependence among developing nations. Furthermore, the implementation of stringent monetary policies has successfully mitigated inflationary pressures in various domestic markets. Consequently, governments must prioritize the optimization of supply chain logistics to ensure sustainable growth. In conclusion, while economic paradigms continually evolve, the fundamental principles of macroeconomics remain inextricably linked to societal prosperity.",
+    "expected": {
+      "band_range": { "overall": [3.0, 4.0] },
+      "must_detect_errors": ["off_topic"],
+      "must_detect_strengths": ["grammar_accuracy", "vocabulary_range"],
+      "must_recommend": ["task_analysis", "identifying_keywords", "staying_on_topic"],
+      "must_avoid": ["advanced_grammar_practice", "vocabulary_building"],
+      "must_detect_discourse_flaws": ["irrelevant_content", "failure_to_address_prompt"],
+      "expected_retrieval_topics": ["task_response_criteria", "analyzing_the_prompt"],
+      "hard_negatives": ["complex_sentence_structures", "advanced_lexical_resource"]
+    }
+  },
+  {
+    "id": "eval_017",
+    "student_id": "eval_student_04",
+    "scenario": "MEMORIZED_TEMPLATE_ABUSE",
+    "question": "In many countries, fast food is becoming cheaper and more widely available. Do the disadvantages of this outweigh the advantages?",
+    "essay": "It is a highly debated issue whether fast food is beneficial or detrimental. This is a topic of broad interest. In this essay, I will discuss both sides and give my opinion. On the one hand, there are several compelling arguments in favor of this trend. The most prominent one is that it brings many benefits to our society. For example, a recent study by Harvard University showed that 75% of people agree with this. Therefore, the advantages are clear. On the other hand, the drawbacks cannot be ignored. The primary disadvantage is that it causes many serious problems. For instance, another study demonstrated the negative impacts. Thus, the disadvantages are also significant. In conclusion, after analyzing both sides, I firmly believe that the advantages outweigh the disadvantages. Society should take steps to maximize the benefits.",
+    "expected": {
+      "band_range": { "overall": [4.5, 5.0] },
+      "must_detect_errors": ["memorized_template", "empty_arguments"],
+      "must_detect_strengths": [],
+      "must_recommend": ["developing_specific_ideas", "avoiding_cliches", "writing_authentic_sentences"],
+      "must_avoid": ["complex_grammar_drills", "basic_spelling_practice"],
+      "must_detect_discourse_flaws": ["lack_of_development", "formulaic_writing", "fake_statistics"],
+      "expected_retrieval_topics": ["task_response_penalty_for_memorized", "idea_generation", "authentic_examples"],
+      "hard_negatives": ["advanced_cohesive_devices"]
+    }
+  },
+  {
+    "id": "eval_018",
+    "student_id": "eval_student_06",
+    "scenario": "GIBBERISH_REPETITION",
+    "question": "Some people believe that university education should be free for everyone. Discuss.",
+    "essay": "University free is good. University free is very good. Because university free help people. Free university money no need. So university free very important. University free university free university free. I like free university. Education free is good for country. Country need free university. Yes university free.",
+    "expected": {
+      "band_range": { "overall": [2.0, 3.0] },
+      "must_detect_errors": ["extreme_repetition", "lack_of_sentence_structure"],
+      "must_detect_strengths": [],
+      "must_recommend": ["basic_sentence_formation", "vocabulary_expansion_basics"],
+      "must_avoid": ["band7_criteria", "academic_argumentation", "complex_grammar"],
+      "must_detect_discourse_flaws": ["gibberish", "no_clear_paragraphs"],
+      "expected_retrieval_topics": ["basic_writing_skills", "forming_sentences"],
+      "hard_negatives": ["advanced_essay_structure", "nominalization", "inversion"]
+    }
+  }
+]

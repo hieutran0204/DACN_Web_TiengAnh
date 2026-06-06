@@ -1,0 +1,36 @@
+{
+  "meta": {
+    "judge_provider": "ollama",
+    "total_judged": 1,
+    "timestamp": "2026-06-01T16:00:56.684Z"
+  },
+  "average_scores": {
+    "relevance": 5,
+    "actionability": 5,
+    "personalization": 3,
+    "hallucination_free": 5,
+    "pedagogical_alignment": 5
+  },
+  "per_case_judgments": [
+    {
+      "id": "eval_001",
+      "scenario": "BASIC_GRAMMAR_DISASTER",
+      "student": "eval_student_01",
+      "scores": {
+        "relevance": 5,
+        "actionability": 5,
+        "personalization": 3,
+        "hallucination_free": 5,
+        "pedagogical_alignment": 5
+      },
+      "reasoning": {
+        "relevance": "The feedback accurately identifies the student’s key weaknesses—article usage, subject‑verb agreement, coherence, and brevity—while acknowledging the strength in task relevance. It directly addresses the issues that are most critical for the student’s target band.",
+        "actionability": "Concrete, sentence‑level corrections are provided, along with clear, step‑by‑step suggestions (e.g., expand to 150 words, use specific linking words, practice complex sentences). The scaffolding examples give exact before‑and‑after transformations.",
+        "personalization": "The feedback references the student’s recurring errors and overall band level, but it does not explicitly tie the advice to the student’s essay history or learning trajectory. A more personalized note about past essays or progress would strengthen this dimension.",
+        "hallucination_free": "All errors and strengths mentioned are present in the essay. No unsupported claims or invented achievements appear.",
+        "pedagogical_alignment": "The suggestions are tailored to a Band 4.5 learner, focusing on foundational grammar and coherence before moving to more advanced structures. The advice follows sound scaffolding principles and aligns with the student’s learning goal."
+      },
+      "overall_summary": "The feedback is highly relevant, actionable, and pedagogically sound, with minor room for deeper personalization."
+    }
+  ]
+}

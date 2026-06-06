@@ -1,20 +1,37 @@
 const { Neo4jGraph } = require("@langchain/community/graphs/neo4j_graph");
 const { Neo4jVectorStore } = require("@langchain/community/vectorstores/neo4j_vector");
 const { ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings } = require("@langchain/google-genai");
+const { ChatOllama } = require("@langchain/ollama");
 const { RecursiveCharacterTextSplitter } = require("@langchain/textsplitters");
 
 class GraphRAGService {
   constructor() {
     this.graph = null;
-    this.model = new ChatGoogleGenerativeAI({
-      model: "gemini-2.5-flash",
-      apiKey: process.env.GOOGLE_AI_API_KEY || process.env.GEMINI_API_KEY,
-      temperature: 0,
-    });
     
-    // Professional Ontology Constants
-    this.ALLOWED_LABELS = ['Vocabulary', 'Concept', 'Context', 'ErrorType', 'IELTS_Criteria', 'Sentence', 'Essay', 'Student', 'Strength', 'Idiom', 'Collocation'];
-    this.ALLOWED_RELATIONSHIPS = ['EXEMPLIFIES', 'USED_IN', 'VIOLATES', 'LEADS_TO', 'CAUSES', 'SUPPORTS', 'CONTAINS', 'EXPRESSES', 'WROTE', 'HAS_ERROR', 'HAS_STRENGTH', 'MAKES_ERROR', 'MASTERED'];
+    const provider = process.env.AI_PROVIDER || 'ollama';
+    if (provider === "ollama") {
+      const modelName = process.env.AI_MODEL;
+      console.log(`🤖 GraphRAG Service: Using local Ollama model: ${modelName}`);
+      this.model = new ChatOllama({
+        model: modelName,
+        baseUrl: process.env.OLLAMA_BASE_URL || "http://127.0.0.1:11434",
+        temperature: 0,
+        format: "json", // Instruct ChatOllama to guarantee JSON outputs
+      });
+    } else {
+      console.log("🤖 GraphRAG Service: Using cloud Gemini model: gemini-2.5-flash");
+      this.model = new ChatGoogleGenerativeAI({
+        model: "gemini-2.5-flash",
+        apiKey: process.env.GOOGLE_AI_API_KEY || process.env.GEMINI_API_KEY,
+        temperature: 0,
+      });
+    }
+    
+    // Professional Ontology Constants — SINGLE SOURCE OF TRUTH
+    // Both ingestMasterKnowledge() and extractTriplets() MUST use these lists.
+    // Adding a label here automatically enables it in both ingestion paths.
+    this.ALLOWED_LABELS        = ['Vocabulary', 'Concept', 'Context', 'ErrorType', 'IELTS_Criteria', 'Sentence', 'Essay', 'Student', 'Strength', 'Idiom', 'Collocation', 'GrammarPoint', 'BandScore'];
+    this.ALLOWED_RELATIONSHIPS = ['EXEMPLIFIES', 'USED_IN', 'VIOLATES', 'LEADS_TO', 'CAUSES', 'SUPPORTS', 'CONTAINS', 'EXPRESSES', 'WROTE', 'HAS_ERROR', 'HAS_STRENGTH', 'MAKES_ERROR', 'MASTERED', 'PART_OF', 'REQUIRED_FOR', 'DEFINES', 'LEADS_TO_HIGH_SCORE', 'SYNONYM_OF', 'USED_WITH'];
   }
 
   async init() {
@@ -42,6 +59,31 @@ class GraphRAGService {
         console.warn(`📡 Neo4j Graph Init Attempt ${attempt} failed: ${error.message}`);
         if (attempt >= maxAttempts) throw error;
         await new Promise(res => setTimeout(res, 3000));
+      }
+    }
+  }
+
+  async _invokeWithRetry(prompt, maxRetries = 3, initialDelay = 15000) {
+    let attempt = 0;
+    while (attempt < maxRetries) {
+      try {
+        return await this.model.invoke(prompt);
+      } catch (err) {
+        attempt++;
+        const errStr = err.message || "";
+        const isRateLimit = errStr.includes("429") || errStr.toLowerCase().includes("quota") || errStr.toLowerCase().includes("rate limit") || errStr.toLowerCase().includes("too many requests");
+        
+        if (isRateLimit && attempt < maxRetries) {
+          let delay = initialDelay;
+          const match = errStr.match(/retry in ([\d.]+)\s*s/i);
+          if (match && match[1]) {
+            delay = parseFloat(match[1]) * 1000 + 1000;
+          }
+          console.warn(`⚠️  Rate limited (429) on Gemini API. Attempt ${attempt}/${maxRetries}. Waiting ${Math.round(delay/1000)}s before retrying...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+        } else {
+          throw err;
+        }
       }
     }
   }
@@ -123,8 +165,17 @@ class GraphRAGService {
     Task: Analyze the content regarding [${category.toUpperCase()}] and extract Master Knowledge triplets.
     Specific Focus: ${specialInstructions}
 
-    ALLOWED LABELS: Concept, GrammarPoint, VocabLevel, IELTS_Criteria, BandScore, SampleEssay, Idiom
-    ALLOWED RELATIONSHIPS: PART_OF, REQUIRED_FOR, EXEMPLIFIES, DEFINES, LEADS_TO_HIGH_SCORE, SYNONYM_OF, USED_WITH
+    ALLOWED LABELS (use ONLY these exact values): ${this.ALLOWED_LABELS.join(', ')}
+    ALLOWED RELATIONSHIPS (use ONLY these exact values): ${this.ALLOWED_RELATIONSHIPS.join(', ')}
+
+    Label mapping guide:
+    - Grammar rules, syntax patterns        → use label "GrammarPoint"
+    - Vocabulary, words, collocations       → use label "Vocabulary" or "Collocation"
+    - Abstract ideas, themes, topics        → use label "Concept"
+    - IELTS scoring criteria (TR/CC/LR/GRA) → use label "IELTS_Criteria"
+    - Band score levels (Band 6, Band 7...) → use label "BandScore"
+    - Sample essays, writing examples       → use label "Concept" (type: SampleEssay)
+    - Idioms and fixed expressions          → use label "Idiom"
 
     FORMAT: Return ONLY a JSON:
     {
@@ -144,21 +195,48 @@ class GraphRAGService {
     `;
 
     try {
-      const response = await this.model.invoke(prompt);
+      const response = await this._invokeWithRetry(prompt);
       const cleanedJson = response.content.replace(/```json|```/g, "").trim();
-      const parsed = JSON.parse(cleanedJson);
       
-      // Normalize names
-      if (parsed.triplets) {
-        for (const t of parsed.triplets) {
-          t.subject.name = this.normalize(t.subject.name);
-          t.object.name = this.normalize(t.object.name);
-          t.relationship = t.relationship.toUpperCase().trim();
+      let parsed;
+      try {
+        parsed = JSON.parse(cleanedJson);
+      } catch (e) {
+        // Fallback robust sanitizer for control characters / bad formatting
+        try {
+          const jsonMatch = cleanedJson.match(/\{[\s\S]*\}/);
+          let rawJsonStr = jsonMatch ? jsonMatch[0] : cleanedJson;
+          
+          // Replace raw control characters (ASCII 0-31) with escaped counterparts
+          rawJsonStr = rawJsonStr.replace(/[\u0000-\u001F]+/g, (match) => {
+            if (match.includes('\n')) return '\\n';
+            if (match.includes('\r')) return '\\r';
+            if (match.includes('\t')) return '\\t';
+            return ' ';
+          });
+          
+          parsed = JSON.parse(rawJsonStr);
+        } catch (err) {
+          console.error(`❌ [LỖI PARSE JSON THẤT BẠI] File category: ${category}. Lỗi:`, err.message);
+          return { chunksAdded: 0, tripletsAdded: 0 };
         }
+      }
+      
+      // Normalize names (Defensive Programming checks to avoid undefined crashes)
+      if (parsed && parsed.triplets && Array.isArray(parsed.triplets)) {
+        parsed.triplets = parsed.triplets.filter(t => t && t.subject && t.object && t.relationship);
+        for (const t of parsed.triplets) {
+          t.subject.name = t.subject.name ? this.normalize(t.subject.name) : "unknown";
+          t.object.name = t.object.name ? this.normalize(t.object.name) : "unknown";
+          t.relationship = typeof t.relationship === 'string' ? t.relationship.toUpperCase().trim() : "UNKNOWN";
+        }
+      } else {
+        parsed = { triplets: [], summary: parsed?.summary || "" };
       }
 
       // Phase 3: LINK GRAPH <-> CHUNK (SỬA LỖI: Luôn ưu tiên SET category)
       for (const t of parsed.triplets) {
+        if (!t?.subject?.name || !t?.object?.name) continue; // Defensive skip
         const query = `
           // 1. Tạo hoặc cập nhật các hạt tri thức và gán Category
           CALL apoc.merge.node([$sLabel, 'KnowledgePoint'], {name: $sName}) YIELD node AS s
@@ -211,45 +289,149 @@ class GraphRAGService {
   }
 
   /**
-   * REASONING LAYER (Phase 4 & 5): Hybrid RAG Query
-   * Sự kết hợp (Fusion) giữa Vector Semantic Search và Graph Expansion.
+   * REASONING LAYER — True Hybrid RAG Query
+   *
+   * Architecture (Dense + Sparse + Graph Expansion):
+   *   Channel 1 — Dense Retrieval (Semantic Vector Search):
+   *     Uses Neo4jVectorStore.similaritySearchWithScore() to perform cosine similarity
+   *     over the `knowledge_vector_index` (pre-computed nomic-embed-text embeddings
+   *     stored in Neo4j KnowledgeChunk nodes during ingestMasterKnowledge()).
+   *     This is TRUE semantic retrieval — it finds chunks conceptually related to the
+   *     essay even when no keywords match.
+   *
+   *   Channel 2 — Sparse Graph Expansion (Structured Traversal):
+   *     For each KnowledgePoint linked to the top vector hits, traverses Neo4j
+   *     relationships (DEFINES, REQUIRED_FOR, EXEMPLIFIES, SYNONYM_OF) to expand
+   *     context with related concepts from the IELTS knowledge ontology.
+   *     DATA ISOLATION enforced: Student/Essay/Sentence nodes are excluded.
+   *
+   * Why this is "Hybrid":
+   *   - Dense = vector similarity (semantic)    → finds WHAT is conceptually relevant
+   *   - Sparse/Graph = structured traversal     → finds HOW concepts are connected
+   *   Both signals are combined into the final RAG context injected into the LLM prompt.
+   *
+   * @param {string} text - Essay text to retrieve knowledge context for
+   * @returns {Promise<string>} RAG context string for LLM prompt injection
    */
   async hybridQuery(text) {
     if (!this.graph) await this.init();
-    
-    console.log(`📡 Đang thực hiện Hybrid Query (Vector + Graph) cho: "${text.substring(0, 50)}..."`);
-    
+
+    console.log(`📡 Hybrid RAG Query (Dense Vector + Graph Expansion): "${text.substring(0, 60)}..."`);
+
+    // ── Channel 1: Dense Semantic Retrieval via Neo4j Vector Index ────────────
+    // The `knowledge_vector_index` was created during ingestMasterKnowledge()
+    // using Neo4jVectorStore.fromTexts() with nomic-embed-text embeddings.
+    // We now query it using the same embedding model for semantic similarity.
+    let vectorHits = [];
     try {
-      // 1. Dùng Full-text Search để tìm các KnowledgePoint liên quan trực tiếp
-      const initialNodes = await this.graph.query(`
+      const { OllamaEmbeddings } = require('@langchain/ollama');
+      const { GoogleGenerativeAIEmbeddings } = require('@langchain/google-genai');
+
+      const provider = process.env.AI_PROVIDER || 'ollama';
+      const embeddings = provider === 'ollama'
+        ? new OllamaEmbeddings({
+            model:   process.env.EMBED_MODEL || 'nomic-embed-text',
+            baseUrl: process.env.OLLAMA_BASE_URL || 'http://localhost:11434',
+          })
+        : new GoogleGenerativeAIEmbeddings({
+            model:  'text-embedding-004',
+            apiKey: process.env.GOOGLE_AI_API_KEY || process.env.GEMINI_API_KEY,
+          });
+
+      // Instantiate vector store pointing at existing index (no re-ingestion)
+      const vectorStore = await Neo4jVectorStore.fromExistingIndex(embeddings, {
+        url:                    process.env.NEO4J_URI,
+        username:               process.env.NEO4J_USERNAME,
+        password:               process.env.NEO4J_PASSWORD,
+        indexName:              'knowledge_vector_index',
+        nodeLabel:              'KnowledgeChunk',
+        textNodeProperties:     ['text'],
+        embeddingNodeProperty:  'embedding',
+      });
+
+      // Semantic search: returns top-k chunks ranked by cosine similarity
+      const results = await vectorStore.similaritySearchWithScore(text, 4);
+      vectorHits = results.filter(([, score]) => score >= 0.50); // threshold: 0.50 cosine
+      console.log(`✅ Dense retrieval: ${vectorHits.length} relevant chunks (cosine ≥ 0.50)`);
+    } catch (err) {
+      console.warn(`⚠️ Dense vector retrieval failed (${err.message}), falling back to graph-only.`);
+    }
+
+    // ── Channel 2: Structured Graph Expansion from Vector Hits ───────────────
+    // For each high-scoring KnowledgeChunk, traverse MENTIONS → KnowledgePoint
+    // edges, then expand via IELTS ontology relationships to enrich context.
+    let context = '';
+
+    if (vectorHits.length > 0) {
+      // Build context from dense results
+      context += '--- RETRIEVED KNOWLEDGE (Vector Similarity) ---\n';
+      for (const [doc, score] of vectorHits) {
+        context += `[score=${score.toFixed(3)}] ${doc.pageContent}\n`;
+      }
+
+      // Graph Expansion: follow MENTIONS edges from matched chunks
+      try {
+        // Use the page content to find matching KnowledgePoints via full text
+        const sampleText = vectorHits[0][0].pageContent.slice(0, 100);
+        const graphExpansion = await this.graph.query(`
+          MATCH (c:KnowledgeChunk)
+          WHERE c.text CONTAINS $sample
+          MATCH (c)-[:MENTIONS]->(p:KnowledgePoint)
+          MATCH (p)-[r:DEFINES|REQUIRED_FOR|EXEMPLIFIES|SYNONYM_OF]-(related)
+          WHERE NOT 'Student' IN labels(related)
+            AND NOT 'Essay'   IN labels(related)
+            AND NOT 'Sentence' IN labels(related)
+          RETURN p.name as source, type(r) as rel, related.name as target
+          LIMIT 8
+        `, { sample: sampleText });
+
+        if (graphExpansion.length > 0) {
+          context += '\n--- GRAPH EXPANSION (Ontology Relations) ---\n';
+          graphExpansion.forEach(row => {
+            context += `  [${row.source}] --${row.rel}--> [${row.target}]\n`;
+          });
+        }
+      } catch (gErr) {
+        console.warn(`⚠️ Graph expansion step failed: ${gErr.message}`);
+      }
+
+      return context;
+    }
+
+    // ── Fallback: Sparse full-text search if vector index unavailable ─────────
+    // This path activates only when Neo4j vector index is not yet populated
+    // (e.g., fresh instance with no ingested knowledge). Clearly labeled as fallback.
+    console.warn('⚠️ hybridQuery: Vector index miss — falling back to full-text (sparse) search.');
+    try {
+      const sparseHits = await this.graph.query(`
         CALL db.index.fulltext.queryNodes("knowledge_chunks", $text) YIELD node, score
         MATCH (node)-[:MENTIONS]->(p:KnowledgePoint)
         RETURN p.name as name, labels(p) as labels, score
         ORDER BY score DESC LIMIT 3
       `, { text });
 
-      if (initialNodes.length === 0) return "";
+      if (sparseHits.length === 0) return '';
 
-      // 2. Với mỗi Node tìm được, "leo" qua các quan hệ để tìm kiến thức liên quan (Graph Expansion)
-      const names = initialNodes.map(n => n.name);
-      const graphContext = await this.graph.query(`
+      const names = sparseHits.map(n => n.name);
+      const graphCtx = await this.graph.query(`
         MATCH (p:KnowledgePoint)
         WHERE p.name IN $names
         MATCH (p)-[r:DEFINES|REQUIRED_FOR|EXEMPLIFIES|SYNONYM_OF]-(related)
+        WHERE NOT 'Student' IN labels(related)
+          AND NOT 'Essay'   IN labels(related)
+          AND NOT 'Sentence' IN labels(related)
         RETURN p.name as source, type(r) as rel, related.name as target, labels(related) as targetLabel
         LIMIT 10
       `, { names });
 
-      // 3. Tổng hợp thành chuỗi tri thức cho AI
-      let context = "--- RELATIVE KNOWLEDGE FROM GRAPH ---\n";
-      graphContext.forEach(row => {
+      context = '--- RELATIVE KNOWLEDGE FROM GRAPH (sparse fallback) ---\n';
+      graphCtx.forEach(row => {
         context += `- [${row.source}] ${row.rel} [${row.target}] (${row.targetLabel})\n`;
       });
-
       return context;
     } catch (err) {
-      console.warn("⚠️ Hybrid Query failed:", err.message);
-      return "";
+      console.warn('⚠️ Sparse fallback also failed:', err.message);
+      return '';
     }
   }
 
@@ -297,7 +479,7 @@ class GraphRAGService {
     `;
 
     try {
-      const response = await this.model.invoke(prompt);
+      const response = await this._invokeWithRetry(prompt);
       const cleanedJson = response.content.replace(/```json|```/g, "").trim();
       const parsed = JSON.parse(cleanedJson);
       
@@ -476,16 +658,23 @@ class GraphRAGService {
   }
 
   /**
-   * Lấy toàn bộ tên từ vựng trong Graph để đồng bộ với RuleBasedService
+   * Get all vocabulary word names from Graph for synchronization with RuleBasedService.
+   * Queries Vocabulary nodes (the canonical label) at B2/C1/C2 levels.
    */
   async getAllWordNames() {
     if (!this.driver && !this.graph) await this.init();
-    const query = `MATCH (w:Word) RETURN w.name as name`;
+    // NOTE: Label is 'Vocabulary' (canonical ontology label), NOT 'Word'.
+    // 'Word' was never part of the ALLOWED_LABELS ontology.
+    const query = `
+      MATCH (w:Vocabulary)
+      WHERE w.level IN ['B2', 'C1', 'C2'] OR w.academic = true
+      RETURN w.name as name, w.level as level
+    `;
     try {
       const results = await this.graph.query(query);
-      return results.map(r => r.name);
+      return results.map(r => ({ name: r.name, level: r.level || 'B2' }));
     } catch (e) {
-      console.error("❌ Lỗi lấy danh sách từ vựng từ Graph:", e.message);
+      console.error('\u274c Lỗi lấy danh sách từ vựng từ Graph:', e.message);
       return [];
     }
   }

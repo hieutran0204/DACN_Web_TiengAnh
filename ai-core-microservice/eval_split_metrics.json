@@ -1,0 +1,127 @@
+{
+  "generated_at": "2026-06-01T16:36:53.277Z",
+  "source_file": "C:\\Users\\ACER\\OneDrive\\Máy tính\\DACN_Web_TiengAnh\\Web_TiengAnh\\ai-core-microservice\\eval_results.json",
+  "group_a": {
+    "label": "Standard Test Set — GT_001 to GT_020",
+    "description": "Cases that ran through the full pipeline. Use these for thesis QWK/MAE reporting.",
+    "case_ids": [
+      "GT_001",
+      "GT_002",
+      "GT_003",
+      "GT_004",
+      "GT_005",
+      "GT_006",
+      "GT_007",
+      "GT_008",
+      "GT_009",
+      "GT_010",
+      "GT_011",
+      "GT_012",
+      "GT_013",
+      "GT_014",
+      "GT_015",
+      "GT_016",
+      "GT_017",
+      "GT_018",
+      "GT_019",
+      "GT_020"
+    ],
+    "metrics": {
+      "n": 20,
+      "qwk": 0.7375,
+      "mae": 0.625,
+      "bias": -0.125,
+      "aar_pct": 70,
+      "emr_pct": 15,
+      "pearson_overall": 0.8534,
+      "per_criterion_mae": {
+        "tr": 1.15,
+        "cc": 0.95,
+        "lr": 1.2,
+        "gra": 0.775
+      },
+      "per_criterion_pearson": {
+        "tr": 0.7363,
+        "cc": 0.5187,
+        "lr": 0.504,
+        "gra": 0.7063
+      },
+      "latency": {
+        "p50_s": 653.86,
+        "p95_s": 1631.46
+      }
+    }
+  },
+  "group_b": {
+    "label": "High-Band Ceiling Set — GT_021 to GT_030",
+    "description": "Added for ceiling-effect analysis. Data integrity must be verified before reporting.",
+    "case_ids": [
+      "GT_021",
+      "GT_022",
+      "GT_023",
+      "GT_024",
+      "GT_025",
+      "GT_026",
+      "GT_027",
+      "GT_028",
+      "GT_029",
+      "GT_030"
+    ],
+    "data_integrity_warning": "WARNING: ALL Group B cases have delta_overall=0. This indicates predicted scores were manually set equal to human scores (or engine was not re-run on these cases). Group B metrics MUST NOT be combined with Group A for QWK/MAE reporting.",
+    "zero_delta_count": 10,
+    "metrics": {
+      "n": 10,
+      "qwk": 1,
+      "mae": 0,
+      "bias": 0,
+      "aar_pct": 100,
+      "emr_pct": 100,
+      "pearson_overall": 1,
+      "per_criterion_mae": {
+        "tr": 0,
+        "cc": 0,
+        "lr": 0,
+        "gra": 0
+      },
+      "per_criterion_pearson": {
+        "tr": 1,
+        "cc": 1,
+        "lr": 1,
+        "gra": 1
+      },
+      "latency": {
+        "p50_s": 355.7004005418562,
+        "p95_s": 387.0614944904811
+      }
+    }
+  },
+  "combined": {
+    "label": "All cases — informational only",
+    "warning": "Do not use combined metrics if Group B has delta=0 leakage.",
+    "metrics": {
+      "n": 30,
+      "qwk": 0.8607,
+      "mae": 0.417,
+      "bias": -0.083,
+      "aar_pct": 80,
+      "emr_pct": 43.3,
+      "pearson_overall": 0.8858,
+      "per_criterion_mae": {
+        "tr": 0.767,
+        "cc": 0.633,
+        "lr": 0.8,
+        "gra": 0.517
+      },
+      "per_criterion_pearson": {
+        "tr": 0.7953,
+        "cc": 0.6934,
+        "lr": 0.6539,
+        "gra": 0.8259
+      },
+      "latency": {
+        "p50_s": 610.37,
+        "p95_s": 1029.48
+      }
+    }
+  }
+}

@@ -167,14 +167,20 @@ const server = app.listen(PORT, async () => {
   try {
     await graphService.init();
     
-    // Đồng bộ từ vựng từ Graph sang RuleBasedService
-    // Đồng bộ từ vựng từ Neo4j
+    // Sync vocabulary from Graph to RuleBasedService
     const wordNames = await graphService.getAllWordNames();
     ruleBasedService.setAcademicWords(wordNames);
 
-    // Đồng bộ kiến thức từ folder /md (Grammar, Topic Vocabulary)
+    // Bootstrap knowledge from /md folder (Grammar, Topic Vocabulary)
     const mdPath = path.join(__dirname, 'md');
     await ruleBasedService.bootstrapFromMarkdown(mdPath);
+
+    // Seed Exercise catalog into Neo4j (idempotent — uses MERGE)
+    // Creates Exercise nodes + RECOMMENDED_FOR → ErrorType relationships
+    const prescriptionService = require("./services/graph/prescription.service");
+    prescriptionService.ensureCatalogInGraph().catch(err =>
+      console.warn("⚠️ Prescription catalog seed failed (non-fatal):", err.message)
+    );
 
     console.log("🚀 Tất cả từ vựng và kiến thức KG đã sẵn sàng.");
   } catch (err) {
@@ -182,8 +188,9 @@ const server = app.listen(PORT, async () => {
   }
 });
 
-// Set timeout to 10 minutes for long AI analysis
-server.timeout = 600000;
+
+// Set timeout to 100 minutes for long AI analysis
+server.timeout = 6000000;
 // Endpoint liệt kê model có sẵn (gọi REST API vì SDK JS không hỗ trợ listModels)
 app.get("/list-models", async (req, res) => {
   try {

@@ -2,10 +2,11 @@ const WordCategory = require("../../models/vocabulary/WordCategory.model");
 const axios = require("axios");
 
 // GET ALL CATEGORIES
-// GET ALL CATEGORIES
 exports.getAllCategories = async (req, res) => {
   try {
-    const { page = 1, limit = 10, search = "" } = req.query;
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const search = req.query.search || "";
     const skip = (page - 1) * limit;
     const query = {};
 
@@ -25,8 +26,8 @@ exports.getAllCategories = async (req, res) => {
       success: true,
       data: categories,
       pagination: {
-        page: Number(page),
-        limit: Number(limit),
+        page,
+        limit,
         total,
         totalPages: Math.ceil(total / limit),
       },
@@ -88,9 +89,14 @@ exports.deleteCategory = async (req, res) => {
 exports.updateWords = async (req, res) => {
   try {
     const { words, action } = req.body; // action: 'add' or 'remove'
+    
+    if (!Array.isArray(words)) {
+      return res.status(400).json({ success: false, error: "'words' must be an array" });
+    }
+
     const category = await WordCategory.findById(req.params.id);
     
-    if (!category) return res.status(404).json({ error: "Category not found" });
+    if (!category) return res.status(404).json({ success: false, error: "Category not found" });
 
     if (action === 'add') {
       // Add only unique words
@@ -109,13 +115,31 @@ exports.updateWords = async (req, res) => {
   }
 };
 
-// DICTIONARY LOOKUP PROXY
+// DICTIONARY LOOKUP PROXY WITH GOOGLE TRANSLATE
 exports.lookupWord = async (req, res) => {
   try {
     const word = req.params.word;
+    
+    // 1. Fetch English Definition
     const response = await axios.get(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
     
-    res.json({ success: true, data: response.data });
+    // 2. Fetch Vietnamese Translation
+    let vietnameseTranslation = null;
+    try {
+        const translateUrl = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=vi&dt=t&q=${encodeURIComponent(word)}`;
+        const translateRes = await axios.get(translateUrl);
+        if (translateRes.data && translateRes.data[0] && translateRes.data[0][0]) {
+            vietnameseTranslation = translateRes.data[0][0][0]; // Extract translated text
+        }
+    } catch (translateErr) {
+        console.error("Translation proxy error:", translateErr.message);
+    }
+
+    res.json({ 
+        success: true, 
+        data: response.data,
+        translation: vietnameseTranslation
+    });
   } catch (err) {
     if (err.response && err.response.status === 404) {
          return res.status(404).json({ success: false, error: "Word not found in dictionary" });

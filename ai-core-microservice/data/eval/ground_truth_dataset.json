@@ -1,0 +1,652 @@
+[
+  {
+    "id": "GT_GEMINI_001",
+    "source": "IELTS CSV Dataset — Band 5.5 (Gemini Annotated)",
+    "question": "Write about the following topic.Some universities now offer their courses on the Internet so that people can study online.Is this a positive or negative development?Give reasons for your answer and include any relevant examples from your own knowledge or experience.",
+    "essay": "Now days we live in an era of digitalization and that's why so many universities they chosen to implement the traditionals courses at the Atheneum with more and more courses online.\nEven before than COVID panemic caused so many restrictions for Universitues, some of the lectures there was already available online in the univerty website and everyone had easy and quick access to them.\nHowever, I don't think this transition to the most classic lectures in the class could be replace with the online one, not all of them. As we reasonably assume, not all the lessons the are structured in the same way therefore result difficult to migrate all of them in an online version which present the same format and structure of presentation.\nAlthough online courses, most probably, are the future of teaching some lessons require fisical activity. To reinforce my position against the full online courses, I have a personal example: I've parteciapated at one course called Organic farming which require from time to time a fiscally presence in the field. Therefore result quite complicated for me aptended a lesson about beekeeping without be next to the hive, this is happened to me not long ago, we were unable to attend the lesson because of the COVID restrictions.\nRegardless the effort of the professor to address the lesson as best as he could, the resoult was not totally satisfy for me.\nIn conclusion I want to confirm my position against the online version of theacing, maybe I'm a bit old fashion and I can't see the future but I still like the classics lectures at the university with debates confrontations with others students and live the actmosphere of the university not from a screen.",
+    "human": {
+      "overall": 5.5,
+      "tr": 6,
+      "cc": 6,
+      "lr": 5.5,
+      "gra": 4.5
+    }
+  },
+  {
+    "id": "GT_GEMINI_002",
+    "source": "IELTS CSV Dataset — Band 7 (Gemini Annotated)",
+    "question": "Some people say free time activities for children should be organized by parents. Others say that children should be free to choose what they do in their free time. Discuss both views and give your opinion.",
+    "essay": "Whether parents should fully intervene in their children's organization of their leisure time or let them decide it, remains a big discussion. In this essay I will contrast the two opinions and I will explain why I think a good balance is needed.\nOne of the reasons supporting the first view is the idea of the undeveloped children's ability to organize. This is because, although some of them might seem very mature for their age, others might struggle understanding the importance of having a routine, besides playing video games. For instance, many parents orientate their children helping them to organize hobbies and teaching a very important skill, time managment.\nOn the other hand, some people encourage children to decide themselves what to do as this stimulates creativity and personal growth. This view, therefore, opens a new world for the little ones who can decide whatever they like, having multiple options. For example, children in this situation quite often are supported when they want to play sports or participate in a painting class.\nIn my opinion, parents should not only be envolved as much as they can in all aspects of their children's lives, but also they might encourage the little ones to have personal opinions and decision about their hobbies and leisure actitivities. This may be a good way to build trust and communication between parents and children. Moreover, children learn responsability while being guided by their parents.\nIn conclusion, some parents help their children more in scheduling their free time, while others intervene less leaving them to create a routine freely. I believe, parents should always be involved in their children's lives and decisions, allowing children participation too, which brings multiple benefits to their relationship.",
+    "human": {
+      "overall": 7,
+      "tr": 7.5,
+      "cc": 7.5,
+      "lr": 6.5,
+      "gra": 6.5
+    }
+  },
+  {
+    "id": "GT_GEMINI_003",
+    "source": "IELTS CSV Dataset — Band 6 (Gemini Annotated)",
+    "question": "The advantages of the spread of English as a global language will continue to outweigh its disadvantages. To what extent do you agree or disagree?",
+    "essay": "There is no doubt that these days more people is learning and talking by English language. The question is, is this viral of English has a negative view or not? In this essay I will discuss and draw my personal conclusion.\nIn terms of advantages there is many. Firstly, this spread of English language wil make the communication easier more than before . In other words, travelling to a new country that you are not speak there language is not a big problem these days because most of people are speaking English or at least know the main essential questions and there answers .To illustrate, If you are travelling to Italy you don't have to learn Italian language your English will be enough. Secondly, some languages are hard to learn like Chinese and Turkish, so using the English as a united language is much easier than using other language.\nMoreover the massive spread to English may had some disadvantages the main given reason I support this claim is that the consist of using English language in countries will make some other languages disappear. To illustrate, some countries now are choosing not to speak with their naive language and replace it with English in work and school and all daily conversations. On other hand, some countries like Turkey most of their citizens will ignore you when you don't ask them with Turkish.\nIn conclusion, although this spread of English may diminish other languages, but still having English language is important. That's why I believe that using English is essential especially if you are working with international companies and collegues.",
+    "human": {
+      "overall": 6,
+      "tr": 6,
+      "cc": 6.5,
+      "lr": 5.5,
+      "gra": 6
+    }
+  },
+  {
+    "id": "GT_GEMINI_004",
+    "source": "IELTS CSV Dataset — Band 4 (Gemini Annotated)",
+    "question": "Some people think that physical strength is important for success in sport, while other people think that mental strength is more important. Discuss both views and give your own opinion.",
+    "essay": "Physical strength is the vital role of success in sport while other people think that mentally strong is much more important in the competitive sports. In my opinion, both are correct and to be able to strong people would do more exercises in their long life.\nOn the one hand, people are more willing to suceess in the race of their games and sometimes failed. For the reasons of that they never thought that which would be the answer is that physically strength would give them to succeed in their pace of games and other sports they choice. For example, the more they do exercises before entering the match, the body will strong enough till the end of the contest. Then the succeed will come next of grasp.\nOn the other hand, the mental strength would be the main strength and sources of succeed which is the beginning point of the contest. Not even enough the exercises of mind, people would not get the immense advances of win. It means that people's minds might to be whatever they lose in the math, they can get it and stand up right their pace. As long as they get this point of action into their mind, I believed that they are eagle to strong enough to be ready to their games and other atheletics. Moreover, when they practice before entering the space of match, the embedded mind would be the main sources of mental strength too. It gives them to the progress of steps and the successful way until the end of the sports.\nTo wrap up, people should do more exercies and it will give them mentally and physically strong that I think. By doing both, the successful winner will become next and they will get a success in their tournament and will become a good competitior in the near future.",
+    "human": {
+      "overall": 4,
+      "tr": 4.5,
+      "cc": 4.5,
+      "lr": 4.5,
+      "gra": 4
+    }
+  },
+  {
+    "id": "GT_GEMINI_005",
+    "source": "IELTS CSV Dataset — Band 7 (Gemini Annotated)",
+    "question": "The advantages of the spread of English as a global language will continue to outweigh its disadvantages. To what extent do you agree or disagree?",
+    "essay": "Since the middle of the 19th century, English is recognized as the most important language and world common language. There is a variety of advantages because the number of English speakers, including non-native speakers has been increasing across the globe. I strongly agree with this phenomenon.\nTo go into detail, European countries, such as Switzerland, and Belgium are configured with some languages in one country, such as German, French, and Italian. Therefore, English is categorized as a common language in these countries. In addition, the US and European countries have been leading in a variety of fields, such as science, technology, and academic topics. Therefore, some countries, including Germany, the Netherlands, and north European countries followed learning English to keep up with technology. Therefore, the number of non-native speakers has widely and drastically increased in Europe to communicate smoothly. As a result, since internet technology has widely spread around the world, Japanese people can search for any kind of information in English more than five times higher than searching for the same information in Japanese. Therefore, learning English is inevitable for Japanese people, as well as other Asian countries or developing countries.\nFortunately, thanks to recent technology, it is getting easier to study English. For example, online English lessons, such as Cambly allows us to learn English 24/7. In addition, in some social media, the name of an app \"Club House\" is a convenient app to have a conversation with the same users worldwide. Therefore, we can easily share cultural differences and tips to improve our English skill.\nIn contrast, some people are concerned about their own native language might be vanished in the future. In Iceland, although there is a native language, \"Icelandish\" language still remains and is spoken in Iceland, but some people are anxious the language's complex grammar and vocabulary are difficult to explain in some detail. According to the researcher, they are astonished young students are all hanging out only in English, instead of Icelandish. Therefore, the government has been making an effort to maintain the native language by taking advantage of national Media such as, podcast, radio, TV broadcast are only spoken in Icelandish language.\nFinally, thanks to English language, more people are willing to communicate with a lot of people who speak English. This phenomenon is not only convenient to understand cultural differences, but also helpful to learn a variety of subject in English for developing countries, like in the Philipinnes. Tagalogue language is limited to cover some vocabulary to learn academic subjects.\nIn conclusion, English will continuously spread worldwide.",
+    "human": {
+      "overall": 7,
+      "tr": 7.5,
+      "cc": 7,
+      "lr": 7,
+      "gra": 6.5
+    }
+  },
+  {
+    "id": "GT_GEMINI_006",
+    "source": "IELTS CSV Dataset — Band 5 (Gemini Annotated)",
+    "question": "Write about the following topic.Many people use written language in a less formal and more relaxed way. Why? Does this development have advantages and disadvantages?Give reasons for your answer and include any relevant examples from your own knowledge or experience.",
+    "essay": "Nowadays, written language is used in comparatively more informal and relaxed way. I assume that it happens because of the need of making communication easier and faster. Without features of formal written language it is simplier to share your idea in a shorter period of time. This option is essential in a modern temp of life. This essay will cover both advantages and disadvantages of this development.\nThe less formal and tense written language provides some pros. First of all, without formalization the process of communication requires less amount of time. Then letters consists of less number of symbols and can help to solve the discussed problem much faster. Moreover, this way of communication does not support formal borders between members of a dialogue. Then it is easier to come closer with the interlocutor and feel no pressure during the using of written language.\nOn the other hand, development of making written language more informal and relaxed has some cons. Firstly, communication goes less respectful. Then interlocutors have almost no opportunity to pay a respect to each other. Formalized written language is significant in issue of social borders that can hihlight a paid respect. Secondly, sometimes the main gist of the letter goes unclear, because informal language is more relaxed. In these conditions, the quidity of the letter can be hidden with less formal features. If participants of the communication are not close, they will not understand each other correctly.\nIn conclusion I would like to say that the process of using written language in a more informal way has both advantages and disadvantages. It can be revealed in different situations. That is why everyone should have their own opinion based on the information discussed in this essay.",
+    "human": {
+      "overall": 5,
+      "tr": 5,
+      "cc": 5.5,
+      "lr": 5,
+      "gra": 5
+    }
+  },
+  {
+    "id": "GT_GEMINI_007",
+    "source": "IELTS CSV Dataset — Band 7.5 (Gemini Annotated)",
+    "question": "Write about the following topic.Some people believe women are better leaders than men. To what extent do you agree or disagree with this statement?Give reasons for your answer and include any relevant examples from your own knowledge or experience.",
+    "essay": "It is argued by some individuals that men aren't skilled enough as women in regard to leadership. This essay disagrees with the given statement as leadership skills are not depending on gender but are strongly related to people's personality and work experience.\nThe role of a leader should not be stereotyped according to gender, for example, women might be considered more powerful than men because they could normally appear more organised and perfectionist. Indeed, several studies concerning leadership and the role of the leader, have demonstrated that some people have innate attitudes of a leader regardless of their gender. Some of those attitudes are related to active listening, emotional intelligence skills and great communication abilities. Thus, if effectively developed and fostered, those skills can support individuals to achieve higher roles in leadership and management.\nIn the same way, the working experience also plays a crucial role in determining and further developing leadership skills. For example, a large number of women are still renouncing to their career paths in order to care for their families. Indeed, most of the women, apply for part-time roles which do not offer the opportunity to achieve a leadership role despite their abilities. For this reason, is difficult to affirm if women are better than men in leadership.\nTo conclude, the role of a leader is shaped by innate characteristics and people's personalities regardless of their gender. Moreover, the poor presence of women employed in leadership roles does not create pieces of evidence to support such a point of view.",
+    "human": {
+      "overall": 7.5,
+      "tr": 7.5,
+      "cc": 8,
+      "lr": 7.5,
+      "gra": 7
+    }
+  },
+  {
+    "id": "GT_GEMINI_008",
+    "source": "IELTS CSV Dataset — Band 6 (Gemini Annotated)",
+    "question": "Write about the following topic.With the improvements in today’s health care, society has to care for more and more elderly people.Do you feel that society will be able to cope with the increase in numbers of elderly people today and how can it be managed?Give reasons for your answer and include any relevant examples from your own knowledge or experience.",
+    "essay": "In our modern society and the development and improvement of health care sector, the average expected life age has increased comparing to what it was like in the past. This as good as it is, aslo raised the cncern of tkaing care of elderly people. In my opinion, I believe that the ability to deal with this concern depends on two main factors, which are the degree of country developement as well as the society characteristics.\nFirst of all, to be able to take care of elderly people, the relevant orginizations and innstitutions should be in place. However, this condition most of the time cannot be found in under-developed countires. That is because of the lack of funding resources. On the other hand, more developed countries, such as The Netherlands, Norway, and other european countires, are more capable of taking care of elderly. That is because they have the enough resources to fund such non-profitable orginizations.\nNevertheless, other factor that must be taken into account, is the society characteristcs. Here we mean, wheather the society is considered individualist or socialist. In social societies, countries do not need to allocate a lot of resources on elderly care, because this role is already taken by families. Where in individualist societies, most of the times elder people will be living alone. Therefore, when they reach the point where they cannot take care of themselves, they will go to elderly care houses.\nTo summarize, the ability to taking care of elderly people depends on two main factors, the country developement and the society type. If the country is developed or the society is considered social, taking care of the mental and physical health of elderly people will be eaiser. In contrast, if the country institutions are under-developed or the society is considered individualist, taking care of eldery people will be much harder.",
+    "human": {
+      "overall": 6,
+      "tr": 6.5,
+      "cc": 6.5,
+      "lr": 5,
+      "gra": 6
+    }
+  },
+  {
+    "id": "GT_GEMINI_009",
+    "source": "IELTS CSV Dataset — Band 7 (Gemini Annotated)",
+    "question": "Write about the following topic.Many governments think that economic progress is their most important goal. Some people,however, think that other types of progress are equally important for a country.Discuss both these views and give your own opinion.Give reasons for your answer and include any relevant examples from your own knowledge or experience.",
+    "essay": "My custom topic: It is important for people to take risks, in both their professional lives and personal lives.\nDo the advantages of taking these risks outweigh the disadvantages?\nI personally think that taking risks is inevitable in this day and age. There may be some drawbacks, but there it cannot be denied that there are certainly benefits.\nFirstly, risks are necessary for us to move forward. Without risks, there would be no innovation, and without innovation, there will be no progress for humankind. Humankind is built on the foundation of risk-takers who not only achieved their goals of making the world a better place but also learnt to ability to get back up after their countless failures.\nSecondly, by not taking the chance provided and taking a risk, they are missing out on amazing opportunities that could never be achieved unless you have the confidence, determination and conviction to follow the unknown path ahead. These opportunities could easily get them ahead in life, and they would never come true unless they stroll out of their conform zone.\nAlthought that is the case, it is undeniable that the amount of risk for professional and personal lives is vastly different. If they fail in their personal life, this could hurt in the short term, for example, you could need financial support if you had a family feud. This short-term loss could be a disadvantage in life, but it may not be as crucial as its effect on professional lives, for example, a career change could involve a big pay cut, which could be quite influential on professional lives.\nOverall, taking risks could turn out to be a loss in the short term, but it is greatly outweighed by all the upsides taking a risk could bring.",
+    "human": {
+      "overall": 7,
+      "tr": 7.5,
+      "cc": 7,
+      "lr": 6.5,
+      "gra": 7
+    }
+  },
+  {
+    "id": "GT_GEMINI_010",
+    "source": "IELTS CSV Dataset — Band 4.5 (Gemini Annotated)",
+    "question": "Some people think history has nothing or little to tell us, but others think that studying the past history can help us better understand the present. Discuss both views and give your opinion.",
+    "essay": "There is no argument that history is something related to the past generation which has never been seen by the present generation. which let some people think that history has nothing to teach us or has limited information. While others believe that in order to identify history we have to study it to help us in our modern lives. In my opinion, in the past even if they reach wonderful experiments it could be difficult to reach to our era. However, nowadays we are capable of knowing about the old history via modern technology.\nOn one hand, old people are limited by the population which let the people in the same place communicate through symbols to be aware of enemies. Towards generations, these symbols turned into history. As a result, people think that it is just a piece of art by the old people. In fact, some of these are from scientists and have been written as a symbol. Moreover, till now those shapes meant nothing to us or are just small pieces of information.\nOn the other hand, these days the government take a step forward and is trying hard to clarify those stones and what it means, In addition, some historical centers have scientists studying the old tools in order to have an idea from studying that symbols. For instance, Tomes Addison one of his achievement was the discovery of the light lamp which we are used to living with it. Therefore, this exploration comes from studying old history. In other words, each generation is capable to help the following generation.\nIn conclusion, history is an element that can not be ignored from any period, because it could have very critical information. Finally, I believe that technology helped us recently to study those strange tools. consequently, the government should pay more attention to covering the experiment's expenses.",
+    "human": {
+      "overall": 4.5,
+      "tr": 5.5,
+      "cc": 4.5,
+      "lr": 4,
+      "gra": 4
+    }
+  },
+  {
+    "id": "GT_GEMINI_011",
+    "source": "IELTS CSV Dataset — Band 7.5 (Gemini Annotated)",
+    "question": "Write about the following topic.Some people think living in big cities is bad for people’s health.To what extent do you agree or disagree?Give reasons for your answer and include any relevant examples from your own knowledge or experience.",
+    "essay": "Never has the topic concerning citizens’ health failed to attract people’s attention. However, when it comes to whether living in a metropolis would do bad to people’s health, individuals hold different views. As far as I am concerned, it does diminish individuals’ health conditions.\nUndoubtedly, living in a metropolis has some benefits for the inhabitants’ health. A big city is more likely to provide individuals with high level medical services which can be helpful when people are afflicted with various diseases. Precisely, there are numerous community clinics as well as large hospitals where individuals can get access to offering people the most advanced medical technology and medicines. Thus, greater recovering possibilities are provided by big cities for sick people.\nHowever, urban life can also be unhealthy due to numerous reasons. Firstly, individuals tend to suffer from greater mental stress in a metropolis. Specifically, the increasingly higher housing price contributes to the heavy financial burdens of individuals. People are compelled to struggle with high-intensity works due to the high cost in housing, which would cause a high mental pressure. Besides, one of the reasons for individuals’ mental pressure can be the indifferent relationship among urban inhabitants which is caused by the lack of a sense of community.\nFurthermore, the poor air condition which is caused by the remorseless rush of pollution in big cities does do harm to citizens’ health conditions. For instance, the waste gas that discharged by the cars in the streets and the factories is polluting the air in urban areas, leading to a higher rate in diseases. As a result, citizens’ health conditions can be diminished physically.\nIn conclusion, although a metropolis can provide advanced medical services to urban inhabitants, living in big cities can also be hazardous to individuals’ mental heath and body health due to numerous factors. In my opinion, living in a metropolis is more likely to undermine people’s health.",
+    "human": {
+      "overall": 7.5,
+      "tr": 7,
+      "cc": 7.5,
+      "lr": 8,
+      "gra": 7.5
+    }
+  },
+  {
+    "id": "GT_GEMINI_012",
+    "source": "IELTS CSV Dataset — Band 6.5 (Gemini Annotated)",
+    "question": "Write about the following topic.In many countries large amounts of foods are wasted. Why do you think people waste food in this way? What can be done to reduce the amount of food thrown away?Give reasons for your answer and include any relevant examples from your own knowledge or experience.",
+    "essay": "In recent years, the crisis of food wasting has drawn the attention from all over the world. In my perspective, there are reasons to this problem and some measures should be taken into effect to reduce the amount of wasted food.\nFranklly speaking, based on my observation, there are several factors that leads to the food-wasting crisis. Firstly, with the aid of modern technology, especially those related to farming industry, we can get much more stable access to all kinds of crops than our predecessors, which means we no longer need to live in a food-saving lifestyle, thus leading to a number of wastes in terms of food. Secondly, due to lack of educations on saving food in school, the youngsters nowadays tend to be unaware of the importance of adequete food. As a result, people are used to order more amount of food than they actually need, constituting more food is wasted everyday. Finally, as the burgeon of economy in most countries, the fashion of showing off to others is curved into the mind of pubilc, resulting a number of extravegent consuming that could cost plenty of food wasted.\nSince the problem of food wasting is taking place everywhere around the globe right now, it is urgent for us to take some actions to deal with the problem. In my opinion, as it is impossible to reverse the development of science, we should then focus on educaitions, specifically children's education. For example, several lectures could be given to the elementary school students to highlight the hardships to grown crops for our ancestors, as well as the reason why we should save the food we eat everyday. On top of that, the autorities could organise the student for some visits to the farming field, where they can learn the basic knowledges needed for farming industry and then understand how harsh it is to grow food that is sold on market nowadays. Once the children aware of the importance of saving food, there certainly will be less food thrown away on a day to day basis.\nTo sum up, both technologies and lack of public education give birth to food wasting. Althogh several methods could be taken to deal with the problem, it is through our joint effort to reduce the food thrown away everday. Actions need to be implemented swiftly.",
+    "human": {
+      "overall": 6.5,
+      "tr": 7,
+      "cc": 6.5,
+      "lr": 6.5,
+      "gra": 6
+    }
+  },
+  {
+    "id": "GT_GEMINI_013",
+    "source": "IELTS CSV Dataset — Band 4.5 (Gemini Annotated)",
+    "question": "Write about the following topic.In many countries large amounts of foods are wasted. Why do you think people waste food in this way? What can be done to reduce the amount of food thrown away?Give reasons for your answer and include any relevant examples from your own knowledge or experience.",
+    "essay": "one of the important issues of a lot of massive places on the earth is the mammoth food that is wasted let is discuss more about why and what we can figure out to less this problem.\nFirstly, there is many reasons, like the big celebrations which are something popular that happen a lot, also we can see that now adays restrants being almost every where so people these days like to go there always than before, and the most famous things is the junk food which is so cheap consequently more visitors that looking for a fast things because they are busy, while others who buy more than they need because they are hungry.\nSecondly, we can help that issues by many ways, first is by knowing your calories; you will eat just what you need, also do not spend much of money in reasrant because it makes you dreadful by let your body ask for more fast food however, it is curcial to only buy the stuff you really needed only and cook in your home, moving to the huge events it is significant to make sure of how many people who will come so you breing foods as the needed, and when we want to buy foods we must think if it will be sasted or not and ask ourselves if it is significant.\nAt the end, this is a important proplem that we should take car of and start to solve it and let more humans know about this problem.",
+    "human": {
+      "overall": 4.5,
+      "tr": 5,
+      "cc": 5,
+      "lr": 4.5,
+      "gra": 4
+    }
+  },
+  {
+    "id": "GT_GEMINI_014",
+    "source": "IELTS CSV Dataset — Band 6.5 (Gemini Annotated)",
+    "question": "Some people believe that governments should pay full course fees for students who want to study in universities. Do you agree or disagree with this statement?",
+    "essay": "It is believed that governments ought to pay full institutional fees for students who want to obtain higher education. I would say that I strongly agree with this statement.\nTo start with, the cost of course fees nowadays is much higher than it used to be a decade ago. One of the biggest problemss for school leavers is to manage to collect a huge amount of money that is needed in order to enter the university of your dream. Of course there are some scholarships that are very helpful. But the problem is that they are only available for very talented students who scored only high grades during their educational process, or for those who come from low-income families. As the result, students who have passion and necessary skills can not afford to study in the university.\nOn the ohter hand, paying for everyone's course fee would lead to a huge hole in every government's budget. The possibility of free studying for everyone sounds naive and kind of impossible. Another problem is that those students who are more likely not to participate well during their studies and might drop off the university after the first year will have an opportunity to enter universities. This will likely lead to problems with whole educational system. The only solution is to select wisely whether this or that student is ready to spend his or her time studying new knowledge and skills.\nIn conclusion, paying for course fees is a good idea but only for those students who have enthusiasm for studying",
+    "human": {
+      "overall": 6.5,
+      "tr": 6,
+      "cc": 6.5,
+      "lr": 6.5,
+      "gra": 7
+    }
+  },
+  {
+    "id": "GT_GEMINI_015",
+    "source": "IELTS CSV Dataset — Band 6 (Gemini Annotated)",
+    "question": "Many people think modern communication technology is having some negative effects on social relationships. Do you agree or disagree?",
+    "essay": "In today's globalised world, the introduction of smart devices and the Internet have definitely changed the way mankind communicates. It is argued that negative consequences due to the modern communication technology can be shown in relationships of any kind. Although, some people may have difficulty to engage in person with others, the advanced devices allow human-being to mantain relationship around the world and improve their contact network.\nPeople who believe that the introduction of new technology has negative effect on how we related to other could have a point. More human-beings are comfortable with new technologies due to the elimination of anxiety or stressful feelings triggered by face-to-face meetings. Moreover, modern devices allow erasing unprofessional or informal messages with a simple click of a button. Despite the fact that people might lose the ability to communicate correctly at the first attempt, these recent technologies offer more opportunity, encouraging shy and not confident personality.\nThe internet and modern devices connect people around the world expanding their connections through different continents. It is well known that creating a vast network of connections is crucial for buissness allowing expansion or firms merging. Not only it ease working meeting guarantee excellent performances from distance, but also this new technology are increasing connectivity between mankind so that friendship can be saved and language barriers can be a dwindle obstacle.\nTo conclude, I strongly believe that the modern communication technologies have a positive impact on mankind's life, improving their relationship, offering solution to less confident people and implementing network of connection among companies. Therefore, the positive effects of these new way of communicate far outweight the negative one's.",
+    "human": {
+      "overall": 6,
+      "tr": 6.5,
+      "cc": 5.5,
+      "lr": 6,
+      "gra": 6
+    }
+  },
+  {
+    "id": "GT_GEMINI_016",
+    "source": "IELTS CSV Dataset — Band 7 (Gemini Annotated)",
+    "question": "Write about the following topic.An increasing number of people are choosing to have cosmetic surgery in order to improve their appearance. Why are more people choosing to have operation to change the way they look? Do you think this a positive or negative development?Give reasons for your answer and include any relevant examples from your own knowledge or experience.",
+    "essay": "A greater number of individuals opted for plastic surgery to enhance the physical outlook. What could be the reason behind the increasing number of people opting for cosmetic surgery to deter their appearance.\nIn my opinion the main reason why cosmetic surgery is in demand nowadays is because society has set a certain standard that physical appearance will be the fastest ticket to stand out in the crowd. Second is it boosts confidence to people with low self esteem.\nThe favorable outcome is not as much the adverse effect to the individuals. Example, the fastest way to reduce wrinkles on the face is to get Botox treatment. It lasts 3-4 months, after that it needs continuous medication to maintain what has been changed. It takes a lot of money to satisfy the demands of the society. On top of that repetition of pain and recovery during and after the surgery.\nThere are numerous natural ways to enhance beauty and confidence. Contentment, exercise and a healthy lifestyle are effective methods to maintain the genuine beauty of the people. Simple walking in the morning, keeping the distance from negativity and eating vegetables and fruits are the simplest methods that boost the natural glow of the body and prevent us from being sick.\nTo conclude the essay, I think plastic surgery is not necessary to enhance physical outlook as it uses synthetic components that have harmful effects within the body.",
+    "human": {
+      "overall": 7,
+      "tr": 7.5,
+      "cc": 7,
+      "lr": 6.5,
+      "gra": 7
+    }
+  },
+  {
+    "id": "GT_GEMINI_017",
+    "source": "IELTS CSV Dataset — Band 6 (Gemini Annotated)",
+    "question": "Write about the following topic.In many countries large amounts of foods are wasted. Why do you think people waste food in this way? What can be done to reduce the amount of food thrown away?Give reasons for your answer and include any relevant examples from your own knowledge or experience.",
+    "essay": "Wasting food is slowly becoming people's habit in this modern world. This essay will discuss the reason that people are wasting food and suggest a viable solution.\nThe principal reason is that people are unable to finish their dishes as they often take more portions of food than they can, which can cause more food to be wasted. For instance, buffets are the most common place that wastes tons of food, especially in hotels. Hence, as more food you pick, the more reasonable the price of the buffet is.\nWasting food is slowly becoming people's habit in this modern world. This essay will discuss the reason that people are wasting food and suggest a viable solution.\nThe principal reason is that people are unable to finish their dishes as they often take more portions of food than they can, which can cause more food to be wasted. For instance, buffets are the most commonly wasted tons of food, especially in the hotel. Hence, as more food you pick, the more reasonable the price of the buffet is.\nA solution to this worrying problem is to take away the leftovers back home. As food can be kept for a few days in the refrigerator, people can cook it at their house without going out to afford meals. As a result, this can reduce the expenditure on food and transportation. In my experience, my mother would pack the leftover food and bring it back home. As a result, the food still tastes the same at the restaurant. Thus, my family and I will never discuss what to eat for the rest of the day. Had it not been for preventing food waste by bringing it back home, the amount of waste foods would never have been able to reduce.\nIn conclusion, one of the main problems with the over-wasting of food in many countries is unable to finish the food and this can be solved by taking away the food back home. It is predicted that more and more individuals will be taking away their remaining food to their accommodation and this will reduce the amount of waste food.",
+    "human": {
+      "overall": 6,
+      "tr": 6.5,
+      "cc": 5,
+      "lr": 6,
+      "gra": 6.5
+    }
+  },
+  {
+    "id": "GT_GEMINI_018",
+    "source": "IELTS CSV Dataset — Band 5.5 (Gemini Annotated)",
+    "question": "Some countries achieve international sports by building specialised facilities to train top athletes, instead of providing sports facilities that everyone can use. Do you think this is positive or negative development?Discuss both views and give your opinion.",
+    "essay": "Sports is an essential part to most of us , some of us consider it a lifestyle and others consider it a job or source of income , So it's a huge part in our live.\nBuilding specialized facilities to improve and develop athelets levels it's kind of encouragment to this category of people , and it reflects enormous benefit to them. Either by providing to them the professional training or by make them ready to international competitions. But narrowing the attention of sports to a specific category and ignore other categories actually doesn't sounds a good idea.\nAthelets consider as a important part of the community but the don't cover most of it, and other people have the right to have sport facilities that suits their level and everyone whatever is it beginner or professional can use it.\nSports is a public interest that doesn't include specific people in it, and it's important to all genders and all ages, so providing facilities to specific ones can end up with unfairness results. In other hand , providing this facilities to all public people will lead to increase in sport awarness and end up with more people having healthy lifesyle.\nIn conclousion , according to medical facts said that's doing sport daily and make it essence in your life decreases heart attacks and raise the life quality, specified just the athelets people with sports facilities is undesireable decision. In other hand , raising the number of gyms and sports areas will conclude with healthier society.",
+    "human": {
+      "overall": 5.5,
+      "tr": 6,
+      "cc": 6,
+      "lr": 5,
+      "gra": 5
+    }
+  },
+  {
+    "id": "GT_GEMINI_019",
+    "source": "IELTS CSV Dataset — Band 5.5 (Gemini Annotated)",
+    "question": "In some countries young people are encouraged to work or travel for a year between finishing high school and starting university studies. Discuss the advantages and disadvantages for young people who decide to do this .",
+    "essay": "In other nations, after graduation in high school, youth are encouraged to go overseas for travel or to find a job for a period of one year prior to enrollment in universities for continuing studies. Some people believed that these have an effect on young people. The advantages on young people when working or traveling before entering college are saving money and making funds which can be used for matriculation, and they can have enough time for mental break which foster mental health that will help them more prepared individual as student. While the disadvantages are waste of money when traveling and delayed finishing studies when working.\nMoreover, when deciding to take an educational break for travel or work between finishing high school and entering in college has advantages. First would be making funds for enrollment fees and saving money for allowance. Young people can have the opportunity to support themselves in their studies instead of asking financial support from parents. By this way, they become more independent because they can provide their daily necessities. Second would be achieving healthy mental health through traveling abroad. For some students, high school is stressful just like college especially when they are too serious in studying. Going abroad for a vacation might help to destress the students at the same time giving self a time for relaxation which is essential to the mind and body.\nHowever, this decision also brings disadvantages to young people like wasting of money or savings from parents when traveling abroad. Instead of saving this money for college, it is used for booking a trip, hotel accommodation, and other recreational activities. Another would be waste of time, because instead of finishing studies on time in a university, students might be delayed in their graduation because of a year spent in vacation. As a consequence, timeline in studying and getting a degree is longer than usual.",
+    "human": {
+      "overall": 5.5,
+      "tr": 5.5,
+      "cc": 5.5,
+      "lr": 6,
+      "gra": 5
+    }
+  },
+  {
+    "id": "GT_GEMINI_020",
+    "source": "IELTS CSV Dataset — Band 7 (Gemini Annotated)",
+    "question": "Many people think modern communication technology is having some negative effects on social relationships. Do you agree or disagree?",
+    "essay": "It is undeniable that nowadays, smart devices such as phones and tablets play an essential role in one's life. Through countless websites and applications, people can connect with each other without any boundaries. While many people agree that the introduction of these technologies has many disadvantages to the conservative way of starting and maintaining relationships, I personally believe that they rather develop new socializing methods.\nFirst and foremost, social medias and applications can help with keeping in touch with acquintances. Previously, people had to follow a precise time and location to meet up with their friends as they are unable to contact the others to reschedule. However, the internet allows them to update their plans at any time. This means that if there is any emergency, an individual can immediately postpone the upcoming event and find the next available slot to continue the plan. Furthermore, there are several applications that allow people to video call their friends and family who are currently living apart.\nThe current technologies not only offer us options to communicate with our current contacts but also allow us to discover new friends. In the past, it is difficult to find people with a common interest which had to be done through social events. Nowadays, online communities enable their users to connect with new friends virtually. Thus, fewer individuals are left alone, especially introverts and those who are living in remote areas which can have difficulties socializing offline.\nAll in all, despite the fact that there are many positive impacts of the invention of social medias and communication technologies, there are also risks and downsides of using them without face-to-face communication. Therefore, the time used for socializing online and offline should always be balanced.",
+    "human": {
+      "overall": 7,
+      "tr": 7,
+      "cc": 7.5,
+      "lr": 7,
+      "gra": 7
+    }
+  },
+  {
+    "id": "GT_GEMINI_021",
+    "source": "IELTS CSV Dataset — Band 5.5 (Gemini Annotated)",
+    "question": "Some countries achieve international sports by building specialised facilities to train top athletes, instead of providing sports facilities that everyone can use. Do you think this is positive or negative development?Discuss both views and give your opinion.",
+    "essay": "Athletes to be on the top need to have high-end facilities that a country can provide for them to be able to improve their strengths and skills. Some government opted to build facilities exclusively for training athletes for international sports goals, instead of building establishments for everyone to have the liberty of using the sports facilities. From my perspective, this phenomena is a negative development.\nBeing able to discover an individual's potential, they need to have a support from any form of sources. Establishing sports facilities can help people to discover their own interests, talents and even skills in learning new things. Centers which offer utilities, equipments and state-of-the-art tools that provide learning sports can be a great advantage to people who want to train themselves on the things that can awaken their interests when it comes to sports.\nIn addition, building these kind of establishments, not only for the purpose to train top athletes, but also for people to immerse themselves to different variaties of activities can help them socialize more with their peers. This is extremely beneficial that aside from doing sports that they are into, they get to play along with peers, discover one's potential and also learning from one another. Furthermore, these individuals can also have the future to be one of top athletes that a country can have.\nIn conclusion, although there are countries that chose to have their sports establishments exclusively for training top athletes, I assert that these that actions can be lead to negative feedbacks. Government should allow everyone the privilege to use and avail facilities that can hone an individual's talents, skills and dexterity when it comes to sports and this can also be immensely benefical for both country and citizen alike.",
+    "human": {
+      "overall": 5.5,
+      "tr": 5,
+      "cc": 6,
+      "lr": 5.5,
+      "gra": 5.5
+    }
+  },
+  {
+    "id": "GT_GEMINI_022",
+    "source": "IELTS CSV Dataset — Band 6 (Gemini Annotated)",
+    "question": "Write about the following topic.Although there are a lot of translation software available, learning a language could still be advantageous. To what extent do you agree or disagree?Give reasons for your answer and include any relevant examples from your own knowledge or experience.",
+    "essay": "Learning a language seems to be an advantage even though there are plenty of translation softwares can be accessed to in this era. I certainly agree that the benefits of acquiring a new language still outweigh that of using translation apps because it is a systematic learning and it is able to improve your competitiveness rather than rely on translating tools.\nTo learn a language, we must start form vocabulary and grammar then goes to the process of making up a sentence. In the initial stage it would be difficult to master the pronounciation but once you overcome this part, you are actually acquire the skills of using a foreign language naturally. Moreover, through the learning process, you are trying to gain permanent memory of it which won't let you forget the spelling of a word so soon. For example, language laerners usually perform well in certain areas such as academic or business field via lots of practices and trainings and they attribute to their hardwork instead of translating tools.\nUsing translation software is not a bad thing and the fact is they are available in these days yet heavy reliance on it can not bring you as much benefits as learning languages step by step. I can not deny that these tools are convenient and easy to use, however it may restrict our level of learning outcome from it function- translating word by word, which is usually lead to the result of wrong meaning of a sentence. Many learners, on the other hand trying to translating every text while they are reading an article, it may be useful to conquer the hardships initially, but in the long run they may forget all the contents since they are not memorize the meanings of a word and just let it go after the reading. The result is that they are underperforming because lack of training and unable to interprete the definition of words.\nTo summarize, I agree that learning a language still can be advantegeous than just simply searching for the translation by apps no matter how convenient the tools are. Once you really learn something and internalize into your life, than you are able to being outstanding than those who are not.",
+    "human": {
+      "overall": 6,
+      "tr": 6,
+      "cc": 6,
+      "lr": 5.5,
+      "gra": 6.5
+    }
+  },
+  {
+    "id": "GT_GEMINI_023",
+    "source": "IELTS CSV Dataset — Band 7.5 (Gemini Annotated)",
+    "question": "Write about the following topic.An increasing number of people are choosing to have cosmetic surgery in order to improve their appearance. Why are more people choosing to have operation to change the way they look? Do you think this a positive or negative development?Give reasons for your answer and include any relevant examples from your own knowledge or experience.",
+    "essay": "An increasing number of individuals are taking the decision to have cosmetic surgery in order to achieve a better appearance. I strongly believe that mass media advertising and lower costs of surgery are the reasons for the above. Likewise, I think that it is a negative development for our society.\nTo begin with, it is very well known that mass media advertising and lower costs of surgery affect the behaviour of the citizens. Mass media advertising is promoting an uncommon archetype among the population. Plenty of men and women feel that they do not have sex appeal due to the fact that their bodies are different to those shown on television. Moreover, cosmetic surgery costs are more affordable nowadays than before. Hence, several women receive cosmetic surgery as a birthday gift.\nAdditionally, I strongly believe that taking the decision to have cosmetic surgery reflects a negative development in our communities for the reason that it reveals that plenty of people have mental health issues. For instance, low self-esteem has been increasing among the young population during the last years. Besides that, cosmetic surgery centres the attention on beauty instead of other more important values, such as honesty, creativity and charity. For example, there are fewer Non-Governmental Organizations such as Green Peace at the present moment than in the past.\nTo conclude, harmful mass media advertising and lower costs of cosmetic surgery translate into a negative development in our communities due to mental health issues and citizens spending money on nonsense. I would strongly recommend that authorities create laws to regulate mass media advertising.",
+    "human": {
+      "overall": 7.5,
+      "tr": 7.5,
+      "cc": 7.5,
+      "lr": 8,
+      "gra": 8
+    }
+  },
+  {
+    "id": "GT_GEMINI_024",
+    "source": "IELTS CSV Dataset — Band 5.5 (Gemini Annotated)",
+    "question": "Write about the following topic.Many governments think that economic progress is their most important goal. Some people,however, think that other types of progress are equally important for a country.Discuss both these views and give your own opinion.Give reasons for your answer and include any relevant examples from your own knowledge or experience.",
+    "essay": "It is often argued that economic progress is the ultimate goal for most governments, while others suggest that there are other factors that contribute the country's progress. In my opinion, I believe that apart from economy, government should also consider other types of progress which also consider other types of progress which give equal importance to a nation.\nfirst of all, it is widely believed that increase in gross domestic product is related to economic growth, which governments also think is their main aim to focus on. This in other terms lead to an good export and import trading. For example, an imported product is more expensive when compared with native product in terms of quality and manufacturing, where more money is invested by government. Therfore, governments main focus shouldn't be only on economy.\nDesipte this, on the other hand,many argue that governments should also think about considering other types of progress which are as equal as economic progress. for instance, many countries are being recognized because of their education status and culture which attracts young stars to travel and study which in other terms also increase GDP. Other important factor is sports, by participating in worldcups, and olympics will also make a valuable progress by being recognized world-wide may lead to many opportunities. As a reason, the country's government should also focus more on other factors leading to progress.\nIn conclusion, I believe that government should not solely goal for economic growth but also concentrate on other factors which are equally important for a country's growth.",
+    "human": {
+      "overall": 5.5,
+      "tr": 5.5,
+      "cc": 5.5,
+      "lr": 5,
+      "gra": 6
+    }
+  },
+  {
+    "id": "GT_GEMINI_025",
+    "source": "IELTS CSV Dataset — Band 6 (Gemini Annotated)",
+    "question": "Write about the following topic.Although there are a lot of translation software available, learning a language could still be advantageous. To what extent do you agree or disagree?Give reasons for your answer and include any relevant examples from your own knowledge or experience.",
+    "essay": "Learning a language seems to be an advantage even though there are plenty of translation softwares can be accessed to in this era. I certainly agree that the benefits of acquiring a new language still outweigh that of using translation apps because it is a systematic learning and it is able to improve your competitiveness rather than rely on translating tools.\nTo learn a language, we must start form vocabulary and grammar then goes to the process of making up a sentence. In the initial stage it would be difficult to master the pronounciation but once you overcome this part, you are actually acquire the skills of using a foreign language naturally. Moreover, through the learning process, you are trying to gain permanent memory of it which won't let you forget the spelling of a word so soon. For example, language laerners usually perform well in certain areas such as academic or business field via lots of practices and trainings and they attribute to their hardwork instead of translating tools.\nUsing translation software is not a bad thing and the fact is they are available in these days yet heavy reliance on it can not bring you as much benefits as learning languages step by step. I can not deny that these tools are convenient and easy to use, however it may restrict our level of learning outcome from it function- translating word by word, which is usually lead to the result of wrong meaning of a sentence. Many learners, on the other hand trying to translating every text while they are reading an article, it may be useful to conquer the hardships initially, but in the long run they may forget all the contents since they are not memorize the meanings of a word and just let it go after the reading. The result is that they are underperforming because lack of training and unable to interprete the definition of words.\nTo summarize, I agree that learning a language still can be advantegeous than just simply searching for the translation by apps no matter how convenient the tools are. Once you really learn something and internalize into your life, than you are able to being outstanding than those who are not.",
+    "human": {
+      "overall": 6,
+      "tr": 6,
+      "cc": 6,
+      "lr": 5.5,
+      "gra": 6.5
+    }
+  },
+  {
+    "id": "GT_GEMINI_026",
+    "source": "IELTS CSV Dataset — Band 7.5 (Gemini Annotated)",
+    "question": "Write about the following topic.In many countries large amounts of foods are wasted. Why do you think people waste food in this way? What can be done to reduce the amount of food thrown away?Give reasons for your answer and include any relevant examples from your own knowledge or experience.",
+    "essay": "Living in the 21st Century, it is without doubt that most of us already possess the luxury of having everything we need such as shelter, clothes and most importantly food and water. Despite this, it is sad to say that there are still a handful of the world's population that remain in the depths of poverty. And even so, many countries are found guilty to wasting huge amounts of food. In this essay, I will discuss the reason behind this food wastage and suggest solutions to reduce this effect.\nFirst and foremost, why do people waste food? It is to my belief that people tend to take more food than they can handle, especially at functions like all-you-can-eat buffets alongside weddings which act as a few of the many major contributers of food waste. In general, there is also the lack of awareness on poverty among the public to blame for. Therefore, people cannot practice consideration towards a cause they are unfamilar or unaware of. Other than that, they lack exposure to knowledge on the impact that food waste can bring to the environment and the society.\nNow, what actions can we take to reduce amount of food disposed? The government and country's leaders should take the first step in conducting educational campaigns on food wastes and poverty, particularly targeting school children and the public. This can play a significant role in shedding light onto the issues that need to be addressed urgently. People should also be strongly encouraged to take a more sensible amount of food before coming back for seconds to avoid the unecessary wastage as well as the excess weight gain.\nTo sum up, food wastage is not something to be proud of because of the all the adverse effects brought upon us, humans. Hence, we should quickly make the much needed change to help to turn this situation around and hopefully contribute to creating a better society.",
+    "human": {
+      "overall": 7.5,
+      "tr": 7.5,
+      "cc": 7.5,
+      "lr": 7,
+      "gra": 8
+    }
+  },
+  {
+    "id": "GT_GEMINI_027",
+    "source": "IELTS CSV Dataset — Band 5 (Gemini Annotated)",
+    "question": "Some people think that governments should ban dangerous sports, while others think people should have freedom to do any sports or activity. Discuss both views and give your own opinion",
+    "essay": "This is true that some people are sure that civil servants should avoid harmful sport activites, but other part of sosiety thinks that individuals should have freedom to choice any sport that they like. I am in two minds on this, but probably governments should take care of their citizens and be responsible for human lives.\nFirstly, extrem sports are very popular above young generation in all over the world and these kinds of activity are the huge part of pastime for thousands people. Risk's lovers spend planty of time and enormous amount of money to feel freadom and to try themselfs as a brave and strong persons. For instance, in my country such sports as rock jumping, mountain cyicling and BMX are very popular. And even if these activites are dangerous, young men and women are keen on it, and they are against the governments who wants to ban this sports.\nOn the other hand, adult people always want to protect younger ones. To my point of thinking protection is significant habbit of human beings that we need to respect. However, governments, who try to ban dangerous sports, need to be more flexible, and not only say no for harmful sports, but involve young generation in activites that are not so risky. I also belive that media attention can make seance about all cons of extrem choice, becouse information about number of death between exrem sportmens can be helpful.\nSumming up, the buning dangerous sports topic is rather complecation and importaint issue. I suppose that, the sosiety need recive more information about harmful sports, while governments have to be more responsible in building anouth common sport facilities.",
+    "human": {
+      "overall": 5,
+      "tr": 5,
+      "cc": 5,
+      "lr": 4.5,
+      "gra": 5.5
+    }
+  },
+  {
+    "id": "GT_GEMINI_028",
+    "source": "IELTS CSV Dataset — Band 6.5 (Gemini Annotated)",
+    "question": "Write about the following topic:In many countries, not enough students study science subjects. What are the causes? What will be the effect on society?Give reasons for your answer and include any relevant examples from your own knowledge or experience.",
+    "essay": "Science is one of the most important thing to develop country. However, a lot of countries have not enough students to take part in this subject. I think that the root of this issue are money and political problems. Also, the insufficient development of science will cause some social problems.\nFirst, to develop science, huge amount of money are required. It is necessary to establish certified facilities to provide a suitable environment for studying science and starting research. These facilities need to fulfil some international standards like ISO and IEEE which are not so easy to get, therefore the government might need to spend lots of money on building certified facilities. However, some countries dose not have such amount of money, so building certified facilities may be difficult for them to do. Second, some countries such as middle-east countries are suffering some political issues like civil war. it is difficult for them to develop science and to handle the war at the same time.\nScience influence many angles of our lives. First, life will be inconvenient. For example, people living in a poor country may not have cell phone. If there is emergency that needs to be informed immediately to others, it is difficult to find them. Second, internationally, the state of country may become low because of the low living standard of populace. Business will be influenced if the country dose not have great bargaining power. All the social issues will finally affect the financial stability and cause some sorrowful tragedies.\nIn summary, science is a key stone to develop a wealthy country. The government can modify their strategies and improve the academic environment in studying science.",
+    "human": {
+      "overall": 6.5,
+      "tr": 6.5,
+      "cc": 6.5,
+      "lr": 6,
+      "gra": 7
+    }
+  },
+  {
+    "id": "GT_GEMINI_029",
+    "source": "IELTS CSV Dataset — Band 6 (Gemini Annotated)",
+    "question": "Write about the following topic.Some people believe that school children should not be given homework by their teachers, whereas others argue that homework plays an important role in the education of children.Discuss both of these views and give your own opinion.Give reasons for your answer and include any relevant examples from your own knowledge or experience.",
+    "essay": "The issue that whether teachers should assign homework or not has attracted great attention recently.Some people believe that homework is a good way to consolidate students'learning effect.However,others argue that homework exerts huge pressure on students,which is bad for their long-term development.As for me,appropriate homework should be seen as the better choice.I will explain my idea from two aspects.\nFirstly,homework could examine student's learning results.After teaching the basic content,giving some homework is important to consolidate the knowledge.As an old saying goes,practice makes things perfect.Only doing many practices,can we master the knowledge proficiently.There is an example.In my teaching experiences,I found the students finishing their homework better would achieve higher scores in final examination,while those who couldn't finish their ordinary homework would gain lower grades in any examination.And my translation skills were also improved by practicing the homework from my guiders who gave the targeted examination to me.\nSecondly,too much homework will cause so many negative effects,such as making students tired very much,causing their depressed mood and their bored emotion.For example,my brother's daughter always suffered from the huge homework which was assigned by his Chinese teacher.She once complained with me that everyday she felt tired and bored after finishing Chinese teacher's assignments.So appropriate homework is reasonable for most students and those ideas that the more homework,the better students' scores ,are wrong to certain extent.Sometimes huge homework is the reason that why some students'scores are reduced.\nIn sum,removing homework is not an ideal option for student's improvement in learning,and reasonable homework provides us a better way to deal with the problem.That is to say,we should strike a balance between assigning homework and removing homework.",
+    "human": {
+      "overall": 6,
+      "tr": 6,
+      "cc": 6,
+      "lr": 5.5,
+      "gra": 6.5
+    }
+  },
+  {
+    "id": "GT_GEMINI_030",
+    "source": "IELTS CSV Dataset — Band 5.5 (Gemini Annotated)",
+    "question": "Some people believe that governments should pay full course fees for students who want to study in universities. Do you agree or disagree with this statement?",
+    "essay": "In recent years, in some countries, including Japan, some people believe that governments should cover all tuition fees for students who are willing to study at university. Although the total cost will be massive and the governments need to increase the tax on citizens, I strongly agree with this opinion.\nTo begin with, it is absolutely unfair for students who need to give up going to university because of a lack of money. In Japan, they need to terminate to pursue their study at university, there are many students who study diligently though. If the government supported them financially, those who terminated their study could have continued studying and had the great job opportunities they hoped for.\nIn addition, some developed countries have been suffering from depopulation so there are some industries, such as IT, and Civil engineering that chronically have a problem with how to improve the shortage of employees. If governments encourage students to study these industries at university for free, the companies will be not only helpful to increase the number of employees, and also effective for students to obtain some qualifications in advance in university. This\nmeans that the companies do not necessarily spare longer training time than usual for new employees.\nFurthermore, economic growth is linked inextricably with education. If all students could have a variety of courses at university for free charge, they will be able to obtain skillful techniques and plenty of knowledge to pursue their career opportunities regardless of age. In addition, they will be able to study with working at the same time with light-hearted such as nighttime courses, and weekend courses. If they could work and study flexibly, they will obtain more creative ideas to improve their work. If they are required to pay more tax due to the education fee by governments, they are more than happy to pay the tax for themselves and other ambitious students.\nIn conclusion, the free education system in universities must be advantageous to improve their countries' economic growth in the long term.",
+    "human": {
+      "overall": 5.5,
+      "tr": 5.5,
+      "cc": 5.5,
+      "lr": 5,
+      "gra": 6
+    }
+  },
+  {
+    "id": "GT_GEMINI_031",
+    "source": "IELTS CSV Dataset — Band 5.5 (Gemini Annotated)",
+    "question": "In many countries people increasingly talk about money (how much they earn or how much they pay for things in their daily conversations). Why? Is this a positive or negative development?",
+    "essay": "As we are living into a monetary society, it's unavoidable for people to discuss about money matters in daily conversation about housing mortgage, salaries and other living expenses. The financial anxiety has become a main source of headache that lingers on especially for the young generation who has to bear the increasing burden of a city life. From a standpoint of a college student, I believe it's not a postive development that should have occurred in our modern society.\nWhen our conversation turns to money issues, it doesn's really help up with our status quo, but only further exacerbates social anxiety by unnecessay comparison and higher expectation. I personally have similar experiences when friends start to talk about their monthly pocket money and daily luxuries they prefer. We are widely variated in family background, social classes and opportunities. If our daily social discourses are always filled with monetary issues, it is only widening the social gaps between different groups of people and making our society a place less inclusive for underprevilaged people.\nAdditionally, money-oriented conversations might as well shape our world perspective into a very pratical, highly self-interested and boring one, which is full of daily trifles and calculation. In book The Little Prince, he says adult will only appreciate a house when you tell them that it is worth a million pounds. It exactly depicts the moderntime conversations that value things more a monetary basis. But the problem we cannot perch on the path of money and many of our lifelong persuit doesn't rely sorely on our income and expensive services and luxaries. We are neither willing nor prepared to see a world where romance can be purchased, friendship ca be transacted and even life itself has a certain value that can be measured in dollars.\nSo I would really like to call on more people to rid money discussions our of their daily chats and share more about what's interesting in their seemingly mundane lives, some recent photos of an outing, newly met friends and others. Create meanings of life not through talks about money, but upon something more important to our own existance.",
+    "human": {
+      "overall": 5.5,
+      "tr": 5.5,
+      "cc": 5.5,
+      "lr": 5,
+      "gra": 6
+    }
+  },
+  {
+    "id": "GT_GEMINI_032",
+    "source": "IELTS CSV Dataset — Band 6 (Gemini Annotated)",
+    "question": "Some people think that governments should ban dangerous sports, while others think people should have freedom to do any sports or activity. Discuss both views and give your own opinion",
+    "essay": "From the known history of the humanity, many sports or activities have been done to enjoy ourselfs, keeping in shape, or spent time. Grown up people should be free to do any kind of sports or activities by their will unless they are not hurting anyone else except theirselfs.\nSome people think when a citizen hurt his/herself, tax payers need to pay for the health care fees, and it should not be consern for the tax payers since they are paying only for fundamental situations. This point of view is not matching with the freedom. Yes, there might be a fee for tax payers, yet freedom should be above on all fees. While some people prefers less dangerous activities, others can be interested in more dangerous activities, as well.\nGovernments can have some precautions to make citizens' life better. Yet, they should not involve such things like banning sports since it is the preference of the people which dealing with the dangerous sports. Some people could want to make more unique or exciting sports, and it is quite natural. Banning such kind of activities can be considered as limiting people's freedom.\nSince most of the people living together for a quite time in a society, people should pay respect on each others preferences, unless it is not interesting other people's personal area. As a calm and relax person, I am not intend to make dangerous sports or activities. However, I do not think that I have the right or power to say other people what should they do or not, and vice versa.",
+    "human": {
+      "overall": 6,
+      "tr": 6,
+      "cc": 6,
+      "lr": 5.5,
+      "gra": 6.5
+    }
+  },
+  {
+    "id": "GT_GEMINI_033",
+    "source": "IELTS CSV Dataset — Band 5.5 (Gemini Annotated)",
+    "question": "Write about the following topic.In some parts of the world people try to find out one's own family history. Why do people do this? Do you think it is a positive or negative?Give reasons for your answer and include any relevant examples from your own knowledge or experience.",
+    "essay": "At present, discovering one`s own family history is becoming more and more commom. In the following paragraphs, I will present the motives why people do that and the reason I strongly believe this is important and have positive effects on people.\nProbably the most crucial motive people search for their family`s past is to find out about any chronical diseases. One of society`s biggest concern nowadays is healthy leaving. Therefore, by knowing the family health history and genetic predisposition to a specific disease such as cancer or diabetes, one can prepare and take the appropriate mesures to prevent it or have an early treatment.\nMoreover, another reason people may seek for their ancestors`s history is to build a sense of belonging. Human beings need to feel welcomed and inserted into a culture; a community`s identity is as important as an individual one, as it provides people with the opportunity to grow and develop relantioships. When people know about their family history, their sense of belonging is promoted, and they can actively participate in their culture and contribute to their community.\nAs mentioned in the previous paragraphs, people search about family history for health and cultural reasons. One and the other do impact positivily a person`s life, as being healthy and part of a community integrate people`s satisfaction about living.\nTo summarize, one may try to find out about their family history for two main motives, one being about their health and the other one about feeling part of a community. Both reasons are important and have positive impacts on one`s life.",
+    "human": {
+      "overall": 5.5,
+      "tr": 5.5,
+      "cc": 5.5,
+      "lr": 5,
+      "gra": 6
+    }
+  },
+  {
+    "id": "GT_GEMINI_034",
+    "source": "IELTS CSV Dataset — Band 7 (Gemini Annotated)",
+    "question": "Many people think modern communication technology is having some negative effects on social relationships. Do you agree or disagree?",
+    "essay": "With the development of technology, there is a debate whether advanced communication technology would be a major contributor to worsening human relationships in modern society. In my opinion, the developing communication tool could have negative impacts on social relationships in the future. I hold this opinion for two reasons, which I will elaborate on in the following essay.\nTo begin with, new technology could be out of control at an early phase of introduction. New technologies certainly enable us to live conveniently as a result, however, it often takes some time to fit them into our lifestyles under the control. Above all, the latest tool could bring worsened effects on society than we expect. To be more specific, bullying with the use of smartphone is one of the major problems all over the world today. It is manifest that new communication tools can easily devastate human relationships in this regard.\nOn the other hand, some arguments can be made that new communication tools make it possible that people across the world can have a chat without physical moving to another place. But closer examination would reveal that the introduction of new communication technology also causes fewer opportunities for people to meet up in person. A compelling example of this is that Japanese people have less relationship with their neighborhood than in the post. People living today might be satisfied with tons of telecommunication rather than direct communication. I strongly suppose this is also a negative effect on social relationships with the use of new technology.\nHaving considered all the above, I strongly believe that modern communication tools would lead to a negative result for social relationships because of uncontrollable aspects of the latest technology and loss of communication in person with the use of new communication tools.",
+    "human": {
+      "overall": 7,
+      "tr": 7,
+      "cc": 7,
+      "lr": 6.5,
+      "gra": 7.5
+    }
+  },
+  {
+    "id": "GT_GEMINI_035",
+    "source": "IELTS CSV Dataset — Band 6.5 (Gemini Annotated)",
+    "question": "Write about the following topic:Some people think that hosting an international sports event is good for the country, while some people think it is bad. Discuss both views and state your opinion.Give reasons for your answer and include any relevant examples from your own knowledge or experience.",
+    "essay": "People hold different views about the benefits of hosting an international sports. While there are little advantages for some countries throwing such a sports event, I am convinced that holding an international sports event benefits the hosting country.\nOn the one hand, there are several reasons why in some situations people think it is bad for a country to host an international sports event. In the first place, average people draw more attention to daily necessities and medical treatments. They believe hosting such an event is of little value compared with basic infrastructure and amenities. Instead, they hold that if invested in economic development and recovery, the good effects will be doubled. Presumably, if a country , like Afghanistan and Iraq, host an international sports event regardless of its capacity, the country will lose its people's faith because after a war, people all want to fill their belly and want the famine to be eradicated.\nOn the other hand, throwing an international sports event can be a great means of developing a country's economy. Hosting an international sports event spurrs the economy and provide large quantities of employment for people, which revives and thrives all various industries. Apart from that, a sports event held by a country advocates the theme of health and sports, encouraging people there to lead a green positive attitude towards life, as well as setting up its renowned international position. Therefore, after the event, excellent businessman and geniuses all around the world will be attracted to invest there.\nIn conclusion, I can understand why people are unwilling to hold an international sports event, but it seems to me that more advantages of hosting one event like that outweigh than that of not conducting one.",
+    "human": {
+      "overall": 6.5,
+      "tr": 6.5,
+      "cc": 6.5,
+      "lr": 6,
+      "gra": 7
+    }
+  },
+  {
+    "id": "GT_GEMINI_036",
+    "source": "IELTS CSV Dataset — Band 6.5 (Gemini Annotated)",
+    "question": "Write about the following topic.With the improvements in today’s health care, society has to care for more and more elderly people.Do you feel that society will be able to cope with the increase in numbers of elderly people today and how can it be managed?Give reasons for your answer and include any relevant examples from your own knowledge or experience.",
+    "essay": "As the world has been experiencing rapidly aging population, the issue of providing proper care for the elderly is concerning the society. However, I am inclined to believe that the increase of elderly people will be under control. While many challenges are likely to taken place, there will be effective ways to manage this civil segment with the cooperation of both government and private sectors.\nAs the elderly population is expanding, the demand for nursing homes or elders’ clubs are on the increase. To meet this demand, private sectors are investing on this type of institutions and services as they foresee the lucrative profit these businesses can probably generate in the near future. Apparently, young people are occupied with their daily job which makes it impossible to take care of their parents or grandparents. Therefore, sending the elderly to nursing homes or hiring personal care service are reasonable options to be consider.\nAnother reason to validate my opinion is the balance in labor force. While some developed countries are experiencing aging population, the scenario is opposite in developing countries whose birth rate is considerably high. As a result, many developed countries such as Germany have encouraged a welcoming entry of those young laborers into its nursing industry. One of my friend has been settling in Germany following her moving to the country 5 years ago to become a nursing staff in privately-owned elderly clubs.\nLast but not least, government interference in elderly care is highly recommended. It is suggested that the government allocate more budget to establish publicly-owned elderly homes to mitigate the financial burden to acquire this service. Moreover, regulations on pension plan should be properly adjusted and taken more seriously by employers so that people are assured financially when they are retire.\nIn conclusion, I believe the elderly problem is likely to be handled well if there are joint effort of both private and public sectors in creating healthcare system and human resource management.",
+    "human": {
+      "overall": 6.5,
+      "tr": 6.5,
+      "cc": 6.5,
+      "lr": 6,
+      "gra": 7
+    }
+  },
+  {
+    "id": "GT_GEMINI_037",
+    "source": "IELTS CSV Dataset — Band 6 (Gemini Annotated)",
+    "question": "Some people think that governments should ban dangerous sports, while others think people should have freedom to do any sports or activity. Discuss both views and give your own opinion",
+    "essay": "From the known history of the humanity, many sports or activities have been done to enjoy ourselfs, keeping in shape, or spent time. Grown up people should be free to do any kind of sports or activities by their will unless they are not hurting anyone else except theirselfs.\nSome people think when a citizen hurt his/herself, tax payers need to pay for the health care fees, and it should not be consern for the tax payers since they are paying only for fundamental situations. This point of view is not matching with the freedom. Yes, there might be a fee for tax payers, yet freedom should be above on all fees. While some people prefers less dangerous activities, others can be interested in more dangerous activities, as well.\nGovernments can have some precautions to make citizens' life better. Yet, they should not involve such things like banning sports since it is the preference of the people which dealing with the dangerous sports. Some people could want to make more unique or exciting sports, and it is quite natural. Banning such kind of activities can be considered as limiting people's freedom.\nSince most of the people living together for a quite time in a society, people should pay respect on each others preferences, unless it is not interesting other people's personal area. As a calm and relax person, I am not intend to make dangerous sports or activities. However, I do not think that I have the right or power to say other people what should they do or not, and vice versa.",
+    "human": {
+      "overall": 6,
+      "tr": 6,
+      "cc": 6,
+      "lr": 5.5,
+      "gra": 6.5
+    }
+  },
+  {
+    "id": "GT_GEMINI_038",
+    "source": "IELTS CSV Dataset — Band 7 (Gemini Annotated)",
+    "question": "Write about the following topic.Many people use written language in a less formal and more relaxed way. Why? Does this development have advantages and disadvantages?Give reasons for your answer and include any relevant examples from your own knowledge or experience.",
+    "essay": "Nowadays most people tend to write in a more informal way, adopting a relaxed approach. This essay will cover the reasons why this behavior is so common, starting from the necessity of a more quick way to communicate, and then it will attempt to illustrate if it has advantages and disadvantages.\nHence the necessity to interact in a quicker way, due to the business of life at the present time, many people prefer to cure less the formal aspects of their written pieces. This rapidness has been allowed by the spread of emails as the principal mean of written communication. Likewise, the reader itself, having much less time, is prone to take just a rapid look at the emails, not caring much if the way they are written is formal or not.\nOn the one hand, this can lead to some advantages, such as a more relaxed atmosphere even in workplaces. For example, many workers are relieved to know that their boss is keen on writing informal emails and does not pretend his subordinates to do otherwise. Moreover, it has some positive implications also for strangers, that are often less prepared to write in a formal style.\nOn the other hand, it is often hard to draw a limit. Some readers can think that the person sending the informal email is just being rude, leading to a misunderstanding. This is particularly true when the generation gap is taken into consideration: generally, elder people may be less willing to receive an informal letter.\nIn conclusion, the reasons behind a more relaxed style in written language may be found in the faster means of communication. This has undoubtedly advantages, such as the creation of a more peaceful ambient. Albeit, there are also clear disadvantages, for instance, the misinterpretation of the context.",
+    "human": {
+      "overall": 7,
+      "tr": 7,
+      "cc": 7,
+      "lr": 6.5,
+      "gra": 7.5
+    }
+  },
+  {
+    "id": "GT_GEMINI_039",
+    "source": "IELTS CSV Dataset — Band 7.5 (Gemini Annotated)",
+    "question": "Some people believe that governments should pay full course fees for students who want to study in universities. Do you agree or disagree with this statement?",
+    "essay": "Going to university is an important step in life. It will majorly impact their futurs, and will define them in many ways. Unfortunatly, this is an expensive task that not everyone can afford. Thit is the reason why some people think that governments should pay course fees for university students. In this essay, I will explain why I think governments should help students of universities financially by paying their course fees.\nTo begin with, this could make universities more inclusive and help some students achieve their dreams. Some people, due to their economic background, are forced to attend specific establishments, even though they would give anything to be somewhere else. This is an important cause of class differences, and the source of many disciminations today. This is why, offering to pay for their course fees, would considerably help students that are less wealthy, and fight against inequalities.\nTo illustrate this argument, here is an example. Some of my class-mates receive a specific amount of money from an organization, that helps them study at my shool. They find it amazing because, now they are not only defined by their parents' income anymore, and they have the opportunity to accomplish whatever they wish in life.\nSecondly, an enormous amount of students live in a precarous situation, so by paying their course fees they could have a more stable life. University life is rough, you are not with your family, you have to manage so many different things for the first time, one of which being money. Some students have little to no money that they can spend in recreational activities, a big part of it being assigned to accomodations, school fees and food. By paying some of their fees, students could benefit from the money and do what they enjoy. This could help them mentally and make them enjoy life a bit more.\nOn the other hand, I can understand that if governments had to pay for the course fees of every students, it would represent a tremendous amount of money that could be invested in other and more pressing matters. Although, I do still think that providing this aid could have more benefits than downsides.\nIn conclusion, the governments shoulp help students by paying their course fees. This could open some students to new opportunities or help others live in better conditions. Students are the futur of every states, that's why I invite everyone reading this to invest in them.",
+    "human": {
+      "overall": 7.5,
+      "tr": 7.5,
+      "cc": 7.5,
+      "lr": 7,
+      "gra": 8
+    }
+  },
+  {
+    "id": "GT_GEMINI_040",
+    "source": "IELTS CSV Dataset — Band 9 (Gemini Annotated)",
+    "question": "The best way to teach children to cooperate is through team sports at school. To what extent do you agree or disagree?",
+    "essay": "Many people believe that the most effective way to teach children cooperation in teamwork is by encouraging them to join team sports at school. I completely agree with this idea and will give my reasons as follows.\nFirstly, team sports require children to work together and practice communication in order to achieve a common goal. For example, in Taiwan, many schools have baseball lessons in sports courses, and some schools even have a school baseball team. In such courses, children can learn to trust one another and develop communication skills by playing. Furthermore, they can develop mutual understanding and compromise with their teammates in order to reach a common goal. In this way, they can develop their social skills, find a way to cooperate, and build positive relationships with their peers. As a result, team sports experiences will contribute to their social skills and social life as well.\nSecondly, team sports can teach children the value of perseverance and resilience. Through the experience of competing with other teams, children can learn to accept the ups and downs of success and defeat and go through any difficult situations with their teammates. This is especially the case if they fail in a competition as they can learn to encourage each other and develop a sense of group belonging. For instance, we can see many touching stories in team competitions where despite being on the losing side at the beginning, the team rallies, and members encourage each other to restart. This can be a great lesson for children to build their resilience, self-confidence, and a sense of belonging, as well as develop a positive attitude toward their life in the future.\nIn conclusion, I believe that team sports provide children with opportunities to develop their social skills, increase their confidence and resilience, and ultimately benefit their whole life. Therefore, they should be included in the school curriculum for children.",
+    "human": {
+      "overall": 9,
+      "tr": 9,
+      "cc": 9,
+      "lr": 8.5,
+      "gra": 9.5
+    }
+  },
+  {
+    "id": "GT_GEMINI_041",
+    "source": "IELTS CSV Dataset — Band 5 (Gemini Annotated)",
+    "question": "Some experts believe that when a country is already rich, any additional increase in economic wealth does not make its citizens any more satisfied. To what extent do you agree or disagree?",
+    "essay": "There are various numbers of countries that are rich from an economic weath such as petroleum, gas, and minerals. In this essay, I disagree that lucrative wealth makes citizens careless about anything because they are developing their country. Additionally, I will talk about how economic wealth had changed the life of people in their countires. There are numerous reasons why economic wealth is prominent even though if the country is rich they could be richer.\nFirstly, the higher the remunerative wealth makes life easy for citizens. Because now it is difficult to find jobs, therefore, these profitable companies could afford you one in your rich country. Some people may believe that people would be careless, that is not true. Because people are the main purposes of making this wealth, and they also want to develop their country and make it more knownable for the rest of life. Moreover, living in a rich country gives a priority for a good life.\nFurthermore, the increase of economic wealth changes the view of other countires and citizens. Having a high economic wealth could change the life of people. All of the people are greedy no matter what you do they want more and more, therefore, people are developing their county to have a high salary and live a tranquil life.\nTo conclude, having an increase of economic wealth in a country changes the lives of citizens. People are trying to develop the countries to make it more knownable and a prominent figure in life. Meanwhile, people are greedy they want more that what they deserve so by the increase of lurcative wealth they could get higher than what they deserve.",
+    "human": {
+      "overall": 5,
+      "tr": 5,
+      "cc": 5,
+      "lr": 4.5,
+      "gra": 5.5
+    }
+  },
+  {
+    "id": "GT_GEMINI_042",
+    "source": "IELTS CSV Dataset — Band 8.5 (Gemini Annotated)",
+    "question": "Nowadays, not enough students choose science subjects in university in many countries. What are the reasons for this problem? What are the effects on society?",
+    "essay": "There is currently a material issue that while the majority of students are eager to learn business or art in university, there are only a few students who want to study science, leading to numerous negative effects on community. With respect to this matter, there are also a wide variety of factors that influence the decision of students to not study science subjects.\nIt is undeniable that there are many reasons why undergraduates avoid studying science. A classic example of this is that science is extremely difficult to understand. In order to fully comprehend a particular scientific phenomenon, students have to learn complex theories that cause the phenomena. Therefore, they tend to choose other subjects that are easier to understand. Another common reason is a small amount of salary for working in scientific fields. When student choose subjects to study at university, they tend to enroll in an area that they could make a lot of money from having that knowledge. Since science career does not offer high remuneration, student possibly prefer to study other subjects such as business which offers higher salary instead.\nIt is true that there are many negative consequences on society of having less undergraduates studying science. One clear impact of this is the decreasing in innovation. This is because scientific comprehension is a mandatory requirement for creating an innovation. Hence, having only a few people who understand science will inevitably hold the creation of modern innovation. Furthermore, the current environmental crisis, such as an increase in global temperature, would perhaps reach a point of no return. Since the crisis relates to environment which is one of scientific aspects, having a small number of attention from students would lead to less social pressure to address this crisis properly.\nIn conclusion, it is the fact that science is complicated and people who have scientific knowledge can make less money than those who are expertise in other areas, resulting in less popularity in learning about science for university students. Moreover, with the rise in this problem, this trend possibly suspends the creation of new innovation and deteriorate the current environmental issues, which are two most crucial matters for society.",
+    "human": {
+      "overall": 8.5,
+      "tr": 8.5,
+      "cc": 8.5,
+      "lr": 8,
+      "gra": 9
+    }
+  },
+  {
+    "id": "GT_GEMINI_043",
+    "source": "IELTS CSV Dataset — Band 5.5 (Gemini Annotated)",
+    "question": "Write about the following topic.The issue of gay marriage remains controversial. Some people think that this trend has adverse effects on the society while others believe that it is seen as a natural trend and right for people to choose this type of marriage. Should gay marriage be legal?Give reasons for your answer and include any relevant examples from your own knowledge or experience.",
+    "essay": "The topic of gay marriage merely failed to be discussed. However, when it comes to whether gay marriage should be allowed legally, individuals hold divergent views. As far as I am concerned, the government should treat gay marriage as a legal thing.\nUndoubtedly, gay marriage can be beneficial. First of all, it is able to shrink the disparity between the affluent and the impoverished. For instance, some countries which allow gay marriage legally have become well-known tourism sites now by attracting foreign gays to come. Thus, their tourism industry can be thrived and the moribund local economy can be turned into the resurgent one, which may help to avoid turning the gap into gulf. Additionally, allowing gay marriage to be legal is also able to undermine the crime rate. On condition that some gays cannot enjoy the right of marriage, they may feel underrated, underprivileged and underappreciated, which may give them the predisposition to revenge the society to express their resentment and dissatisfaction. What is more, the government is able to diminish cultural conflict through making gay marriage a law. Provided that some individuals get little acquainted with gay culture, they may deem it as aggressive. However, by admitting it as a low, we can minimize such vulnerability and promote the mutual understanding of divergent cultures.\nOn the other hand, treating gay marriage legally also has various disadvantages. Firstly, it may undermine family rapport for the reason that some family members may not willing to accept gay marriage, which may cause the increasingly indifferent among family members and finally lead to family skirmish and splintering. In addition, some young individuals are possible to make mistakes at an early age if the government makes gay marriage law. It is widely acknowledged that some young people are not mature enough to choose the right partner. Provided that they get married at an early age, they may suffer irreversible loss.\nTo sum up, although there are some disadvantages to let gay marriage be legal, the benefits of it are multifaceted. Considering the development of the economy and culture, I agree with allowing gay marriage to be a legal option.",
+    "human": {
+      "overall": 5.5,
+      "tr": 5.5,
+      "cc": 5.5,
+      "lr": 5,
+      "gra": 6
+    }
+  },
+  {
+    "id": "GT_GEMINI_044",
+    "source": "IELTS CSV Dataset — Band 5.5 (Gemini Annotated)",
+    "question": "Write about the following topic.Some people believe that one of the best ways to solve environmental problem is to increase the cost of fuel for cars and other vehicles. To what extent do you agree or disagree?Give reasons for your answer and include any relevant examples from your own knowledge or experience.",
+    "essay": "Environmental problems are the biggest issue that people have to concern and by product form fossil fuels is one of causes. Someone think one way that can reduce result from fuels is sale car fuels in higher price. In my opinion, I disagree with this because highly price of oil leads to other problems such as financial problem and impact to food price, moreover, we can heal their environment by other ways.\nThe negative effects of increasing the cost of vehciles fuels are improtant to human life. The significant points is price of basic requirements, for instance, foods and medicines which have to transportation by trucks that use oil fuels for movement. The expensive fuels increase business costs, so their products price are rising up. Futhermore, social problems follow by financial problems. When poor people do not have money but they still hunger, they will steal some food or water this situation roads to social problems.\nOther ways to reduce environment problems, the causes of this problem are not only fossil fuel but also agricultural or industial aspect which we have to focus on. Intustial areas are the top areas that make lot of pollutions such as air pollution, water pollution from thier procesing and chemical pollution which they use during process. Those of them lead to many problems and effect to qulity of human life. Moveover agricultural areas, there produce many of gas which result to global warming.\nIn conclusion, the increasing car fuels might reduce some of environmental problems but also have drawback to population life. We should to chooce other ways to protect enviromant without effect to our life.",
+    "human": {
+      "overall": 5.5,
+      "tr": 5.5,
+      "cc": 5.5,
+      "lr": 5,
+      "gra": 6
+    }
+  },
+  {
+    "id": "GT_GEMINI_045",
+    "source": "IELTS CSV Dataset — Band 7 (Gemini Annotated)",
+    "question": "Write about the following topic.In many countries large amounts of foods are wasted. Why do you think people waste food in this way? What can be done to reduce the amount of food thrown away?Give reasons for your answer and include any relevant examples from your own knowledge or experience.",
+    "essay": "Nowadays, many countries are confronted with the increasing amount of waste and one of the major contributions is food wasted by people. This issue is mainly driven by an over-ordered food and misunderstanding about the method of food disposal. However, people could cease from creating food waste through the act of both restaurants and governments.\nTo begin with, it is obvious that countries have wasted because the amount of food that people buy is more than the amount they need. The crucial factor of this behavior is that when people contemplate menus in a restaurant, they tend to order many items in order to satisfy their desire level. Eventually, a lot of food scraps are left when these people finish eating their meals. Another potential cause could be because people do not know how to deal with food scraps. As a result, they might understand that putting wasted food into a garbage is the only solution they could do. This is exemplified by statistics published by Thai waste association which demonstrate that more than a half of waste in Thailand come from household food.\nA possible solution for this matter could be for restaurants to fine their customers who leave some food. This policy possibly encourages customers to carefully think of the reasonable amount of food when they order. In addition, from the country’s level governments could also educate their citizens including companies in the food-service industry about how to do with food waste due to the fact that some edible items could be food for animals. For instance, authorities could give an instruction demonstrating that dogs can be fed with remaining food such as rice or bread while remaining vegetables can be food for rabbits.\nIn conclusion, people waste food since they order food by what they want without considering the amount and most of them misunderstand about the way to dispose of food waste. Nevertheless, this concern can be coped with the penalty by restaurants as well as the guidance from governments regarding feeding animal with food scraps.",
+    "human": {
+      "overall": 7,
+      "tr": 7,
+      "cc": 7,
+      "lr": 6.5,
+      "gra": 7.5
+    }
+  },
+  {
+    "id": "GT_GEMINI_046",
+    "source": "IELTS CSV Dataset — Band 7 (Gemini Annotated)",
+    "question": "Write about the following topic.In many countries large amounts of foods are wasted. Why do you think people waste food in this way? What can be done to reduce the amount of food thrown away?Give reasons for your answer and include any relevant examples from your own knowledge or experience.",
+    "essay": "Food crisis might be considered as one of the most worrying matters among the globe. Despite the fact that poverty ratios are constantely increasing, tonnes of foods were thrown away every year. I believe that uncountable reasons could be behind this awful phenomenon, and many solutions should be taken to reduce the amounts of these wasted foods and to reduce the starvation. I will mention some in this essay.\nStarting from the root causes, cooking a feast for a small group of people might be considered part of any country's culture such as many countries in the golf area, or otherwise, the person would look as stingy or even a bad host. Although some people order a huge amount of food just for the purpose of bragging, sometimes it could be due to wrong estimation of the number of guests or the portion that is needed for each individual.\nNevertheless, such matter should have immediate solutions, on both personal and global level. Governments should take all actions needed to increase the awareness of the danger of this problem and its negative consequences, whether through social media platforms or through the national TV, and to find innovative ways to hold their citizens responsible for minimising such cruical issue. Moreover, individuals should always make sure to donate the extra food to any person that is in need.\nIn conclusion, wasting food has been a significant issue since very long time ago. There are many reasons for this unpleasant habit, whether due to cultural impact or personal attitude; therefore, fast actions must be taken from both individuals and governments.",
+    "human": {
+      "overall": 7,
+      "tr": 6.5,
+      "cc": 7.5,
+      "lr": 7,
+      "gra": 7
+    }
+  },
+  {
+    "id": "GT_GEMINI_047",
+    "source": "IELTS CSV Dataset — Band 7.5 (Gemini Annotated)",
+    "question": "Write about the following topic.Some people think living in big cities is bad for people’s health.To what extent do you agree or disagree?Give reasons for your answer and include any relevant examples from your own knowledge or experience.",
+    "essay": "In the past decades, the rise of urbanization has brought trends of moving into the cities. While some people believe that the availability of resources and welfare in metropolises can outweigh the unhealthy environment, I strongly believe that the fancy infrastructures come in exchange for health sacrifice.\nTo begin with, most megacities are overpopulated. With scarce resources and higher demands in every aspect, products and services received in these bustling locations usually come at a higher price, lower quality and longer waiting time. For example, it could take up to weeks or months to queue up for non-urgent medical services while it takes only a few days or even without booking in non-busy areas. Moreover, the nature of crowded areas accelerates the spreading of transmittable diseases during the pandemic.\nAnother undeniable health factor for those residing in cities is pollution. Most cities come with traffic issues where there are exceeding amounts of cars which create air pollution. It is proved that, in long term, smog in the air could result in respiratory diseases such as lung cancer. Furthermore, the number of the city's population is equal to the extremely large amount of waste and without an appropriate waste management system, it could lead to several more problems. One of them is pests such as mice and bugs which are the perfect mediums for severe diseases such as rabies.\nAll in all, urbanization has tremendous benefits to human society as a whole and is unavoidable in the present context. Thus, governments should focus on addressing these issues to ensure the sustainable progress of cities and the citizens' quality of life.",
+    "human": {
+      "overall": 7.5,
+      "tr": 7.5,
+      "cc": 7.5,
+      "lr": 7,
+      "gra": 8
+    }
+  },
+  {
+    "id": "GT_GEMINI_048",
+    "source": "IELTS CSV Dataset — Band 7 (Gemini Annotated)",
+    "question": "Write about the following topic:Some people think that hosting an international sports event is good for the country, while some people think it is bad. Discuss both views and state your opinion.Give reasons for your answer and include any relevant examples from your own knowledge or experience.",
+    "essay": "Some people believe that arranging worldwide sports is a nice idea for the country and it will give some benefits, while others suggest that is an awful idea. From my point of view, It is a brilliant idea for the country and for citizens when they host and are owners of international sports events.\nOn the one hand, arranging a sport event is always hugely expensive. In democratic societies there is always a doubt if these expenditures are appropriate or not. Sometimes it could be thought-provoking about spending this money on charity, medical insurance or to reduce juvenile delinquency for example. Also, there are people who are not fans or spectators, for them this kind of expensive event is not interesting. For instance, in Russia it is a fact that the winter olympic games in 2014 had a lot of controversial ideas about whether it was really necessary or not. I remember that in that time were a lot of discussion in TV and in the internet,\nOn the other hand, when your country hosts an international sport event it is a nice chance to show how rich your country is and express solidarity in your society. It is a fact that events like this, for example \"eurovision\" or \"olympic games\" and other worldwide events help to create an interconnection between countries and cultures. During these events we can see what happens in other countries and how people there live. For example, in 2018 Russia hosted a world football games, and this event invited a large number of foreign specialists and investors.\nIn conclusion, although hosting international sport events could be very expensive, the benefits which it could give to the citizens and to government institutes overload any disadvantages. I believe that each country should try to do it more.",
+    "human": {
+      "overall": 7,
+      "tr": 7,
+      "cc": 7,
+      "lr": 6.5,
+      "gra": 7.5
+    }
+  },
+  {
+    "id": "GT_GEMINI_049",
+    "source": "IELTS CSV Dataset — Band 8.5 (Gemini Annotated)",
+    "question": "In many countries people increasingly talk about money (how much they earn or how much they pay for things in their daily conversations). Why? Is this a positive or negative development?",
+    "essay": "Material achievement has been discussed at a high frequency in some countries; people widely involve this topic in every aspect of their lives. This essay will give two possible reasons for this phenomenon and explain the negative impacts on society.\nTwo major causes keep people lingering on this topic. Firstly, the difficulties in earning a living in some countries have significantly drawn people's focus on finance. For instance, more job opportunities are needed for job seekers in countries with low productivity. Besides that, in many low-income countries, people have to endure low pay; in some extreme cases, their earnings can not cover their spending. Therefore, tremendous anxiety cause people from these countries constantly talk about their financial situations.\nOn the other side, flaunting is becoming the mainstream mindset in some countries. Commonly, in some countries that just escaped poverty, the increasing spared money makes showing off possible. People in these countries display their wealth by owning luxurious items, such as branded bags or jewelry. Therefore, money naturally becomes essential in their conversations.\nAlthough the reasons for money focusing vary, it might develop into risky societal factors. If the frequent discussion of finance is due to insufficient employment or inadequate wages, it is an alarm to the governments to carry on measures of boosting industries' development. Otherwise, riots might be expected and harm social safety. Furthermore, this widespread discussion highly leads to material comparison, which harms morality and even allows crimes to occur. When individuals obsess with showing off, they feel the shame of disposing of the downsides. To maintain a perfect image- especially a wealthy appearance, some people even turn to crime, such as stealing or robbery.\nTo conclude, folks popularly discuss money for various reasons, such as the demands of work or psychological factors. However, the phenomenon is not a positive sign to society and most likely indicates the upcoming crisis.",
+    "human": {
+      "overall": 8.5,
+      "tr": 8.5,
+      "cc": 8.5,
+      "lr": 8,
+      "gra": 9
+    }
+  },
+  {
+    "id": "GT_GEMINI_050",
+    "source": "IELTS CSV Dataset — Band 6.5 (Gemini Annotated)",
+    "question": "Write about the following topic.Many people use written language in a less formal and more relaxed way. Why? Does this development have advantages and disadvantages?Give reasons for your answer and include any relevant examples from your own knowledge or experience.",
+    "essay": "Written language has been in human history since many thousand years ago. It was first developed through ancient egyptians and other old civilizations to keep history safe and remembered. It was then reformed for learning, teaching, documenting know-how and building new civilizations. From the Latin to the modern English, an enormous amount of changes and developments have emerged. Such things were derived through the intent of humanbeings to use easier language to deliver its usages. I am of the opinion, that changing language and using it in a more relaxed way could destroy its basis and strong meanings, which it shall deliver in its original form.\nUsing a less formal language for writing could be associated with multiple different advantages. More people will be able to write using a language easier and faster, if it is in a more relaxed way compared to the formal version of it. So using such easy version of the language, could promotes the amount of written work, which accordingly supports the idea of keeping our culture remembered. For instance, the amount of written stories in English has doubled through the years after making the english a more easier language to apply and write with. Furthermore, such more relaxed language will help many non-fluent speakers learn and use the language faster, which shall increase the amount of people speaking this specific language.\nOn the other hand, a couple of critical disadvantages could be distinguished applying such strategy in the written language. Maybe the amount of written ressources increased massively in the last couple of hunderd years, but what about the quality and sophistication of such materials? Are these materials concrete, concise and accurate? Are those materials capturing the needed knowledge within the current generation successfully? These questions trigger that easier language to use doesn't neccessarily mean better documents, but rather massive irrelevant amount of expolited work.\nTo summarive, I tend to be of the opinion, that the disadvantages outweigh the advantages of using a less formal language in writing. The long-term perspective could be significantly critisized, as only short-sighted point of views, shall think, that such methodology of written language helps human civilizations thrive in any way.",
+    "human": {
+      "overall": 6.5,
+      "tr": 6.5,
+      "cc": 6.5,
+      "lr": 6,
+      "gra": 7
+    }
+  }
+]

@@ -1,0 +1,242 @@
+[
+  {
+    "id": "eval_student_01",
+    "level": "band_4.5",
+    "primary_weakness": ["article_errors", "subject_verb_agreement"],
+    "secondary_weakness": ["coherence", "sentence_fragments"],
+    "strength": ["task_response_relevance"],
+    "learning_goal": "target_band_5.5",
+    "time_horizon": "3_months",
+    "preferred_feedback_style": "direct",
+    "learning_history": {
+      "essays_submitted": 5,
+      "avg_band": 4.5,
+      "recurring_errors": ["article_errors", "subject_verb_agreement"],
+      "recent_trend": "stable"
+    }
+  },
+  {
+    "id": "eval_student_02",
+    "level": "band_5.0",
+    "primary_weakness": ["tense_errors", "run_on_sentences"],
+    "secondary_weakness": ["lexical_repetition"],
+    "strength": ["idea_development", "task_relevance"],
+    "learning_goal": "target_band_6.0",
+    "time_horizon": "2_months",
+    "preferred_feedback_style": "scaffolding",
+    "learning_history": {
+      "essays_submitted": 8,
+      "avg_band": 5.0,
+      "recurring_errors": ["tense_errors"],
+      "recent_trend": "slightly_improving"
+    }
+  },
+  {
+    "id": "eval_student_03",
+    "level": "band_5.5",
+    "primary_weakness": ["coherence", "missing_examples"],
+    "secondary_weakness": ["preposition_errors"],
+    "strength": ["grammar_range", "vocabulary_adequate"],
+    "learning_goal": "target_band_6.5",
+    "time_horizon": "2_months",
+    "preferred_feedback_style": "analytical",
+    "learning_history": {
+      "essays_submitted": 12,
+      "avg_band": 5.5,
+      "recurring_errors": ["coherence", "preposition_errors"],
+      "recent_trend": "stable"
+    }
+  },
+  {
+    "id": "eval_student_04",
+    "level": "band_6.0",
+    "primary_weakness": ["collocation_errors", "overuse_linking_words"],
+    "secondary_weakness": ["lack_of_complex_sentences"],
+    "strength": ["task_response", "paragraph_structure"],
+    "learning_goal": "target_band_7.0",
+    "time_horizon": "3_months",
+    "preferred_feedback_style": "scaffolding",
+    "learning_history": {
+      "essays_submitted": 15,
+      "avg_band": 6.0,
+      "recurring_errors": ["collocation_errors", "overuse_linking_words"],
+      "recent_trend": "improving"
+    }
+  },
+  {
+    "id": "eval_student_05",
+    "level": "band_6.5",
+    "primary_weakness": ["advanced_grammar_missing", "lexical_precision"],
+    "secondary_weakness": ["occasional_spelling"],
+    "strength": ["coherence", "task_response", "idea_extension"],
+    "learning_goal": "target_band_7.5",
+    "time_horizon": "4_months",
+    "preferred_feedback_style": "analytical",
+    "learning_history": {
+      "essays_submitted": 20,
+      "avg_band": 6.5,
+      "recurring_errors": ["lexical_precision"],
+      "recent_trend": "improving"
+    }
+  },
+  {
+    "id": "eval_student_06",
+    "level": "band_4.0",
+    "primary_weakness": ["subject_verb_agreement", "spelling", "word_order"],
+    "secondary_weakness": ["no_paragraph_structure"],
+    "strength": ["attempts_to_address_topic"],
+    "learning_goal": "target_band_5.0",
+    "time_horizon": "4_months",
+    "preferred_feedback_style": "direct",
+    "learning_history": {
+      "essays_submitted": 3,
+      "avg_band": 4.0,
+      "recurring_errors": ["subject_verb_agreement", "spelling"],
+      "recent_trend": "new_student"
+    }
+  },
+  {
+    "id": "eval_student_07",
+    "level": "band_5.0",
+    "primary_weakness": ["article_errors", "coherence"],
+    "secondary_weakness": ["passive_voice_overuse"],
+    "strength": ["vocabulary_range"],
+    "learning_goal": "target_band_6.0",
+    "time_horizon": "2_months",
+    "preferred_feedback_style": "direct",
+    "learning_history": {
+      "essays_submitted": 7,
+      "avg_band": 5.0,
+      "recurring_errors": ["article_errors"],
+      "recent_trend": "stable"
+    }
+  },
+  {
+    "id": "eval_student_08",
+    "level": "band_5.5",
+    "primary_weakness": ["logic_jumps", "weak_conclusions"],
+    "secondary_weakness": ["tense_consistency"],
+    "strength": ["good_introductions", "academic_vocabulary"],
+    "learning_goal": "target_band_6.5",
+    "time_horizon": "3_months",
+    "preferred_feedback_style": "scaffolding",
+    "learning_history": {
+      "essays_submitted": 10,
+      "avg_band": 5.5,
+      "recurring_errors": ["logic_jumps", "tense_consistency"],
+      "recent_trend": "slightly_improving"
+    }
+  },
+  {
+    "id": "eval_student_09",
+    "level": "band_6.0",
+    "primary_weakness": ["limited_complex_structures", "mechanical_linking"],
+    "secondary_weakness": ["occasional_SVA"],
+    "strength": ["clear_position", "adequate_examples"],
+    "learning_goal": "target_band_7.0",
+    "time_horizon": "2_months",
+    "preferred_feedback_style": "analytical",
+    "learning_history": {
+      "essays_submitted": 18,
+      "avg_band": 6.0,
+      "recurring_errors": ["mechanical_linking", "limited_complex_structures"],
+      "recent_trend": "stable"
+    }
+  },
+  {
+    "id": "eval_student_10",
+    "level": "band_7.0",
+    "primary_weakness": ["occasional_awkward_phrasing"],
+    "secondary_weakness": ["minor_article_slips"],
+    "strength": ["strong_coherence", "wide_vocabulary", "complex_grammar", "clear_position"],
+    "learning_goal": "target_band_8.0",
+    "time_horizon": "6_months",
+    "preferred_feedback_style": "analytical",
+    "learning_history": {
+      "essays_submitted": 30,
+      "avg_band": 7.0,
+      "recurring_errors": ["occasional_awkward_phrasing"],
+      "recent_trend": "stable"
+    }
+  },
+  {
+    "id": "eval_student_11",
+    "level": "band_4.5",
+    "primary_weakness": ["tense_errors", "article_errors", "word_choice"],
+    "secondary_weakness": ["no_examples_given"],
+    "strength": ["attempts_complex_ideas"],
+    "learning_goal": "target_band_5.5",
+    "time_horizon": "3_months",
+    "preferred_feedback_style": "direct",
+    "learning_history": {
+      "essays_submitted": 4,
+      "avg_band": 4.5,
+      "recurring_errors": ["tense_errors", "article_errors"],
+      "recent_trend": "new_student"
+    }
+  },
+  {
+    "id": "eval_student_12",
+    "level": "band_5.0",
+    "primary_weakness": ["fragment_sentences", "spelling"],
+    "secondary_weakness": ["weak_coherence"],
+    "strength": ["task_address", "some_vocabulary"],
+    "learning_goal": "target_band_6.0",
+    "time_horizon": "3_months",
+    "preferred_feedback_style": "scaffolding",
+    "learning_history": {
+      "essays_submitted": 6,
+      "avg_band": 5.0,
+      "recurring_errors": ["fragment_sentences"],
+      "recent_trend": "stable"
+    }
+  },
+  {
+    "id": "eval_student_13",
+    "level": "band_5.5",
+    "primary_weakness": ["underdeveloped_ideas", "repetitive_vocabulary"],
+    "secondary_weakness": ["comma_splices"],
+    "strength": ["clear_position", "basic_coherence"],
+    "learning_goal": "target_band_6.5",
+    "time_horizon": "2_months",
+    "preferred_feedback_style": "scaffolding",
+    "learning_history": {
+      "essays_submitted": 9,
+      "avg_band": 5.5,
+      "recurring_errors": ["underdeveloped_ideas", "repetitive_vocabulary"],
+      "recent_trend": "slightly_improving"
+    }
+  },
+  {
+    "id": "eval_student_14",
+    "level": "band_6.0",
+    "primary_weakness": ["lack_of_academic_register", "overgeneralization"],
+    "secondary_weakness": ["pronoun_reference"],
+    "strength": ["good_structure", "relevant_ideas", "decent_grammar"],
+    "learning_goal": "target_band_7.0",
+    "time_horizon": "3_months",
+    "preferred_feedback_style": "analytical",
+    "learning_history": {
+      "essays_submitted": 14,
+      "avg_band": 6.0,
+      "recurring_errors": ["lack_of_academic_register"],
+      "recent_trend": "improving"
+    }
+  },
+  {
+    "id": "eval_student_15",
+    "level": "band_6.5",
+    "primary_weakness": ["thesis_clarity", "conclusion_weakness"],
+    "secondary_weakness": ["minor_collocation"],
+    "strength": ["excellent_vocabulary", "good_grammar_range", "strong_examples"],
+    "learning_goal": "target_band_7.5",
+    "time_horizon": "3_months",
+    "preferred_feedback_style": "analytical",
+    "learning_history": {
+      "essays_submitted": 22,
+      "avg_band": 6.5,
+      "recurring_errors": ["thesis_clarity"],
+      "recent_trend": "stable"
+    }
+  }
+]
